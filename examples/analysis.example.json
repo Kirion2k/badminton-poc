@@ -1,0 +1,14 @@
+{
+  "summary": {
+    "rallies_detected": 12,
+    "hits_detected": 94,
+    "near_hits": 47,
+    "far_hits": 45,
+    "unassigned_hits": 2,
+    "average_hits_per_rally": 7.83,
+    "longest_rally_hits": 19,
+    "ball_visible_frame_fraction": 0.61,
+    "two_players_detected_frame_fraction": 0.94
+  },
+  "rallies": []
+}
