@@ -86,6 +86,93 @@ def write_template(path: str | Path, analysis: dict[str, Any], fps: float) -> Pa
     return out
 
 
+def score_rally_boundaries(
+    detected: list[dict[str, Any]],
+    active_play_ranges: list[Any],
+    *,
+    fps: float,
+    tolerance_seconds: float = 1.0,
+) -> dict[str, Any]:
+    """Score rally segmentation against the hand-labelled play ranges.
+
+    A manual ``boundary_ok`` flag per detected rally cannot express the two failures that
+    matter most. A rally the pipeline invented has no real rally to be flagged against, and a
+    real rally split in two collects two flags for one error. On the second test clip the flags
+    reported 12.5% while the actual picture was four of six rallies bounded correctly, one real
+    rally split in two, and one rally invented out of nothing.
+
+    A real rally counts as approximately correct when exactly one detected rally overlaps it
+    and both of its edges land within ``tolerance_seconds``.
+    """
+    real: list[tuple[int, int]] = []
+    for entry in active_play_ranges or []:
+        if isinstance(entry, dict):
+            start, end = entry.get("start"), entry.get("end")
+        else:
+            if len(entry) != 2:
+                raise ValueError(
+                    f"active_play_ranges entry must be [start, end], got {entry!r}")
+            start, end = entry[0], entry[1]
+        if end is None or start is None or int(end) < int(start):
+            raise ValueError(f"active_play_ranges entry {entry!r} ends before it starts")
+        real.append((int(start), int(end)))
+    real.sort()
+
+    tolerance = tolerance_seconds * fps
+    detail: list[dict[str, Any]] = []
+    matched_detected: set[int] = set()
+    correct = split = missed = 0
+
+    for start, end in real:
+        overlapping = [
+            d for d in detected
+            if not (d["end_frame"] < start or d["start_frame"] > end)
+        ]
+        for d in overlapping:
+            matched_detected.add(id(d))
+        row: dict[str, Any] = {
+            "true_start_frame": start,
+            "true_end_frame": end,
+            "detected_rallies": [d.get("rally") for d in overlapping],
+        }
+        if not overlapping:
+            missed += 1
+            row["verdict"] = "missed"
+        elif len(overlapping) > 1:
+            split += 1
+            row["verdict"] = "split across several detected rallies"
+        else:
+            only = overlapping[0]
+            start_error = (only["start_frame"] - start) / fps
+            end_error = (only["end_frame"] - end) / fps
+            row["start_error_s"] = round(start_error, 3)
+            row["end_error_s"] = round(end_error, 3)
+            if abs(start_error) * fps <= tolerance and abs(end_error) * fps <= tolerance:
+                correct += 1
+                row["verdict"] = "ok"
+            else:
+                row["verdict"] = "edges outside tolerance"
+        detail.append(row)
+
+    spurious = [d for d in detected if id(d) not in matched_detected]
+    return {
+        "real_rallies": len(real),
+        "detected_rallies": len(detected),
+        "approximately_correct": correct,
+        "accuracy": (correct / len(real)) if real else None,
+        "split": split,
+        "missed": missed,
+        "spurious": len(spurious),
+        "spurious_rallies": [d.get("rally") for d in spurious],
+        "tolerance_seconds": tolerance_seconds,
+        "detail": detail,
+        "note": (
+            "Scored against active_play_ranges. A real rally is correct when exactly one "
+            "detected rally overlaps it and both edges land within the tolerance."
+        ),
+    }
+
+
 class NotLabelledError(RuntimeError):
     pass
 
@@ -114,9 +201,18 @@ def evaluate(analysis: dict[str, Any], ground_truth: dict[str, Any], players: li
 
     rallies = [r for r in ground_truth.get("rallies", []) if isinstance(r, dict)]
     judged = [r for r in rallies if r.get("boundary_ok") is not None]
-    rally_accuracy = _ratio(sum(1 for r in judged if r["boundary_ok"]), len(judged))
+    ranges = ground_truth.get("active_play_ranges") or []
+    boundaries = score_rally_boundaries(
+        analysis.get("rallies", []), ranges, fps=float(ground_truth.get("fps") or 0.0) or 1.0
+    )
+    boundaries["manual_boundary_ok"] = {
+        "judged": len(judged),
+        "marked_ok": sum(1 for r in judged if r["boundary_ok"]),
+        "note": "The labeller's own per-detected-rally flags, kept for cross-checking.",
+    }
+    rally_accuracy = boundaries["accuracy"]
 
-    active = _active_frames(ground_truth.get("active_play_ranges") or [])
+    active = _active_frames(ranges)
     coverage = _coverage(players, active)
 
     return {
@@ -138,11 +234,7 @@ def evaluate(analysis: dict[str, Any], ground_truth: dict[str, Any], players: li
             "correct": len(correct),
             "accuracy": hitter_accuracy,
         },
-        "rally_boundaries": {
-            "judged": len(judged),
-            "approximately_correct": sum(1 for r in judged if r["boundary_ok"]),
-            "accuracy": rally_accuracy,
-        },
+        "rally_boundaries": boundaries,
         "targets": _targets(coverage.get("both_players_fraction"), hitter_accuracy, rally_accuracy),
     }
 

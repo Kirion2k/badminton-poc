@@ -1,0 +1,112 @@
+{
+  "labelled": true,
+  "two_player_tracking": {
+    "active_play_frames": 3730,
+    "both_players_frames": 3561,
+    "both_players_fraction": 0.9547,
+    "near_only": 169,
+    "far_only": 0,
+    "neither": 0
+  },
+  "shuttle_trajectory": {
+    "visible_fraction_all_frames": 0.9729,
+    "note": "Coherence through rallies is a visual judgement; record it in notes."
+  },
+  "hit_detection": {
+    "true_positives": 55,
+    "false_positives": 33,
+    "missed": 7,
+    "precision": 0.625,
+    "recall": 0.8871
+  },
+  "hitter_assignment": {
+    "scored_hits": 54,
+    "correct": 54,
+    "accuracy": 1.0
+  },
+  "rally_boundaries": {
+    "real_rallies": 6,
+    "detected_rallies": 8,
+    "approximately_correct": 4,
+    "accuracy": 0.6666666666666666,
+    "split": 1,
+    "missed": 0,
+    "spurious": 1,
+    "spurious_rallies": [
+      6
+    ],
+    "tolerance_seconds": 1.0,
+    "detail": [
+      {
+        "true_start_frame": 83,
+        "true_end_frame": 236,
+        "detected_rallies": [
+          1
+        ],
+        "start_error_s": 0.0,
+        "end_error_s": 4.284,
+        "verdict": "edges outside tolerance"
+      },
+      {
+        "true_start_frame": 773,
+        "true_end_frame": 1098,
+        "detected_rallies": [
+          2
+        ],
+        "start_error_s": 0.0,
+        "end_error_s": 0.934,
+        "verdict": "ok"
+      },
+      {
+        "true_start_frame": 1502,
+        "true_end_frame": 2767,
+        "detected_rallies": [
+          3,
+          4
+        ],
+        "verdict": "split across several detected rallies"
+      },
+      {
+        "true_start_frame": 3821,
+        "true_end_frame": 5217,
+        "detected_rallies": [
+          5
+        ],
+        "start_error_s": -0.183,
+        "end_error_s": -0.1,
+        "verdict": "ok"
+      },
+      {
+        "true_start_frame": 6185,
+        "true_end_frame": 6439,
+        "detected_rallies": [
+          7
+        ],
+        "start_error_s": -0.233,
+        "end_error_s": 0.517,
+        "verdict": "ok"
+      },
+      {
+        "true_start_frame": 7024,
+        "true_end_frame": 7355,
+        "detected_rallies": [
+          8
+        ],
+        "start_error_s": -0.183,
+        "end_error_s": -0.683,
+        "verdict": "ok"
+      }
+    ],
+    "note": "Scored against active_play_ranges. A real rally is correct when exactly one detected rally overlaps it and both edges land within the tolerance.",
+    "manual_boundary_ok": {
+      "judged": 8,
+      "marked_ok": 1,
+      "note": "The labeller's own per-detected-rally flags, kept for cross-checking."
+    }
+  },
+  "targets": {
+    "two_player_coverage_active_play >= 0.90": "PASS",
+    "hitter_assignment_accuracy >= 0.90": "PASS",
+    "rally_boundary_accuracy >= 0.85": "FAIL"
+  }
+}

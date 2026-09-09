@@ -1,0 +1,873 @@
+{
+  "_instructions": "Fill this in by watching annotated.mp4. Set labelled=true when done. Frame numbers refer to the working video (outputs/<clip>/work.mp4); metadata.json records the offset back to the source video.",
+  "labelled": true,
+  "fps": 59.986172678840134,
+  "active_play_ranges": [
+    [
+      83,
+      236
+    ],
+    [
+      773,
+      1098
+    ],
+    [
+      1502,
+      2767
+    ],
+    [
+      3821,
+      5217
+    ],
+    [
+      6185,
+      6439
+    ],
+    [
+      7024,
+      7355
+    ]
+  ],
+  "_active_play_help": "Inclusive [start_frame, end_frame] ranges where a rally is actually in progress. The >=90% two-player tracking target is measured over these frames only, because coverage between rallies is not what the criterion is about.",
+  "missed_hits": [
+    {
+      "frame": 1803,
+      "time_s": 30.08,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": "the shuttle goes out of view from the camera but you can still see the player hit it, while the shuttle is coming down"
+    },
+    {
+      "frame": 1886,
+      "time_s": 31.44,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": "model doesnt detect the far player for some reason and hence doesnt detect the shuttle being hit?"
+    },
+    {
+      "frame": 2006,
+      "time_s": 33.441,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 2079,
+      "time_s": 34.66,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": "near player hits the shuttle, doesnt get registered, but the far player is not being properly registered, its being registered as someone on the sideline "
+    },
+    {
+      "frame": 2189,
+      "time_s": 36.49,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": "same thing as 2079, near player hits the shuttle, doesnt get registered, but the far player is not being properly registered, its being registered as someone on the sideline "
+    },
+    {
+      "frame": 3972,
+      "time_s": 2.317,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": "hit doenst get detected?"
+    },
+    {
+      "frame": 6286,
+      "time_s": 104.81,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": "near player hits a backhand shot"
+    }
+  ],
+  "_missed_hits_help": "Frames of real hits the pipeline did not detect at all: [{\"frame\": 123}]",
+  "hits": [
+    {
+      "frame": 83,
+      "time_s": 1.384,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 139,
+      "time_s": 2.317,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 232,
+      "time_s": 3.868,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": false,
+      "notes": ""
+    },
+    {
+      "frame": 269,
+      "time_s": 4.484,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": false,
+      "notes": ""
+    },
+    {
+      "frame": 359,
+      "time_s": 5.985,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": false,
+      "notes": "the shuttle was picked up by the near sided player, shouldnt count as a shot?"
+    },
+    {
+      "frame": 395,
+      "time_s": 6.585,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 482,
+      "time_s": 8.035,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": false,
+      "notes": ""
+    },
+    {
+      "frame": 773,
+      "time_s": 12.886,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 822,
+      "time_s": 13.703,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 870,
+      "time_s": 14.503,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 916,
+      "time_s": 15.27,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 994,
+      "time_s": 16.57,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": false,
+      "notes": "shuttle went out of the camera view, blocked by the far player"
+    },
+    {
+      "frame": 1092,
+      "time_s": 18.204,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": false,
+      "notes": "shuttle picked up by the far ended player"
+    },
+    {
+      "frame": 1124,
+      "time_s": 18.738,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": "the shuttle was technically hit by the player, but he hit the shuttle to himself?"
+    },
+    {
+      "frame": 1143,
+      "time_s": 19.054,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": false,
+      "notes": "shuttle was not hit/goes out of view while the player is holding the shuttle"
+    },
+    {
+      "frame": 1502,
+      "time_s": 25.039,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 1549,
+      "time_s": 25.823,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 1622,
+      "time_s": 27.04,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 1670,
+      "time_s": 27.84,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 1717,
+      "time_s": 28.623,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 1743,
+      "time_s": 29.057,
+      "detected_hitter": null,
+      "true_hitter": null,
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 1931,
+      "time_s": 32.191,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 2006,
+      "time_s": 33.441,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 2120,
+      "time_s": 35.341,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 2217,
+      "time_s": 36.959,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 2292,
+      "time_s": 38.209,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 2388,
+      "time_s": 39.809,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 2452,
+      "time_s": 40.876,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 2518,
+      "time_s": 41.976,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": false,
+      "notes": "shuttle tracking spins around for some reason, maybe due to lighting causes false shot"
+    },
+    {
+      "frame": 2540,
+      "time_s": 42.343,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 2597,
+      "time_s": 43.293,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 2643,
+      "time_s": 44.06,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": false,
+      "notes": "shuttle tracking somehow tracks to the shoe of the far player and detects a false hit"
+    },
+    {
+      "frame": 2689,
+      "time_s": 44.827,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 2744,
+      "time_s": 45.744,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": false,
+      "notes": "shuttle drops out/onto the floor, falsely detected as a hit"
+    },
+    {
+      "frame": 2812,
+      "time_s": 46.877,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": false,
+      "notes": "detects players shorts logo as a shuttle "
+    },
+    {
+      "frame": 2951,
+      "time_s": 49.195,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": false,
+      "notes": "near player is holding shuttle after the rally ended, false hit"
+    },
+    {
+      "frame": 3006,
+      "time_s": 50.112,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": false,
+      "notes": "shuttle gets tossed"
+    },
+    {
+      "frame": 3058,
+      "time_s": 50.978,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": false,
+      "notes": "no shot was hit?"
+    },
+    {
+      "frame": 3172,
+      "time_s": 52.879,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": false,
+      "notes": "umpire passes a shuttle to near player"
+    },
+    {
+      "frame": 3220,
+      "time_s": 53.679,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": false,
+      "notes": "the near player just tosses the shuttle up"
+    },
+    {
+      "frame": 3810,
+      "time_s": 63.515,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 3868,
+      "time_s": 64.482,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 3935,
+      "time_s": 65.598,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 4016,
+      "time_s": 66.949,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": false,
+      "notes": "no hit?"
+    },
+    {
+      "frame": 4095,
+      "time_s": 68.266,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 4151,
+      "time_s": 69.199,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 4238,
+      "time_s": 70.65,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 4348,
+      "time_s": 72.483,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 4407,
+      "time_s": 73.467,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 4510,
+      "time_s": 75.184,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 4556,
+      "time_s": 75.951,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 4614,
+      "time_s": 76.918,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 4704,
+      "time_s": 78.418,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 4750,
+      "time_s": 79.185,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 4814,
+      "time_s": 80.252,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 4888,
+      "time_s": 81.485,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 4936,
+      "time_s": 82.286,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 4957,
+      "time_s": 82.636,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": false,
+      "notes": "shoe gets detected as shuttle and a hit"
+    },
+    {
+      "frame": 5007,
+      "time_s": 83.469,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 5060,
+      "time_s": 84.353,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 5123,
+      "time_s": 85.403,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 5173,
+      "time_s": 86.237,
+      "detected_hitter": null,
+      "true_hitter": null,
+      "is_real_hit": false,
+      "notes": "shuttle hit the ground"
+    },
+    {
+      "frame": 5352,
+      "time_s": 89.221,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": false,
+      "notes": "shuttle is just on the ground not moving"
+    },
+    {
+      "frame": 5386,
+      "time_s": 89.787,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": false,
+      "notes": "shuttle gets tracked to one of the lights which i think the model might think its a shuttle"
+    },
+    {
+      "frame": 5421,
+      "time_s": 90.371,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": false,
+      "notes": "far player picks up shuttle"
+    },
+    {
+      "frame": 5442,
+      "time_s": 90.721,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": false,
+      "notes": "not a proper hit"
+    },
+    {
+      "frame": 5472,
+      "time_s": 91.221,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": false,
+      "notes": "not a proper hit"
+    },
+    {
+      "frame": 5545,
+      "time_s": 92.438,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": false,
+      "notes": "shuttle bounces on the ground"
+    },
+    {
+      "frame": 5576,
+      "time_s": 92.955,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": false,
+      "notes": "shuttle bounces on the ground"
+    },
+    {
+      "frame": 5606,
+      "time_s": 93.455,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": false,
+      "notes": "false hit"
+    },
+    {
+      "frame": 5680,
+      "time_s": 94.688,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": false,
+      "notes": "shuttle tracking spikes up and down when the shuttle isnt even moving its just on the ground and somehow detects a hit"
+    },
+    {
+      "frame": 5725,
+      "time_s": 95.439,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": false,
+      "notes": "no hit?"
+    },
+    {
+      "frame": 5779,
+      "time_s": 96.339,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": false,
+      "notes": "near player just holds the shuttle"
+    },
+    {
+      "frame": 6171,
+      "time_s": 102.874,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 6223,
+      "time_s": 103.741,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 6260,
+      "time_s": 104.357,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": false,
+      "notes": "shuttle tracking mixes the shuttle with the light that probably looks like it"
+    },
+    {
+      "frame": 6326,
+      "time_s": 105.458,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 6355,
+      "time_s": 105.941,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 6435,
+      "time_s": 107.275,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": false,
+      "notes": "shuttle lands out"
+    },
+    {
+      "frame": 6464,
+      "time_s": 107.758,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": false,
+      "notes": "shuttle lands out"
+    },
+    {
+      "frame": 7013,
+      "time_s": 116.91,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 7057,
+      "time_s": 117.644,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 7114,
+      "time_s": 118.594,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 7196,
+      "time_s": 119.961,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 7227,
+      "time_s": 120.478,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 7248,
+      "time_s": 120.828,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 7286,
+      "time_s": 121.461,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 7314,
+      "time_s": 121.928,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    }
+  ],
+  "_hits_help": "One row per detected hit. Set is_real_hit=false for a false positive. Correct true_hitter to 'near' or 'far' where the assignment is wrong.",
+  "rallies": [
+    {
+      "rally": 1,
+      "detected_start_frame": 83,
+      "detected_end_frame": 236,
+      "true_start_frame": 83,
+      "true_end_frame": 236,
+      "boundary_ok": true,
+      "notes": ""
+    },
+    {
+      "rally": 2,
+      "detected_start_frame": 773,
+      "detected_end_frame": 1154,
+      "true_start_frame": 773,
+      "true_end_frame": 1098,
+      "boundary_ok": false,
+      "notes": ""
+    },
+    {
+      "rally": 3,
+      "detected_start_frame": 1502,
+      "detected_end_frame": 1743,
+      "true_start_frame": 1502,
+      "true_end_frame": 2767,
+      "boundary_ok": false,
+      "notes": ""
+    },
+    {
+      "rally": 4,
+      "detected_start_frame": 1931,
+      "detected_end_frame": 3230,
+      "true_start_frame": 3821,
+      "true_end_frame": 5217,
+      "boundary_ok": false,
+      "notes": ""
+    },
+    {
+      "rally": 5,
+      "detected_start_frame": 3810,
+      "detected_end_frame": 5211,
+      "true_start_frame": 6185,
+      "true_end_frame": 6439,
+      "boundary_ok": false,
+      "notes": ""
+    },
+    {
+      "rally": 6,
+      "detected_start_frame": 5352,
+      "detected_end_frame": 5791,
+      "true_start_frame": 7024,
+      "true_end_frame": 5791,
+      "boundary_ok": false,
+      "notes": ""
+    },
+    {
+      "rally": 7,
+      "detected_start_frame": 6171,
+      "detected_end_frame": 6470,
+      "true_start_frame": 6171,
+      "true_end_frame": 6470,
+      "boundary_ok": false,
+      "notes": ""
+    },
+    {
+      "rally": 8,
+      "detected_start_frame": 7013,
+      "detected_end_frame": 7314,
+      "true_start_frame": 7013,
+      "true_end_frame": 7314,
+      "boundary_ok": false,
+      "notes": ""
+    }
+  ],
+  "_rallies_help": "Set boundary_ok=true/false for each detected rally."
+}

@@ -13,7 +13,13 @@ models/
 # input footage and everything the pipeline generates
 data/input/*
 !data/input/.gitkeep
-outputs/
+outputs/*
+# Hand labelling is expensive and irreplaceable, and the evaluation derived from it is the
+# only accuracy record. Everything else under outputs/ is regenerable; these two are not.
+!outputs/*/
+outputs/*/*
+!outputs/*/ground_truth.json
+!outputs/*/evaluation.json
 
 # media, wherever it lands
 *.mp4

@@ -55,12 +55,20 @@ def test_evaluate_scores_the_six_poc_metrics():
     }
     players = [{"frame": i, "near": {"bbox": []} if i < 9 else None, "far": {"bbox": []}}
                for i in range(10)]
-    result = evaluate(ANALYSIS, ground_truth, players)
+    analysis = dict(ANALYSIS, rallies=[{"rally": 1, "start_frame": 0, "end_frame": 9}])
+    result = evaluate(analysis, ground_truth, players)
 
     assert result["hit_detection"]["precision"] == pytest.approx(2 / 3, abs=1e-4)
     assert result["hit_detection"]["recall"] == pytest.approx(2 / 3, abs=1e-4)
     assert result["hitter_assignment"]["accuracy"] == pytest.approx(0.5)
-    assert result["rally_boundaries"]["accuracy"] == pytest.approx(0.5)
+    # Scored against active_play_ranges, not the labeller's flags: the one real rally is
+    # covered by exactly one detected rally with both edges exact.
+    assert result["rally_boundaries"]["accuracy"] == pytest.approx(1.0)
+    assert result["rally_boundaries"]["spurious"] == 0
+    assert result["rally_boundaries"]["manual_boundary_ok"] == {
+        "judged": 2, "marked_ok": 1,
+        "note": "The labeller's own per-detected-rally flags, kept for cross-checking.",
+    }
     assert result["two_player_tracking"]["both_players_fraction"] == pytest.approx(0.9)
     assert result["targets"]["hitter_assignment_accuracy >= 0.90"] == "FAIL"
 
@@ -84,3 +92,58 @@ def test_active_play_ranges_are_validated():
                               "detected_hitter": "near"}], "rallies": []}
     with pytest.raises(ValueError, match=r"\[start, end\]"):
         evaluate(ANALYSIS, ground_truth, [])
+
+
+def test_rally_boundaries_are_scored_against_the_labelled_play_ranges():
+    """A manual boundary_ok flag cannot see the two failures that matter. A rally the pipeline
+    invented has no real rally to be flagged against, and a real rally split in two gets two
+    flags for one error. Scoring against active_play_ranges catches both."""
+    from badminton_poc.evaluation import score_rally_boundaries
+
+    real = [[100, 200], [500, 700], [1000, 1100]]
+    detected = [
+        {"rally": 1, "start_frame": 100, "end_frame": 205},   # good
+        {"rally": 2, "start_frame": 500, "end_frame": 560},   # split, first half
+        {"rally": 3, "start_frame": 600, "end_frame": 700},   # split, second half
+        {"rally": 4, "start_frame": 800, "end_frame": 900},   # spurious
+        # [1000, 1100] is missed entirely
+    ]
+    result = score_rally_boundaries(detected, real, fps=60.0, tolerance_seconds=1.0)
+
+    assert result["real_rallies"] == 3
+    assert result["approximately_correct"] == 1
+    assert result["accuracy"] == pytest.approx(1 / 3)
+    assert result["spurious"] == 1
+    assert result["split"] == 1
+    assert result["missed"] == 1
+
+
+def test_a_boundary_inside_the_tolerance_counts_as_correct():
+    from badminton_poc.evaluation import score_rally_boundaries
+
+    result = score_rally_boundaries(
+        [{"rally": 1, "start_frame": 90, "end_frame": 240}], [[100, 236]],
+        fps=60.0, tolerance_seconds=1.0)
+    assert result["approximately_correct"] == 1
+    assert result["spurious"] == 0
+
+
+def test_an_end_far_beyond_the_tolerance_is_not_correct():
+    """The commonest failure on the test clip: the rally is found but runs on past the point
+    play stopped, because a stray hit candidate keeps it alive."""
+    from badminton_poc.evaluation import score_rally_boundaries
+
+    result = score_rally_boundaries(
+        [{"rally": 1, "start_frame": 83, "end_frame": 493}], [[83, 236]],
+        fps=60.0, tolerance_seconds=1.0)
+    assert result["approximately_correct"] == 0
+    assert result["detail"][0]["end_error_s"] == pytest.approx(4.28, abs=0.02)
+
+
+def test_scoring_needs_labelled_ranges():
+    from badminton_poc.evaluation import score_rally_boundaries
+
+    result = score_rally_boundaries([{"rally": 1, "start_frame": 1, "end_frame": 2}], [],
+                                    fps=60.0, tolerance_seconds=1.0)
+    assert result["accuracy"] is None
+    assert result["real_rallies"] == 0
