@@ -40,6 +40,10 @@ class VideoInfo:
     avg_frame_rate: float
     duration_s: float
     frame_count: int
+    """Frames that actually decode -- what every frame index downstream refers to."""
+    packet_count: int
+    """Video packets the container claims. Not always the same thing; see reconcile_frame_count."""
+    count_warning: str | None
     pix_fmt: str
     bit_rate: int | None
     is_vfr: bool
@@ -112,16 +116,19 @@ def probe(path: str | Path) -> VideoInfo:
     display_w, display_h = (stored_h, stored_w) if swapped else (stored_w, stored_h)
 
     pts = _packet_pts(path)
-    frame_count = len(pts)
-    if frame_count < 2:
-        raise VideoError(f"{path} has {frame_count} video packets; nothing to analyse")
+    packet_count = len(pts)
+    if packet_count < 2:
+        raise VideoError(f"{path} has {packet_count} video packets; nothing to analyse")
+    frame_count, count_warning = reconcile_frame_count(
+        packets=packet_count, decoded=_decoded_frame_count(path)
+    )
 
     duration = float(stream.get("duration") or payload.get("format", {}).get("duration") or 0.0)
     if duration <= 0:
         duration = pts[-1] - pts[0]
 
     deltas: dict[str, int] = {}
-    for i in range(frame_count - 1):
+    for i in range(packet_count - 1):
         key = f"{pts[i + 1] - pts[i]:.5f}"
         deltas[key] = deltas.get(key, 0) + 1
     # Anything with more than one distinct inter-frame gap (beyond float noise) is VFR.
@@ -139,11 +146,51 @@ def probe(path: str | Path) -> VideoInfo:
         avg_frame_rate=_parse_rate(stream.get("avg_frame_rate")),
         duration_s=duration,
         frame_count=frame_count,
+        packet_count=packet_count,
+        count_warning=count_warning,
         pix_fmt=str(stream.get("pix_fmt", "unknown")),
         bit_rate=int(stream["bit_rate"]) if stream.get("bit_rate") else None,
         is_vfr=is_vfr,
         pts_deltas_histogram=dict(sorted(deltas.items(), key=lambda kv: -kv[1])),
     )
+
+
+def reconcile_frame_count(*, packets: int, decoded: int | None) -> tuple[int, str | None]:
+    """Decide how many frames a source really has, and say so when the file disagrees.
+
+    A container's packet count is a claim, not a measurement: the second test clip advertises
+    7377 and decodes 7376, because its last packet never becomes a picture. Every frame index
+    downstream -- the trim range, players.jsonl, the shuttle CSV -- refers to decoded frames,
+    so the decoded count is the one to believe. Trusting the packet count made normalization
+    fail its own frame-alignment check, which is the right failure with the wrong diagnosis.
+    """
+    if decoded is None:
+        return packets, (
+            f"could not count decodable frames; falling back to the container's claim of "
+            f"{packets} video packets. If normalization reports a frame-count mismatch, this "
+            "is why."
+        )
+    if decoded != packets:
+        return decoded, (
+            f"container advertises {packets} video packets but only {decoded} decode to a "
+            f"picture; using {decoded}, which is what every frame index downstream refers to"
+        )
+    return decoded, None
+
+
+def _decoded_frame_count(path: Path) -> int | None:
+    """Frames that actually decode. Costs a decode pass, which is why the result is carried
+    on VideoInfo rather than recomputed."""
+    try:
+        raw = _run([
+            "ffprobe", "-v", "error", "-select_streams", "v:0", "-count_frames",
+            "-show_entries", "stream=nb_read_frames",
+            "-of", "default=nokey=1:noprint_wrappers=1", str(path),
+        ])
+    except VideoError:
+        return None
+    text = raw.strip()
+    return int(text) if text.isdigit() else None
 
 
 def _packet_pts(path: Path) -> list[float]:
@@ -215,7 +262,7 @@ def normalize(
     if destination.exists() and not overwrite:
         existing = probe(destination)
         if existing.frame_count == expected_frames:
-            return _working_dict(destination, existing, fps, start_frame, reused=True)
+            return _working_dict(destination, existing, fps, start_frame=start_frame, reused=True)
 
     destination.parent.mkdir(parents=True, exist_ok=True)
     # passthrough keeps exactly one output frame per input frame, so frame indices stay
@@ -248,7 +295,7 @@ def normalize(
             f"working video still carries rotation metadata ({result.rotation}); "
             "downstream OpenCV/ffmpeg consumers would disagree about orientation."
         )
-    return _working_dict(destination, result, fps, reused=False)
+    return _working_dict(destination, result, fps, start_frame=start_frame, reused=False)
 
 
 def _supports_fps_mode() -> bool:
@@ -259,9 +306,13 @@ def _supports_fps_mode() -> bool:
     return "-fps_mode" in (result.stdout or "")
 
 
-def _working_dict(path: Path, info: VideoInfo, fps: float, *, reused: bool) -> dict[str, Any]:
+def _working_dict(
+    path: Path, info: VideoInfo, fps: float, *, start_frame: int = 0, reused: bool
+) -> dict[str, Any]:
     return {
         "path": str(path),
+        # metadata.json's contract: working frame N is source frame N + this.
+        "source_frame_offset": start_frame,
         "width": info.display_width,
         "height": info.display_height,
         "fps": fps,

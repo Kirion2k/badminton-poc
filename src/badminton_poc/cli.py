@@ -80,6 +80,13 @@ def build_parser() -> argparse.ArgumentParser:
     p_eval.add_argument("--video", required=True, help="source video, used to locate outputs/<stem>/")
     common(p_eval)
 
+    p_report = sub.add_parser(
+        "report", help="render analysis.json as a readable summary page")
+    p_report.add_argument("--video", required=True, help="source video, used to locate outputs/<stem>/")
+    p_report.add_argument("--html", help="write the page here (default outputs/<stem>/report.html)")
+    p_report.add_argument("--title", help="page title (default '<stem> Rally Report')")
+    common(p_report)
+
     return parser
 
 
@@ -164,6 +171,24 @@ def main(argv: list[str] | None = None) -> int:
         out = paths.root / "evaluation.json"
         out.write_text(json.dumps(result, indent=2), encoding="utf-8")
         print(json.dumps(result, indent=2))
+        return 0
+
+    if args.command == "report":
+        from .report import build_report, render_html
+
+        paths = Paths(Path(args.output_root), Path(args.video).stem)
+        analysis = json.loads(paths.analysis.read_text(encoding="utf-8"))
+        report = build_report(analysis)
+        destination = Path(args.html) if args.html else paths.root / "report.html"
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(render_html(report, title=args.title), encoding="utf-8")
+        (paths.root / "report.json").write_text(
+            json.dumps(report, indent=2), encoding="utf-8")
+        warn = [c for c in report["caveats"] if c["level"] == "warn"]
+        print(f"{destination}")
+        print(f"  {report['headline']['rallies'].get('detected', 0)} rallies, "
+              f"{report['headline']['hits'].get('detected', 0)} hits, "
+              f"{len(warn)} caveats to read before quoting any of it")
         return 0
 
     raise SystemExit(f"unhandled command {args.command}")

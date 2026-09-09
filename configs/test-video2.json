@@ -1,0 +1,28 @@
+{
+  "notes": "Court ROI for outputs/test-video2/work.mp4 (1920x884), derived from a permissive calibration pass rather than by eye: the near player's foot cloud spans x 0.20-0.86 y 0.67-1.00, the far player's x 0.20-0.40 y 0.55-0.68, and the courtside crowd sits at x 0.74-0.90 y 0.63-0.72 with the left-hand spectators pinned at x 0.11. Six vertices, not four, because the crowd on the right needs a near-horizontal cut above it while the far court needs a sloping baseline - a quadrilateral cannot do both. The near baseline runs off the bottom of the frame, so the polygon closes on y=1.0. Source is pillarboxed: x<0.09 and x>0.905 are solid black.",
+  "court": {
+    "polygon": [[0.17, 0.59], [0.46, 0.47], [0.72, 0.66], [0.86, 0.745], [0.86, 1.0], [0.17, 1.0]],
+    "net_line": [[0.19, 0.695], [0.65, 0.645]],
+    "shuttle_polygon": [[0.13, 0.0], [0.70, 0.0], [0.90, 1.0], [0.15, 1.0]]
+  },
+  "target_width": 1920,
+  "players": {
+    "model": "yolo11m-pose.pt",
+    "imgsz": 1920,
+    "conf": 0.25,
+    "min_box_height_frac": 0.05,
+    "max_box_height_frac": 0.80,
+    "identity_smoothing_frames": 20
+  },
+  "shuttle": {
+    "repo": "../BadmintonTrackNet",
+    "device": "auto",
+    "batch_size": 8
+  },
+  "analysis": {
+    "hit_search_radius_frames": 4,
+    "assignment_margin_px": 40.0,
+    "rally_gap_seconds": 2.5,
+    "shuttle_absent_seconds": 1.0
+  }
+}

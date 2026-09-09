@@ -153,6 +153,8 @@ def _preview_court(paths: Paths, config: PipelineConfig) -> None:
 
 def _warnings(info) -> list[str]:
     warnings: list[str] = []
+    if getattr(info, "count_warning", None):
+        warnings.append(info.count_warning)
     if info.rotation:
         warnings.append(
             f"source carries {info.rotation} degrees of display rotation; baked into the working "
