@@ -316,12 +316,37 @@ what recall means.
 
 | Metric | Result | Target | |
 |---|---|---|---|
-| Two-player tracking, active play | 95.5% | ≥ 90% | **PASS** |
-| Hitter assignment | 98.3% (59/60) | ≥ 90% | **PASS** |
+| Two-player tracking, active play | 92.7% | ≥ 90% | **PASS** |
+| Hitter assignment | 98.1% (53/54) | ≥ 90% | **PASS** |
 | Rally boundaries | 66.7% (4/6) | ≥ 85% | **FAIL** |
 | Hit precision / recall | 62.5% / 88.7% | — | |
 
 **61 of 189 candidates are real hits.** Two out of three the detector emits are not.
+
+### One frame of absence could hand a slot to a bystander
+
+Coverage read 95.5% before this was found, and that number was partly fiction. Spotted by hand
+while labelling -- "the far player is being registered as someone on the sideline" -- and much
+larger than it looked: an official standing beside the far court held the far slot for **1373
+frames, 23 seconds**, while the real far player held it for 38.
+
+The mechanism is a single undetected frame. At frame 1918 the far player was absent from the
+detector's output entirely; the official was the only other far-side candidate and took the
+slot by default. Identity continuity then held it for the next 1373 frames, and on 1085 of them
+(79%) the real player was an available candidate and lost every comparison -- continuity 1.0 and
+proximity 0.999 against a stranger's zero.
+
+``identity_smoothing_frames`` exists to survive exactly this and does not: it protects a slot
+against an *empty pool*, not against a *substitute*. A player cannot cross the court in one
+frame, so a slot that still remembers a track now refuses a different one further away than the
+player could plausibly have moved, and reports itself empty instead. The allowance grows with
+how long the track has been missing, so a genuine ByteTrack id break -- the same player
+reappearing a few pixels away under a new number -- still transfers freely.
+
+The intruder went from 1373 frames to 196, the real far player from 38 to 1123, and the four
+tracks that now hold the far slot longest are all within the real player's x range. Reported
+coverage *fell* from 95.5% to 92.7%, because the slot now says "empty" where it used to say
+"an official". That is the number getting more honest, not worse.
 
 ### The confidence threshold, measured
 

@@ -340,3 +340,56 @@ def test_swing_speed_handles_a_missing_player():
 
     result = swing_speed({f: {"frame": f, "near": None} for f in range(0, 9)}, 4, "near", fps=60.0)
     assert result["peak_heights_per_second"] is None
+
+
+def test_a_distant_stranger_cannot_take_a_slot_during_a_brief_dropout():
+    """On the test clip the far player went undetected for a single frame. The only other
+    far-side candidate was an official standing beside the court, 380 px away. It took the slot
+    by default, and identity continuity then held it for 1373 frames while the real player
+    stood there as an available candidate on 79% of them.
+
+    identity_smoothing_frames was meant to cover this and does not: it protects a slot against
+    an empty pool, not against a substitute. A player cannot cross the court in one frame, so a
+    different track that far from the slot's last known position is a different person."""
+    near_slot, far_slot = fresh()
+    player = box(0.600, 0.500, 0.12, conf=0.77, track_id=705)
+    select_players([player], near_slot, far_slot, court=COURT, width=W, height=H,
+                   diagonal=2113.0, forget_after=20, identity_transfer_px_per_frame=30.0)
+    assert far_slot.track_id == 705
+
+    # next frame: 705 is not detected; an official 380 px away is the only far candidate
+    stranger = box(0.798, 0.500, 0.12, conf=0.90, track_id=706)   # 380 px away
+    _, far = select_players([stranger], near_slot, far_slot, court=COURT, width=W, height=H,
+                            diagonal=2113.0, forget_after=20, identity_transfer_px_per_frame=30.0)
+    assert far is None, "a stranger 380px away took the slot"
+    assert far_slot.track_id == 705, "the slot forgot the player it was following"
+
+
+def test_a_nearby_track_may_still_take_over_because_that_is_an_id_break():
+    """The same guard must not block a ByteTrack id break, which is the far player reappearing
+    a few pixels away under a new number."""
+    near_slot, far_slot = fresh()
+    select_players([box(0.600, 0.500, 0.12, track_id=705)], near_slot, far_slot, court=COURT,
+                   width=W, height=H, diagonal=2113.0, forget_after=20,
+                   identity_transfer_px_per_frame=30.0)
+    replacement = box(0.602, 0.501, 0.12, track_id=811)
+    _, far = select_players([replacement], near_slot, far_slot, court=COURT, width=W, height=H,
+                            diagonal=2113.0, forget_after=20, identity_transfer_px_per_frame=30.0)
+    assert far is not None and far["track_id"] == 811
+
+
+def test_the_transfer_guard_lapses_once_the_slot_has_forgotten_its_track():
+    """After forget_after frames the slot holds no identity, so anyone eligible may claim it --
+    otherwise a player lost for a long spell could never be picked up again."""
+    near_slot, far_slot = fresh()
+    select_players([box(0.600, 0.500, 0.12, track_id=705)], near_slot, far_slot, court=COURT,
+                   width=W, height=H, diagonal=2113.0, forget_after=2,
+                   identity_transfer_px_per_frame=30.0)
+    for _ in range(3):
+        select_players([], near_slot, far_slot, court=COURT, width=W, height=H,
+                       diagonal=2113.0, forget_after=2, identity_transfer_px_per_frame=30.0)
+    assert far_slot.track_id is None
+    _, far = select_players([box(0.798, 0.500, 0.12, track_id=706)], near_slot, far_slot,
+                            court=COURT, width=W, height=H, diagonal=2113.0, forget_after=2,
+                            identity_transfer_px_per_frame=30.0)
+    assert far is not None and far["track_id"] == 706

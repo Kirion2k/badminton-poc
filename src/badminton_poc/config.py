@@ -242,6 +242,13 @@ class PlayerConfig:
     static_track_handoff_heights: float = 1.0
     """How close a new track must appear to a vanished mobile track to inherit its mobility,
     in box heights. Spatial, or every new id in the frame inherits a player's mobility."""
+    identity_transfer_px_per_frame: float = 30.0
+    """How far a slot will accept its identity jumping, per frame since it last saw its track.
+
+    Zero disables the guard. A slot that still remembers a track will not hand itself to a
+    different, distant one: a player cannot cross the court in a frame. identity_smoothing_
+    frames does not cover this -- it protects a slot against an empty pool, not against a
+    substitute standing somewhere else."""
     net_hysteresis_frac: float = 0.01
     """Normalized band around the net floor line inside which track identity, not geometry,
     decides which side a player is on. See ``CourtROI.side_of``."""

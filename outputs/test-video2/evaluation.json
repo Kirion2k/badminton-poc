@@ -2,9 +2,9 @@
   "labelled": true,
   "two_player_tracking": {
     "active_play_frames": 3730,
-    "both_players_frames": 3561,
-    "both_players_fraction": 0.9547,
-    "near_only": 169,
+    "both_players_frames": 3458,
+    "both_players_fraction": 0.9271,
+    "near_only": 272,
     "far_only": 0,
     "neither": 0
   },

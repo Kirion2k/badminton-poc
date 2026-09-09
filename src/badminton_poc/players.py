@@ -212,6 +212,7 @@ def select_players(
     forget_after: int,
     mobile: set[int] | None = None,
     net_hysteresis: float = 0.0,
+    identity_transfer_px_per_frame: float = 0.0,
 ) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
     """Pick one player per side of the net. Pure function over already-filtered candidates,
     so it can be unit-tested without running any model.
@@ -260,6 +261,29 @@ def select_players(
         scored = [(*_score(c, slot_state, diagonal), c) for c in eligible]
         scored.sort(key=lambda item: item[0], reverse=True)
         total, terms, best = scored[0]
+
+        # A player cannot cross the court in one frame. If this slot still remembers a track
+        # and the winner is a *different* one further away than the player could plausibly have
+        # moved, it is a different person -- report the slot empty and keep waiting.
+        #
+        # identity_smoothing_frames was meant to cover this and does not: it protects a slot
+        # against an empty pool, not against a substitute. On the test clip the far player went
+        # undetected for a single frame, an official standing beside the court was the only
+        # other far-side candidate, and continuity then held the slot for 1373 frames while the
+        # real player lost the comparison on 79% of them.
+        if (
+            identity_transfer_px_per_frame > 0
+            and slot_state.track_id is not None
+            and slot_state.last_foot is not None
+            and best.track_id is not None
+            and best.track_id != slot_state.track_id
+        ):
+            allowed = (slot_state.frames_missing + 1) * identity_transfer_px_per_frame
+            jump = math.dist(best.foot, slot_state.last_foot)
+            if jump > allowed:
+                slot_state.miss(forget_after)
+                chosen[slot] = None
+                continue
         runner_up = round(scored[1][0], 4) if len(scored) > 1 else None
         slot_state.claim(best)
         chosen[slot] = {
@@ -485,6 +509,7 @@ def iter_player_frames(
             forget_after=cfg.identity_smoothing_frames,
             mobile=candidate_filter.mobile,
             net_hysteresis=cfg.net_hysteresis_frac,
+            identity_transfer_px_per_frame=cfg.identity_transfer_px_per_frame,
         )
         chosen_ids = {
             p["track_id"] for p in (near, far) if p and p.get("track_id") is not None
