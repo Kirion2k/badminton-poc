@@ -122,58 +122,169 @@ def wrist_points(keypoints: list[list[float]], min_conf: float = 0.15) -> list[t
     return out
 
 
-def swing_speed(
+LEFT_SHOULDER, RIGHT_SHOULDER = 5, 6
+LEFT_ELBOW, RIGHT_ELBOW = 7, 8
+ELBOW_INDICES = (LEFT_ELBOW, RIGHT_ELBOW)
+SHOULDER_INDICES = (LEFT_SHOULDER, RIGHT_SHOULDER)
+
+
+def _joint_track(
+    players_by_frame: dict[int, dict[str, Any]],
+    frame: int,
+    slot: str,
+    half_window: int,
+    min_keypoint_conf: float,
+) -> tuple[dict[int, list[tuple[int, float, float]]], float, int]:
+    """Per-keypoint (frame, x, y) samples around a candidate, plus the player's box height.
+
+    Scale comes from the box height at the candidate frame, not per sample: a box that flickers
+    in size would otherwise modulate every velocity in the window with noise that has nothing to
+    do with the arm.
+    """
+    tracks: dict[int, list[tuple[int, float, float]]] = {}
+    height = 0.0
+    measured = 0
+    for f in range(frame - half_window, frame + half_window + 1):
+        row = players_by_frame.get(f)
+        player = row.get(slot) if row else None
+        if not player:
+            continue
+        box = player.get("bbox") or []
+        keypoints = player.get("keypoints") or []
+        if len(box) != 4:
+            continue
+        if f == frame or height == 0.0:
+            height = max(height, box[3] - box[1])
+        for index in (*WRIST_INDICES, *ELBOW_INDICES, *SHOULDER_INDICES):
+            if index >= len(keypoints):
+                continue
+            x, y, conf = keypoints[index][0], keypoints[index][1], keypoints[index][2]
+            if conf < min_keypoint_conf:
+                continue
+            tracks.setdefault(index, []).append((f, float(x), float(y)))
+            measured += 1
+    return tracks, max(height, 1.0), measured
+
+
+def _peak_speed(
+    samples: list[tuple[int, float, float]], height: float, fps: float
+) -> tuple[float | None, int | None]:
+    """Fastest consecutive-frame step, in body heights per second, and where it happened."""
+    best: float | None = None
+    at: int | None = None
+    for (f0, x0, y0), (f1, x1, y1) in zip(samples, samples[1:]):
+        gap = f1 - f0
+        if gap < 1 or gap > 2:
+            continue
+        speed = (math.dist((x0, y0), (x1, y1)) / height) * fps / gap
+        if best is None or speed > best:
+            best, at = speed, f1
+    return best, at
+
+
+def _relative(
+    limb: list[tuple[int, float, float]], base: list[tuple[int, float, float]]
+) -> list[tuple[int, float, float]]:
+    """Limb position with the base joint subtracted, on frames where both are visible."""
+    by_frame = {f: (x, y) for f, x, y in base}
+    return [(f, x - by_frame[f][0], y - by_frame[f][1]) for f, x, y in limb if f in by_frame]
+
+
+def swing_features(
     players_by_frame: dict[int, dict[str, Any]],
     frame: int,
     slot: str,
     *,
     fps: float,
-    half_window: int = 4,
+    half_window: int = 6,
     min_keypoint_conf: float = 0.3,
 ) -> dict[str, Any]:
-    """Peak wrist speed for one player around a frame, in that player's own box heights.
+    """Motion of one player's racket arm around a candidate frame, from the pose model.
 
-    Evidence that a racket swing happened, gathered from the pose model rather than the shuttle
-    track. That independence is the point: the upstream event detector saturates during dead
-    time, and none of its own outputs -- confidence, landings, trajectory smoothness -- separate
-    a real hit from a spurious one. On the labelled clip this does: a median 0.072 body-heights
-    per frame for real hits against 0.033 for false ones.
+    Evidence gathered independently of the shuttle track, which is the point: the upstream event
+    detector saturates during dead time, and none of its own outputs -- confidence, landings,
+    trajectory smoothness -- separate a real contact from a spurious one.
 
-    Body heights rather than pixels for the same reason the static-track filter needed it: the
-    far player is half the near player's size in frame, so an identical swing covers half the
-    pixels. Per second rather than per frame for the matching reason across clips: the same
-    swing at 28 fps covers twice the distance per frame as at 60, and clip 1 read a median
-    0.113 per frame against clip 2's 0.051 -- 3.17 and 3.08 per second, the same swing.
+    Everything is normalised twice. Spatially by the player's box height, because the far player
+    is half the near player's size in frame and an identical swing covers half the pixels.
+    Temporally by fps, because the same swing at 28 fps covers twice the distance per frame as
+    at 60 -- measured per frame the development clips read 0.113 and 0.051 for the same motion,
+    and per second 3.17 and 3.08. Nothing here is in raw pixels or per-frame units.
 
-    Reported, never used to discard. A hit with no swing behind it is worth marking; deleting it
-    on this evidence alone costs more recall than it buys precision.
+    The shoulder-relative terms matter most. A player sprinting back into position moves their
+    wrist quickly without swinging at anything, and dead time is full of exactly that;
+    subtracting the shoulder removes whole-body translation and leaves the stroke.
+
+    Reported, never thresholded here. Whether any of it separates real contacts from false ones
+    is a question for the labelled clips, and a threshold chosen on one clip is not validated
+    by that clip.
     """
-    peak = 0.0
-    measured = 0
-    for f in range(frame - half_window, frame + half_window):
-        first, second = players_by_frame.get(f), players_by_frame.get(f + 1)
-        if not first or not second:
-            continue
-        a, b = first.get(slot), second.get(slot)
-        if not a or not b:
-            continue
-        ka, kb = a.get("keypoints") or [], b.get("keypoints") or []
-        box = a.get("bbox") or []
-        if len(box) != 4:
-            continue
-        height = max(1.0, box[3] - box[1])
-        for index in WRIST_INDICES:
-            if index >= len(ka) or index >= len(kb):
-                continue
-            if ka[index][2] < min_keypoint_conf or kb[index][2] < min_keypoint_conf:
-                continue
-            measured += 1
-            step = math.dist(ka[index][:2], kb[index][:2]) / height
-            peak = max(peak, step)
-    return {
-        "peak_heights_per_second": round(peak * fps, 3) if measured else None,
+    tracks, height, measured = _joint_track(
+        players_by_frame, frame, slot, half_window, min_keypoint_conf)
+    window_s = (2 * half_window + 1) / fps if fps else None
+    empty = {
+        "peak_wrist_speed": None,
+        "peak_wrist_speed_left": None,
+        "peak_wrist_speed_right": None,
+        "peak_elbow_speed": None,
+        "peak_shoulder_speed": None,
+        "peak_wrist_minus_shoulder_speed": None,
+        "wrist_net_displacement": None,
+        "wrist_path_length": None,
+        "peak_offset_frames": None,
+        "peak_offset_s": None,
         "frames_measured": measured,
-        "window_frames": half_window,
+        "window_seconds": round(window_s, 4) if window_s else None,
+        "body_height_px": round(height, 1) if measured else None,
+        "units": "body-heights per second; displacements in body heights",
+    }
+    if not measured:
+        return empty
+
+    def peak_over(indices):
+        best, at = None, None
+        for index in indices:
+            speed, when = _peak_speed(tracks.get(index, []), height, fps)
+            if speed is not None and (best is None or speed > best):
+                best, at = speed, when
+        return best, at
+
+    left, _ = _peak_speed(tracks.get(LEFT_WRIST, []), height, fps)
+    right, _ = _peak_speed(tracks.get(RIGHT_WRIST, []), height, fps)
+    wrist, wrist_at = peak_over(WRIST_INDICES)
+    elbow, _ = peak_over(ELBOW_INDICES)
+    shoulder, _ = peak_over(SHOULDER_INDICES)
+
+    relative_best = None
+    for wrist_index, shoulder_index in ((LEFT_WRIST, LEFT_SHOULDER), (RIGHT_WRIST, RIGHT_SHOULDER)):
+        pair = _relative(tracks.get(wrist_index, []), tracks.get(shoulder_index, []))
+        speed, _ = _peak_speed(pair, height, fps)
+        if speed is not None and (relative_best is None or speed > relative_best):
+            relative_best = speed
+
+    # Displacement and path length over the faster wrist: a real stroke travels, a flickering
+    # keypoint covers distance without going anywhere.
+    fastest = LEFT_WRIST if (left or 0) >= (right or 0) else RIGHT_WRIST
+    samples = tracks.get(fastest, [])
+    net = path = None
+    if len(samples) >= 2:
+        net = math.dist(samples[0][1:], samples[-1][1:]) / height
+        path = sum(math.dist(a[1:], b[1:]) for a, b in zip(samples, samples[1:])) / height
+
+    return {
+        **empty,
+        "peak_wrist_speed": round(wrist, 4) if wrist is not None else None,
+        "peak_wrist_speed_left": round(left, 4) if left is not None else None,
+        "peak_wrist_speed_right": round(right, 4) if right is not None else None,
+        "peak_elbow_speed": round(elbow, 4) if elbow is not None else None,
+        "peak_shoulder_speed": round(shoulder, 4) if shoulder is not None else None,
+        "peak_wrist_minus_shoulder_speed": (
+            round(relative_best, 4) if relative_best is not None else None),
+        "wrist_net_displacement": round(net, 4) if net is not None else None,
+        "wrist_path_length": round(path, 4) if path is not None else None,
+        "peak_offset_frames": (wrist_at - frame) if wrist_at is not None else None,
+        "peak_offset_s": (
+            round((wrist_at - frame) / fps, 4) if wrist_at is not None and fps else None),
     }
 
 

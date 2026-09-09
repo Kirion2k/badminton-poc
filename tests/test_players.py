@@ -307,39 +307,39 @@ def test_swing_speed_is_measured_in_body_heights_not_pixels():
     """The far player is half the near player's size in frame, so the same swing covers half
     the pixels. Measured against the player's own box height the two are comparable -- the same
     correction the static-track filter needed."""
-    from badminton_poc.players import swing_speed
+    from badminton_poc.players import swing_features
 
     rows = {f: _row(f, "near", (100.0 + 20.0 * f, 300.0), box_height=200.0) for f in range(0, 9)}
-    fast_near = swing_speed(rows, 4, "near", fps=60.0, half_window=4)
+    fast_near = swing_features(rows, 4, "near", fps=60.0, half_window=4)
     rows_far = {f: _row(f, "far", (100.0 + 10.0 * f, 300.0), box_height=100.0) for f in range(0, 9)}
-    fast_far = swing_speed(rows_far, 4, "far", fps=60.0, half_window=4)
+    fast_far = swing_features(rows_far, 4, "far", fps=60.0, half_window=4)
 
-    assert fast_near["peak_heights_per_second"] == pytest.approx(6.0)
-    assert fast_far["peak_heights_per_second"] == pytest.approx(6.0)
+    assert fast_near["peak_wrist_speed"] == pytest.approx(6.0)
+    assert fast_far["peak_wrist_speed"] == pytest.approx(6.0)
 
 
 def test_a_still_arm_scores_near_zero():
-    from badminton_poc.players import swing_speed
+    from badminton_poc.players import swing_features
 
     rows = {f: _row(f, "near", (100.0, 300.0)) for f in range(0, 9)}
-    assert swing_speed(rows, 4, "near", fps=60.0, half_window=4)["peak_heights_per_second"] == 0.0
+    assert swing_features(rows, 4, "near", fps=60.0, half_window=4)["peak_wrist_speed"] == 0.0
 
 
 def test_swing_speed_ignores_low_confidence_keypoints():
     """A wrist the pose model is guessing at would otherwise produce a huge apparent swing."""
-    from badminton_poc.players import swing_speed
+    from badminton_poc.players import swing_features
 
     rows = {f: _row(f, "near", (100.0 + 50.0 * f, 300.0), conf=0.05) for f in range(0, 9)}
-    result = swing_speed(rows, 4, "near", fps=60.0, half_window=4)
-    assert result["peak_heights_per_second"] is None
+    result = swing_features(rows, 4, "near", fps=60.0, half_window=4)
+    assert result["peak_wrist_speed"] is None
     assert result["frames_measured"] == 0
 
 
 def test_swing_speed_handles_a_missing_player():
-    from badminton_poc.players import swing_speed
+    from badminton_poc.players import swing_features
 
-    result = swing_speed({f: {"frame": f, "near": None} for f in range(0, 9)}, 4, "near", fps=60.0)
-    assert result["peak_heights_per_second"] is None
+    result = swing_features({f: {"frame": f, "near": None} for f in range(0, 9)}, 4, "near", fps=60.0)
+    assert result["peak_wrist_speed"] is None
 
 
 def test_a_distant_stranger_cannot_take_a_slot_during_a_brief_dropout():
@@ -393,3 +393,99 @@ def test_the_transfer_guard_lapses_once_the_slot_has_forgotten_its_track():
                             court=COURT, width=W, height=H, diagonal=2113.0, forget_after=2,
                             identity_transfer_px_per_frame=30.0)
     assert far is not None and far["track_id"] == 706
+
+
+# --- swing features (step 5) ----------------------------------------------------------
+# COCO-17: shoulders 5/6, elbows 7/8, wrists 9/10.
+
+def _pose(frame, slot, *, wrist=(0.0, 0.0), elbow=(0.0, 0.0), shoulder=(0.0, 0.0),
+          box_height=200.0, conf=0.9):
+    kp = [[0.0, 0.0, 0.0]] * 17
+    kp[5] = [shoulder[0], shoulder[1], conf]
+    kp[7] = [elbow[0], elbow[1], conf]
+    kp[9] = [wrist[0], wrist[1], conf]
+    return {"frame": frame, slot: {"bbox": [0.0, 0.0, 40.0, box_height], "keypoints": kp}}
+
+
+def _series(fn, slot="near", n=13):
+    return {f: fn(f, slot) for f in range(n)}
+
+
+def test_shoulder_relative_motion_ignores_a_running_player():
+    """A player sprinting across court moves their wrist fast without swinging. Subtracting the
+    shoulder removes whole-body translation, which is the difference between a stroke and a
+    sprint -- and dead-time false positives are full of players jogging back into position."""
+    from badminton_poc.players import swing_features
+
+    # whole body translating 20 px/frame; the arm never moves relative to the torso
+    rows = _series(lambda f, s: _pose(f, s, wrist=(20.0 * f, 0.0), elbow=(20.0 * f, 0.0),
+                                      shoulder=(20.0 * f, 0.0)))
+    out = swing_features(rows, 6, "near", fps=60.0, half_window=6)
+    assert out["peak_wrist_speed"] == pytest.approx(6.0)          # fast in absolute terms
+    assert out["peak_wrist_minus_shoulder_speed"] == pytest.approx(0.0)   # no stroke
+
+
+def test_a_swing_shows_up_in_shoulder_relative_motion():
+    from badminton_poc.players import swing_features
+
+    rows = _series(lambda f, s: _pose(f, s, wrist=(30.0 * f, 0.0), shoulder=(0.0, 0.0),
+                                      elbow=(15.0 * f, 0.0)))
+    out = swing_features(rows, 6, "near", fps=60.0, half_window=6)
+    assert out["peak_wrist_minus_shoulder_speed"] == pytest.approx(9.0)
+    assert out["peak_elbow_speed"] == pytest.approx(4.5)
+
+
+def test_path_length_and_net_displacement_differ_for_an_oscillation():
+    """A wrist that jitters back and forth covers distance without going anywhere. A real swing
+    travels; a flickering keypoint does not."""
+    from badminton_poc.players import swing_features
+
+    rows = _series(lambda f, s: _pose(f, s, wrist=(40.0 * (f % 2), 0.0)))
+    out = swing_features(rows, 6, "near", fps=60.0, half_window=6)
+    assert out["wrist_path_length"] > 2.0            # covers a lot of ground
+    assert out["wrist_net_displacement"] == pytest.approx(0.0)   # and ends where it started
+
+
+def test_the_peak_is_located_relative_to_the_candidate_frame():
+    """Temporal lead/lag: the detector places a hit where the shuttle turns, which is not
+    exactly where the racket swings. If the peak sits consistently on one side, the association
+    window is misaligned."""
+    from badminton_poc.players import swing_features
+
+    def pose(f, s):
+        x = 0.0 if f < 9 else 60.0 * (f - 8)
+        return _pose(f, s, wrist=(x, 0.0))
+    out = swing_features(pose_rows := _series(pose), 6, "near", fps=60.0, half_window=6)
+    assert out["peak_offset_frames"] == 3          # peak is 3 frames after the candidate
+    assert out["peak_offset_s"] == pytest.approx(0.05)
+
+
+def test_both_wrists_are_measured_and_the_faster_one_wins():
+    from badminton_poc.players import swing_features
+
+    def pose(f, s):
+        kp = [[0.0, 0.0, 0.0]] * 17
+        kp[5] = [0.0, 0.0, 0.9]
+        kp[9] = [5.0 * f, 0.0, 0.9]      # left wrist, slow
+        kp[10] = [25.0 * f, 0.0, 0.9]    # right wrist, fast
+        return {"frame": f, s: {"bbox": [0.0, 0.0, 40.0, 200.0], "keypoints": kp}}
+    out = swing_features(_series(pose), 6, "near", fps=60.0, half_window=6)
+    assert out["peak_wrist_speed_left"] == pytest.approx(1.5)
+    assert out["peak_wrist_speed_right"] == pytest.approx(7.5)
+    assert out["peak_wrist_speed"] == pytest.approx(7.5)
+
+
+def test_features_are_none_when_the_pose_is_unusable():
+    from badminton_poc.players import swing_features
+
+    rows = _series(lambda f, s: _pose(f, s, wrist=(10.0 * f, 0.0), conf=0.05))
+    out = swing_features(rows, 6, "near", fps=60.0, half_window=6)
+    assert out["peak_wrist_speed"] is None
+    assert out["frames_measured"] == 0
+
+
+def test_features_are_none_when_the_player_is_absent():
+    from badminton_poc.players import swing_features
+
+    out = swing_features({f: {"frame": f, "near": None} for f in range(13)}, 6, "near", fps=60.0)
+    assert out["peak_wrist_speed"] is None

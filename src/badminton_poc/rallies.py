@@ -300,10 +300,10 @@ def build_timeline(
                 detail["swing_evidence"] = {
                     "near": swings.get("near"),
                     "far": swings.get("far"),
-                    "hitter_peak_heights_per_second": (
-                        (swings.get(hitter) or {}).get("peak_heights_per_second")
-                        if hitter in ("near", "far") else None
-                    ),
+                    # The assigned player's own numbers, lifted for convenience; both
+                    # players' full feature sets stay above so a wrong assignment can be
+                    # re-examined without re-running the pose model.
+                    "hitter": (swings.get(hitter) if hitter in ("near", "far") else None),
                 }
                 detail.pop("hitter", None)
         timeline.append(
@@ -381,8 +381,9 @@ def _finalise(
             "time_s": round(hit.frame / fps, 3),
             "hitter": hit.hitter,
             "detector_confidence": hit.detail.get("detector_confidence"),
-            "swing_peak_heights_per_second": (
-                (hit.detail.get("swing_evidence") or {}).get("hitter_peak_heights_per_second")
+            "swing_peak_wrist_speed": (
+                ((hit.detail.get("swing_evidence") or {}).get("hitter") or {})
+                .get("peak_wrist_speed")
             ),
             "assignment_separation": hit.detail.get("assignment_separation"),
             "assignment_reason": hit.detail.get("assignment_reason"),

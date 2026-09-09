@@ -103,7 +103,8 @@ def swing_stats(analysis: dict[str, Any]) -> dict[str, Any]:
     for event in analysis.get("events", []):
         if event.get("event_type") != "hit":
             continue
-        peak = (event.get("swing_evidence") or {}).get("hitter_peak_heights_per_second")
+        hitter_swing = (event.get("swing_evidence") or {}).get("hitter") or {}
+        peak = hitter_swing.get("peak_wrist_speed")
         if peak is not None:
             values.append(float(peak))
     values.sort()

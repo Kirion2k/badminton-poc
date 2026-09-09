@@ -9,7 +9,7 @@ from typing import Any
 from .assoc import assign_hit, enforce_alternation
 from .config import AnalysisConfig, CourtROI
 from .parsing import BallTrack, load_ball_csv, load_events_json, load_jsonl
-from .players import swing_speed
+from .players import swing_features
 from .rallies import (
     build_timeline,
     consolidate_events,
@@ -68,7 +68,7 @@ def analyze(
     swing_by_frame = {}
     for event in hits:
         swing_by_frame[event.frame] = {
-            slot: swing_speed(players_by_frame, event.frame, slot, fps=fps)
+            slot: swing_features(players_by_frame, event.frame, slot, fps=fps)
             for slot in ("near", "far")
         }
     raw_assignments = [

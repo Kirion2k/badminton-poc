@@ -236,11 +236,11 @@ def test_hits_with_no_swing_behind_them_are_surfaced():
     a = _analysis()
     a["events"] = [
         {"event_type": "hit", "frame": 10, "time_s": 0.1, "hitter": "near",
-         "swing_evidence": {"hitter_peak_heights_per_second": 9.0}},
+         "swing_evidence": {"hitter": {"peak_wrist_speed": 9.0}}},
         {"event_type": "hit", "frame": 60, "time_s": 1.0, "hitter": "far",
-         "swing_evidence": {"hitter_peak_heights_per_second": 0.6}},
+         "swing_evidence": {"hitter": {"peak_wrist_speed": 0.6}}},
         {"event_type": "hit", "frame": 120, "time_s": 2.0, "hitter": "near",
-         "swing_evidence": {"hitter_peak_heights_per_second": 0.3}},
+         "swing_evidence": {"hitter": {"peak_wrist_speed": 0.3}}},
     ]
     report = build_report(a)
 
@@ -253,7 +253,7 @@ def test_hits_with_no_swing_behind_them_are_surfaced():
 def test_no_swing_caveat_when_every_hit_has_a_swing_behind_it():
     a = _analysis()
     a["events"] = [{"event_type": "hit", "frame": 10, "time_s": 0.1, "hitter": "near",
-                    "swing_evidence": {"hitter_peak_heights_per_second": 12.0}}]
+                    "swing_evidence": {"hitter": {"peak_wrist_speed": 12.0}}}]
     report = build_report(a)
     assert report["swing"]["below_threshold"] == 0
     assert not [c for c in report["caveats"] if "swing" in c["text"].lower()]
