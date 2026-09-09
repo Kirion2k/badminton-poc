@@ -277,6 +277,7 @@ def build_timeline(
     ball: BallTrack,
     fps: float,
     shuttle_absent_seconds: float,
+    swing_by_frame: dict[int, dict[str, Any]] | None = None,
 ) -> list[TimelineEvent]:
     timeline: list[TimelineEvent] = []
     for event in events:
@@ -292,6 +293,18 @@ def build_timeline(
             if assignment is not None:
                 hitter = assignment.hitter
                 detail.update(assignment.to_dict())
+            swings = (swing_by_frame or {}).get(event.frame)
+            if swings:
+                # Evidence, not a filter. A hit with no swing behind it is worth marking; the
+                # measurement costs more recall than it buys precision if used to discard.
+                detail["swing_evidence"] = {
+                    "near": swings.get("near"),
+                    "far": swings.get("far"),
+                    "hitter_peak_heights_per_second": (
+                        (swings.get(hitter) or {}).get("peak_heights_per_second")
+                        if hitter in ("near", "far") else None
+                    ),
+                }
                 detail.pop("hitter", None)
         timeline.append(
             TimelineEvent(
@@ -368,6 +381,9 @@ def _finalise(
             "time_s": round(hit.frame / fps, 3),
             "hitter": hit.hitter,
             "detector_confidence": hit.detail.get("detector_confidence"),
+            "swing_peak_heights_per_second": (
+                (hit.detail.get("swing_evidence") or {}).get("hitter_peak_heights_per_second")
+            ),
             "assignment_separation": hit.detail.get("assignment_separation"),
             "assignment_reason": hit.detail.get("assignment_reason"),
         }

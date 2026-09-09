@@ -1,6 +1,8 @@
 """Player selection and identity tests. No model, no GPU: select_players is a pure function."""
 from __future__ import annotations
 
+import pytest
+
 from badminton_poc.config import CourtROI, PlayerConfig
 from badminton_poc.players import CandidateFilter, Candidate, Slot, select_players, wrist_points
 
@@ -293,3 +295,48 @@ def test_an_untracked_detection_is_not_withheld():
                             court=COURT, width=W, height=H, diagonal=2113.0, forget_after=20,
                             mobile=set())
     assert far is not None
+
+
+def _row(frame, slot, wrist_xy, box_height=200.0, conf=0.9):
+    keypoints = [[0.0, 0.0, 0.0]] * 9 + [[wrist_xy[0], wrist_xy[1], conf], [0.0, 0.0, 0.0]]
+    return {"frame": frame, slot: {"bbox": [0.0, 0.0, 40.0, box_height],
+                                   "keypoints": keypoints}}
+
+
+def test_swing_speed_is_measured_in_body_heights_not_pixels():
+    """The far player is half the near player's size in frame, so the same swing covers half
+    the pixels. Measured against the player's own box height the two are comparable -- the same
+    correction the static-track filter needed."""
+    from badminton_poc.players import swing_speed
+
+    rows = {f: _row(f, "near", (100.0 + 20.0 * f, 300.0), box_height=200.0) for f in range(0, 9)}
+    fast_near = swing_speed(rows, 4, "near", fps=60.0, half_window=4)
+    rows_far = {f: _row(f, "far", (100.0 + 10.0 * f, 300.0), box_height=100.0) for f in range(0, 9)}
+    fast_far = swing_speed(rows_far, 4, "far", fps=60.0, half_window=4)
+
+    assert fast_near["peak_heights_per_second"] == pytest.approx(6.0)
+    assert fast_far["peak_heights_per_second"] == pytest.approx(6.0)
+
+
+def test_a_still_arm_scores_near_zero():
+    from badminton_poc.players import swing_speed
+
+    rows = {f: _row(f, "near", (100.0, 300.0)) for f in range(0, 9)}
+    assert swing_speed(rows, 4, "near", fps=60.0, half_window=4)["peak_heights_per_second"] == 0.0
+
+
+def test_swing_speed_ignores_low_confidence_keypoints():
+    """A wrist the pose model is guessing at would otherwise produce a huge apparent swing."""
+    from badminton_poc.players import swing_speed
+
+    rows = {f: _row(f, "near", (100.0 + 50.0 * f, 300.0), conf=0.05) for f in range(0, 9)}
+    result = swing_speed(rows, 4, "near", fps=60.0, half_window=4)
+    assert result["peak_heights_per_second"] is None
+    assert result["frames_measured"] == 0
+
+
+def test_swing_speed_handles_a_missing_player():
+    from badminton_poc.players import swing_speed
+
+    result = swing_speed({f: {"frame": f, "near": None} for f in range(0, 9)}, 4, "near", fps=60.0)
+    assert result["peak_heights_per_second"] is None

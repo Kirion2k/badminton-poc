@@ -155,7 +155,12 @@ def score_rally_boundaries(
         detail.append(row)
 
     spurious = [d for d in detected if id(d) not in matched_detected]
-    return {
+    # The template seeds these from the detected rallies. Coming back identical means they were
+    # never edited, and everything measured over them is scored against the pipeline's own
+    # opinion of where play happened.
+    seeded = [(int(d["start_frame"]), int(d["end_frame"])) for d in detected]
+    unedited = bool(real) and sorted(seeded) == real
+    result: dict[str, Any] = {
         "real_rallies": len(real),
         "detected_rallies": len(detected),
         "approximately_correct": correct,
@@ -166,11 +171,21 @@ def score_rally_boundaries(
         "spurious_rallies": [d.get("rally") for d in spurious],
         "tolerance_seconds": tolerance_seconds,
         "detail": detail,
+        "ranges_look_unedited": unedited,
         "note": (
             "Scored against active_play_ranges. A real rally is correct when exactly one "
             "detected rally overlaps it and both edges land within the tolerance."
         ),
     }
+    if unedited:
+        result["warning"] = (
+            "active_play_ranges is identical to the detected rallies, so it was not edited. "
+            "The template seeds it from them as a draft. Until it is corrected by hand, rally "
+            "boundaries are being scored against the pipeline's own output and two-player "
+            "coverage is measured over frames the pipeline chose, not frames where play "
+            "actually happened."
+        )
+    return result
 
 
 class NotLabelledError(RuntimeError):

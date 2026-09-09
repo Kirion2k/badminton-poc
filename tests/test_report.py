@@ -226,3 +226,34 @@ def test_no_filter_caveat_when_no_threshold_was_applied():
     report = build_report(_analysis())
     assert report["filtered"]["dropped"] == 0
     assert not [c for c in report["caveats"] if "threshold" in c["text"].lower()]
+
+
+def test_hits_with_no_swing_behind_them_are_surfaced():
+    """The one signal that separates a real hit from a spurious one is the assigned player's
+    own racket-arm motion, and it is independent of the detector that produces the hits. It is
+    reported, never used to discard: on the labelled clip a 0.06 cut buys 85% precision but
+    keeps only 61% of real hits."""
+    a = _analysis()
+    a["events"] = [
+        {"event_type": "hit", "frame": 10, "time_s": 0.1, "hitter": "near",
+         "swing_evidence": {"hitter_peak_heights_per_second": 9.0}},
+        {"event_type": "hit", "frame": 60, "time_s": 1.0, "hitter": "far",
+         "swing_evidence": {"hitter_peak_heights_per_second": 0.6}},
+        {"event_type": "hit", "frame": 120, "time_s": 2.0, "hitter": "near",
+         "swing_evidence": {"hitter_peak_heights_per_second": 0.3}},
+    ]
+    report = build_report(a)
+
+    assert report["swing"]["measured"] == 3
+    assert report["swing"]["below_threshold"] == 2
+    text = " ".join(c["text"] for c in report["caveats"])
+    assert "swing" in text.lower() and "2 of 3" in text
+
+
+def test_no_swing_caveat_when_every_hit_has_a_swing_behind_it():
+    a = _analysis()
+    a["events"] = [{"event_type": "hit", "frame": 10, "time_s": 0.1, "hitter": "near",
+                    "swing_evidence": {"hitter_peak_heights_per_second": 12.0}}]
+    report = build_report(a)
+    assert report["swing"]["below_threshold"] == 0
+    assert not [c for c in report["caveats"] if "swing" in c["text"].lower()]

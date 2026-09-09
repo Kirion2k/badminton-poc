@@ -102,6 +102,7 @@
         "verdict": "ok"
       }
     ],
+    "ranges_look_unedited": false,
     "note": "Scored against active_play_ranges. A real rally is correct when exactly one detected rally overlaps it and both edges land within the tolerance.",
     "manual_boundary_ok": {
       "judged": 8,

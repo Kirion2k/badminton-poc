@@ -193,3 +193,44 @@ def test_hits_are_scored_when_the_labels_match_the_run():
     result = evaluate(analysis, ground_truth, [])
     assert result["hit_detection"]["scorable"] is True
     assert result["hit_detection"]["precision"] == pytest.approx(0.5)
+
+
+def test_untouched_active_play_ranges_are_flagged():
+    """The template seeds active_play_ranges from the detected rallies so labelling starts from
+    a draft. If they come back byte-identical, they were not edited, and every number measured
+    over them -- tracking coverage and every rally boundary -- is scored against the pipeline's
+    own opinion. That happened once and produced a boundary score that contradicted its own
+    ranges."""
+    analysis = dict(
+        ANALYSIS,
+        rallies=[{"rally": 1, "start_frame": 100, "end_frame": 200}],
+        events=[{"event_type": "hit", "frame": 150, "time_s": 2.5}],
+    )
+    ground_truth = {
+        "labelled": True, "fps": 60.0,
+        "active_play_ranges": [[100, 200]],          # exactly the detected rally
+        "hits": [{"frame": 150, "detected_hitter": "near", "true_hitter": "near",
+                  "is_real_hit": True}],
+        "rallies": [],
+    }
+    result = evaluate(analysis, ground_truth, [])
+    assert result["rally_boundaries"]["ranges_look_unedited"] is True
+    assert "not edited" in result["rally_boundaries"]["warning"]
+
+
+def test_edited_ranges_are_not_flagged():
+    analysis = dict(
+        ANALYSIS,
+        rallies=[{"rally": 1, "start_frame": 100, "end_frame": 200}],
+        events=[{"event_type": "hit", "frame": 150, "time_s": 2.5}],
+    )
+    ground_truth = {
+        "labelled": True, "fps": 60.0,
+        "active_play_ranges": [[100, 160]],          # a human moved the end
+        "hits": [{"frame": 150, "detected_hitter": "near", "true_hitter": "near",
+                  "is_real_hit": True}],
+        "rallies": [],
+    }
+    result = evaluate(analysis, ground_truth, [])
+    assert result["rally_boundaries"]["ranges_look_unedited"] is False
+    assert "warning" not in result["rally_boundaries"]

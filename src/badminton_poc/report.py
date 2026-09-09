@@ -26,6 +26,11 @@ _OFFCOURT_SHARE = 0.10
 # window on each side of it, so twice that window is the widest a healthy merge can be. Beyond
 # it, merging has started chaining separate shots together again.
 _MERGE_SPAN_WINDOWS = 2.0
+# Peak wrist speed of the assigned player, in body-heights per second. On the labelled clip real
+# hits sit at a median 4.3 and false ones at 2.0; this is the point where precision reaches
+# 85%. Per second, not per frame, so it means the same on a 28 fps clip and a 60 fps one.
+# Used to mark a hit as weakly evidenced, never to discard it.
+_WEAK_SWING = 3.6
 _FALLBACK_MIN_HIT_INTERVAL_S = 0.30
 
 
@@ -88,6 +93,25 @@ def consolidation_stats(analysis: dict[str, Any]) -> dict[str, Any]:
         "median_merge_s": round(spans[len(spans) // 2], 3) if spans else None,
         "healthy_span_limit_s": round(limit, 3),
         "merges_over_the_limit": sum(1 for s in spans if s > limit),
+    }
+
+
+def swing_stats(analysis: dict[str, Any]) -> dict[str, Any]:
+    """How many hits have a racket swing behind them, from the pose model rather than the
+    shuttle track. The only signal measured that separates a real hit from a spurious one."""
+    values = []
+    for event in analysis.get("events", []):
+        if event.get("event_type") != "hit":
+            continue
+        peak = (event.get("swing_evidence") or {}).get("hitter_peak_heights_per_second")
+        if peak is not None:
+            values.append(float(peak))
+    values.sort()
+    return {
+        "measured": len(values),
+        "below_threshold": sum(1 for v in values if v < _WEAK_SWING),
+        "threshold": _WEAK_SWING,
+        "median": round(values[len(values) // 2], 4) if values else None,
     }
 
 
@@ -184,6 +208,18 @@ def _caveats(analysis: dict[str, Any], rows: list[dict[str, Any]]) -> list[dict[
             "being chained together and the shot count below is an undercount."
         )})
 
+    swing = swing_stats(analysis)
+    if swing["below_threshold"]:
+        out.append({"level": "warn", "text": (
+            f"{swing['below_threshold']} of {swing['measured']} hits have little or no racket "
+            f"swing behind them: the assigned player's wrist peaked below "
+            f"{swing['threshold']} body-heights per second. Measured from the pose model, "
+            "independently of the detector that produced the hit. On a hand-labelled clip real "
+            "hits sat at a median 4.3 against 2.0 for false ones, so a weak swing is a "
+            "reason to doubt a hit -- but it is reported rather than filtered, because cutting "
+            "on it costs more real hits than it removes false ones."
+        )})
+
     if rows and all(r["hit_count"] <= 2 for r in rows):
         out.append({"level": "warn", "text": (
             "Every rally has two hits or fewer, which is not what a real rally looks like. "
@@ -231,6 +267,7 @@ def build_report(analysis: dict[str, Any]) -> dict[str, Any]:
         "tempo": tempo,
         "consolidation": consolidation_stats(analysis),
         "filtered": filter_stats(analysis),
+        "swing": swing_stats(analysis),
         "rallies": rows,
         "caveats": _caveats(analysis, rows),
     }

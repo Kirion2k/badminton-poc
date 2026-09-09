@@ -122,6 +122,61 @@ def wrist_points(keypoints: list[list[float]], min_conf: float = 0.15) -> list[t
     return out
 
 
+def swing_speed(
+    players_by_frame: dict[int, dict[str, Any]],
+    frame: int,
+    slot: str,
+    *,
+    fps: float,
+    half_window: int = 4,
+    min_keypoint_conf: float = 0.3,
+) -> dict[str, Any]:
+    """Peak wrist speed for one player around a frame, in that player's own box heights.
+
+    Evidence that a racket swing happened, gathered from the pose model rather than the shuttle
+    track. That independence is the point: the upstream event detector saturates during dead
+    time, and none of its own outputs -- confidence, landings, trajectory smoothness -- separate
+    a real hit from a spurious one. On the labelled clip this does: a median 0.072 body-heights
+    per frame for real hits against 0.033 for false ones.
+
+    Body heights rather than pixels for the same reason the static-track filter needed it: the
+    far player is half the near player's size in frame, so an identical swing covers half the
+    pixels. Per second rather than per frame for the matching reason across clips: the same
+    swing at 28 fps covers twice the distance per frame as at 60, and clip 1 read a median
+    0.113 per frame against clip 2's 0.051 -- 3.17 and 3.08 per second, the same swing.
+
+    Reported, never used to discard. A hit with no swing behind it is worth marking; deleting it
+    on this evidence alone costs more recall than it buys precision.
+    """
+    peak = 0.0
+    measured = 0
+    for f in range(frame - half_window, frame + half_window):
+        first, second = players_by_frame.get(f), players_by_frame.get(f + 1)
+        if not first or not second:
+            continue
+        a, b = first.get(slot), second.get(slot)
+        if not a or not b:
+            continue
+        ka, kb = a.get("keypoints") or [], b.get("keypoints") or []
+        box = a.get("bbox") or []
+        if len(box) != 4:
+            continue
+        height = max(1.0, box[3] - box[1])
+        for index in WRIST_INDICES:
+            if index >= len(ka) or index >= len(kb):
+                continue
+            if ka[index][2] < min_keypoint_conf or kb[index][2] < min_keypoint_conf:
+                continue
+            measured += 1
+            step = math.dist(ka[index][:2], kb[index][:2]) / height
+            peak = max(peak, step)
+    return {
+        "peak_heights_per_second": round(peak * fps, 3) if measured else None,
+        "frames_measured": measured,
+        "window_frames": half_window,
+    }
+
+
 def _score(
     candidate: Candidate,
     slot: Slot,

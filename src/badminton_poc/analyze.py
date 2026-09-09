@@ -9,6 +9,7 @@ from typing import Any
 from .assoc import assign_hit, enforce_alternation
 from .config import AnalysisConfig, CourtROI
 from .parsing import BallTrack, load_ball_csv, load_events_json, load_jsonl
+from .players import swing_speed
 from .rallies import (
     build_timeline,
     consolidate_events,
@@ -64,6 +65,12 @@ def analyze(
     merge_audit = merge_audit + landing_audit
 
     hits = [e for e in events if e.event_type == "hit"]
+    swing_by_frame = {}
+    for event in hits:
+        swing_by_frame[event.frame] = {
+            slot: swing_speed(players_by_frame, event.frame, slot, fps=fps)
+            for slot in ("near", "far")
+        }
     raw_assignments = [
         assign_hit(event, ball, players_by_frame, court, cfg, width=width, height=height)
         for event in hits
@@ -72,7 +79,8 @@ def analyze(
     assignments = enforce_alternation(raw_assignments, max_gap)
     by_frame = {a.frame: a for a in assignments}
 
-    timeline = build_timeline(events, by_frame, ball, fps, cfg.shuttle_absent_seconds)
+    timeline = build_timeline(events, by_frame, ball, fps, cfg.shuttle_absent_seconds,
+                              swing_by_frame=swing_by_frame)
     rallies = segment_rallies(
         timeline, fps, gap_seconds=cfg.rally_gap_seconds, min_hits=cfg.min_hits_per_rally
     )

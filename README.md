@@ -341,7 +341,7 @@ against the labels, and four of them do not work:
 | Shuttle speed (play gate) | ≥4 px/f covers 78% of play frames and 22% of dead ones | **No.** Not a gate |
 | Landing events | 47 of 68 gaps are 47–49 frames | **No.** A metronome, not events |
 | Trajectory smoothness | residual median 12.4 real vs 18.7 false | **No.** Overlapping |
-| **Player wrist speed** | median 0.072 vs 0.033 body-heights/frame | **Best lead.** 85% precision at 61% recall |
+| **Player wrist speed** | median 4.30 vs 1.98 body-heights/second | **Best lead.** 85% precision at 61% recall |
 
 The landing result is worth dwelling on. `min_landing_interval_seconds` is 0.75s and the
 suppression floor is 45 frames; 47 of 68 landing gaps are 47–49 frames. The detector fires
@@ -350,10 +350,16 @@ within 0.75s of the true rally end" is therefore true *everywhere* and carries n
 a spurious correlation that a rally-trimming fix was nearly built on.
 
 Wrist speed is the first signal that clearly beats the 63% baseline, and the only one
-independent of the shuttle track. It is not applied: it buys precision with recall, and every
-filter tried against these labels has cost more than it gained. The better use is probably as
-evidence attached to each hit rather than as a gate, so a marginal hit is marked rather than
-discarded.
+independent of the shuttle track. Every hit now carries it as `swing_evidence`, and the report
+says how many hits have little or no swing behind them. It is **not** used to discard anything:
+it buys precision with recall, and every filter tried against these labels has cost more than
+it gained.
+
+Measured per *second*, not per frame. Per frame it is not comparable across clips -- the same
+swing at 28 fps covers twice the distance per frame as at 60, and clip 1 read a median 0.113
+against clip 2's 0.051 before the correction. Per second they are 3.17 and 3.08: the same
+swing. Any signal normalised by frame has this problem, and this project has now been bitten by
+it twice, the other being the static-track travel threshold.
 
 ### The confidence threshold, and why it is a rule filter
 
