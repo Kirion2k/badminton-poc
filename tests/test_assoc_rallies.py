@@ -335,3 +335,40 @@ def test_consolidated_hits_are_never_closer_than_the_minimum_interval():
     assert frames, "consolidation dropped everything"
     closest = min((b - a for a, b in zip(frames, frames[1:])), default=999)
     assert closest > 18, f"two hits {closest} frames apart, inside the 18-frame floor"
+
+
+def test_low_confidence_hit_candidates_are_dropped_before_consolidation():
+    """Clip 2's residual over-firing: 613 of 777 raw candidates came from one upstream rule at
+    a single confidence of 0.75. Filtering has to happen before suppression, or a weak
+    candidate that survives only because nothing stronger is near it still becomes a hit."""
+    from badminton_poc.rallies import drop_low_confidence
+
+    events = [
+        ShuttleEvent(10, "hit", 1.0, 2.0, 0.75, "acceleration_peak", ("acceleration_peak",)),
+        ShuttleEvent(60, "hit", 1.0, 2.0, 0.90, "vy_reversal", ("vy_reversal",)),
+        ShuttleEvent(90, "landing", 1.0, 2.0, 0.50, "speed_step", ("speed_step",)),
+    ]
+    kept, dropped = drop_low_confidence(events, 0.85, "hit")
+    assert [e.frame for e in kept] == [60, 90]
+    assert [d["frame"] for d in dropped] == [10]
+    assert dropped[0]["confidence"] == 0.75
+    assert dropped[0]["rule"] == "acceleration_peak"
+
+
+def test_a_zero_threshold_drops_nothing():
+    """The default. A threshold has to be chosen against hand labels, not assumed."""
+    from badminton_poc.rallies import drop_low_confidence
+
+    events = [ShuttleEvent(f, "hit", 1.0, 2.0, 0.5, "r", ("r",)) for f in (10, 20)]
+    kept, dropped = drop_low_confidence(events, 0.0, "hit")
+    assert len(kept) == 2 and dropped == []
+
+
+def test_the_confidence_filter_leaves_other_event_types_alone():
+    """Landings have their own confidence distribution; a hit threshold says nothing about
+    them."""
+    from badminton_poc.rallies import drop_low_confidence
+
+    events = [ShuttleEvent(10, "landing", 1.0, 2.0, 0.5, "speed_step", ("speed_step",))]
+    kept, dropped = drop_low_confidence(events, 0.85, "hit")
+    assert len(kept) == 1 and dropped == []

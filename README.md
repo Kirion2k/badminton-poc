@@ -308,36 +308,75 @@ kept, so no two survivors can be closer than the interval and no chain can form.
 properties now hold on real data — the closest pair of hits on either clip is 0.32s, and the
 widest hit merge is 0.583s against a healthy limit of 0.6s.
 
-### Where it stands
+### The confidence threshold is a rule filter, not a certainty filter
 
-Pipeline output on both clips — **these are counts, not accuracy**:
+Clip 2 still reported 1.5 hits a second after consolidation was fixed. The cause was upstream
+candidate quality: **613 of its 777 hit candidates came from one rule, `acceleration_peak`, at a
+flat confidence of 0.75.**
+
+Inspecting the rule-to-confidence mapping shows what upstream's confidence actually is — a fixed
+value per rule, raised when rules agree:
+
+| | |
+|---|---|
+| `speed_local_max` alone | 0.50 |
+| `acceleration_peak` alone | 0.75 |
+| `vx_reversal` alone | 0.80 |
+| `vy_reversal` alone | 0.85 |
+| two rules agreeing | 0.90 |
+| three rules | 0.95 |
+
+So a threshold selects **which rules to trust**, not how certain a detection is. `>= 0.85`
+means "vy_reversal fired, or at least two rules agreed". Sweeping it:
+
+| threshold | clip 2 hits | /s | rallies | longest | clip 1 hits | /s | rallies |
+|---|---|---|---|---|---|---|---|
+| none | 189 | 1.54 | 6 | 72 | 78 | 0.72 | 9 |
+| 0.80 | 96 | 0.78 | 7 | 29 | 58 | 0.54 | 5 |
+| **0.85** | **88** | **0.72** | **8** | **22** | 55 | 0.51 | 5 |
+| 0.90 | 33 | 0.27 | 6 | 6 | 35 | 0.32 | 5 |
+
+0.85 is applied to clip 2 and **not** to clip 1, because the two clips need different things.
+Clip 1's candidates are spread across rules (`vy_reversal` 144, `acceleration_peak` 111) and
+0.85 keeps 52% of them; clip 2's are 79% `acceleration_peak` and it keeps 16%. Filtering clip 1
+cuts its rallies from 9 to 5 — it removes signal, not noise.
+
+The likely reason clip 2 leans so hard on `acceleration_peak` is its frame rate. Acceleration
+from finite differences scales as 1/dt², so at 60 fps its noise is roughly five times that at
+clip 1's 28 fps, and the rule trips constantly. **The better source makes this rule worse.**
+
+**This threshold is not validated.** It was chosen by looking at unlabelled output and judging
+the result plausible, which is not a measurement. It is per-clip config, defaults to off, and
+every discarded candidate is written to `analysis.json` under `low_confidence_hits_dropped`, so
+the choice can be argued with. The report states it as a caveat rather than presenting the
+filtered count as fact.
+
+### Where it stands
 
 | | clip 1 | clip 2 |
 |---|---|---|
 | source | screen recording of YouTube, VFR 60→28 fps | download, genuine 60 fps |
-| two players, during rallies | 85.4% | **94.9%** |
+| two players, during rallies | 85.4% | **96.8%** |
 | — near | 95.0% | **100.0%** |
-| — far | 89.8% | **94.9%** |
+| — far | 89.8% | **96.8%** |
 | shuttle visible and on our court | 65.3% | **97.3%** |
 | shuttle rejected as another court's | 30.3% | **0.3%** |
-| hits (from raw candidates) | 78 (from 153) | 189 (from 772) |
-| rallies | 9, longest 28 hits | 6, longest 72 hits |
-| widest hit merge | 0.500s | 0.583s (limit 0.6s) |
+| confidence threshold | none | 0.85 |
+| hits | 78, 0.72/s | 88, 0.72/s |
+| — near / far / unassigned | 42 / 23 / 13 | 46 / 40 / **2** |
+| rallies | 9, longest 28 | 8, longest 22 |
+| seconds per shot | — | 0.98 |
+| widest hit merge (limit 0.6s) | 0.500s | 0.433s |
 
-**Clip 2 clears the tracking acceptance criterion.** Both players are detected on 94.9% of
-rally frames against a ≥90% target, the near player on every frame of the clip, and no frame
-has neither player. That is a better camera position and a real constant frame rate, not a code
-change — the far-player work on clip 1 is what stopped it being wasted.
+Clip 2's output is now internally plausible: eight rallies of 7, 8, 6, 19, 22, 11, 7 and 8
+shots, a shot a second, near and far hits nearly balanced, and two unassigned hits out of 88.
+None of that is evidence it is *correct* — a plausible wrong answer is exactly what a
+hand-tuned threshold produces. It means the clip is finally worth labelling.
 
-**Clip 2 does not yet give a believable shot count.** 189 hits over 123 seconds is 1.5 a
-second, and two of its six rallies are reported at 56 and 72 shots. Consolidation is no longer
-the cause: it is now provably correct and the caveat that detects chaining does not fire. The
-remaining cause is upstream candidate quality — **613 of 777 raw candidates come from a single
-rule, `acceleration_peak`, all at confidence 0.75**. Filtering to confidence ≥ 0.85 leaves 128
-candidates and 89 hits, which is 0.72 a second and matches clip 1's rate. That threshold has
-not been applied, because picking it against unlabelled output would be fitting a number to a
-guess. It is the first thing to test once `ground_truth.json` is labelled.
+**Nothing above is accuracy.** Precision, recall, hitter accuracy and rally-boundary accuracy
+require `ground_truth.json`. Clip 2 is the one to label: it clears the tracking criterion at
+96.8%, its shuttle track is 97% usable, and 88 hits is a manageable labelling load. Labelling it
+would also settle whether 0.85 is right or whether it is discarding real shots.
 
-Precision, recall, hitter accuracy and rally-boundary accuracy are still **not** reported.
-`badminton-poc report` renders any clip's `analysis.json` as a page, with every figure carrying
-the caveat it rests on.
+`badminton-poc report --video <clip>` renders any clip's `analysis.json` as a page, with every
+figure carrying the caveat it rests on.

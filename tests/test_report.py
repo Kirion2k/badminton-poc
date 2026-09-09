@@ -198,3 +198,31 @@ def test_short_merges_are_not_flagged():
         {"kept_frame": 100, "merged_frames": [98, 100, 102], "event_type": "hit"}]
     report = build_report(a)
     assert not [c for c in report["caveats"] if "merge" in c["text"].lower()]
+
+
+def test_the_confidence_filter_is_reported_separately_from_merging():
+    """646 of clip 2's 772 candidates were discarded by the confidence threshold and only 64
+    were merged. Attributing the whole reduction to consolidation misstates what happened to
+    them, and hides that a threshold was applied at all."""
+    a = _analysis(summary={
+        "hits": {"detected": 88, "near": 46, "far": 40, "unassigned": 2,
+                 "raw_detector_candidates": 772, "assignment_reasons": {}}})
+    a["config"]["analysis"] = {"min_hit_confidence": 0.85, "min_hit_interval_seconds": 0.30}
+    a["low_confidence_hits_dropped"] = [
+        {"frame": f, "confidence": 0.75, "rule": "acceleration_peak", "threshold": 0.85}
+        for f in range(646)
+    ]
+    report = build_report(a)
+
+    assert report["filtered"]["dropped"] == 646
+    assert report["filtered"]["threshold"] == 0.85
+    assert report["filtered"]["rules"] == {"acceleration_peak": 646}
+
+    text = " ".join(c["text"] for c in report["caveats"])
+    assert "646" in text and "0.85" in text and "acceleration_peak" in text
+
+
+def test_no_filter_caveat_when_no_threshold_was_applied():
+    report = build_report(_analysis())
+    assert report["filtered"]["dropped"] == 0
+    assert not [c for c in report["caveats"] if "threshold" in c["text"].lower()]

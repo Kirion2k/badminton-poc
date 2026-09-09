@@ -281,6 +281,17 @@ class AnalysisConfig:
     rally_gap_seconds: float = 2.5
     """Silence between events longer than this starts a new rally."""
     min_hits_per_rally: int = 2
+    min_hit_confidence: float = 0.0
+    """Drop hit candidates below this upstream confidence before consolidating.
+
+    Upstream's confidence is not a learned score. It is a fixed value per rule -- 0.50
+    speed_local_max, 0.75 acceleration_peak, 0.80 vx_reversal, 0.85 vy_reversal -- raised to
+    0.90 when two rules agree and 0.95 when three do. So a threshold here selects rules and
+    agreement, not certainty: 0.85 means "vy_reversal fired, or at least two rules agreed".
+
+    Zero by default: which rules to trust has to be settled against hand labels, and picking a
+    threshold from unlabelled output is fitting a number to a guess. Set it per clip. Every
+    dropped candidate is recorded in analysis.json under low_confidence_hits_dropped."""
     min_hit_interval_seconds: float = 0.30
     """Hit candidates closer together than this are treated as one racket contact."""
     min_landing_interval_seconds: float = 0.75

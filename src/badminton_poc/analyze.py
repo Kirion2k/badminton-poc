@@ -9,7 +9,7 @@ from typing import Any
 from .assoc import assign_hit, enforce_alternation
 from .config import AnalysisConfig, CourtROI
 from .parsing import BallTrack, load_ball_csv, load_events_json, load_jsonl
-from .rallies import build_timeline, consolidate_events, segment_rallies
+from .rallies import build_timeline, consolidate_events, drop_low_confidence, segment_rallies
 
 
 def analyze(
@@ -37,6 +37,9 @@ def analyze(
     raw_counts: dict[str, int] = {}
     for event in raw_events:
         raw_counts[event.event_type] = raw_counts.get(event.event_type, 0) + 1
+    raw_events, low_confidence = drop_low_confidence(
+        raw_events, cfg.min_hit_confidence, "hit"
+    )
     events, merge_audit = consolidate_events(
         raw_events, fps, cfg.min_hit_interval_seconds, "hit"
     )
@@ -81,6 +84,7 @@ def analyze(
         "rallies": rallies,
         "events": [e.to_dict(fps) for e in timeline],
         "hit_consolidation": merge_audit,
+        "low_confidence_hits_dropped": low_confidence,
         "offcourt_events_dropped": offcourt_events,
     }
     out = Path(output_json)

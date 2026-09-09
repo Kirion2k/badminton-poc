@@ -91,6 +91,17 @@ def consolidation_stats(analysis: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def filter_stats(analysis: dict[str, Any]) -> dict[str, Any]:
+    """What the confidence threshold discarded, and which upstream rules produced it."""
+    dropped = analysis.get("low_confidence_hits_dropped") or []
+    rules: dict[str, int] = {}
+    for entry in dropped:
+        rule = entry.get("rule") or "unknown"
+        rules[rule] = rules.get(rule, 0) + 1
+    threshold = (analysis.get("config", {}).get("analysis") or {}).get("min_hit_confidence") or 0.0
+    return {"dropped": len(dropped), "threshold": threshold, "rules": rules}
+
+
 def _caveats(analysis: dict[str, Any], rows: list[dict[str, Any]]) -> list[dict[str, str]]:
     summary = analysis.get("summary", {})
     coverage = summary.get("two_player_coverage", {})
@@ -107,12 +118,25 @@ def _caveats(analysis: dict[str, Any], rows: list[dict[str, Any]]) -> list[dict[
 
     raw = hits.get("raw_detector_candidates")
     detected = hits.get("detected")
-    if raw and detected and raw > detected * _CONSOLIDATION_RATIO:
+    filtered = filter_stats(analysis)
+
+    if filtered["dropped"]:
+        worst = max(filtered["rules"].items(), key=lambda kv: kv[1])
         out.append({"level": "warn", "text": (
-            f"The detector emitted {raw} raw hit candidates for the {detected} hits shown. "
-            f"Bursts were consolidated into single events, so {detected} is a merged count, "
-            "not a count of independent detections. Every merge is listed in "
-            "analysis.json under hit_consolidation."
+            f"A confidence threshold of {filtered['threshold']} discarded "
+            f"{filtered['dropped']} of {raw} hit candidates before anything was merged, "
+            f"{worst[1]} of them from the {worst[0]} rule alone. Upstream scores by rule "
+            "identity and how many rules agree, not by certainty, so this selects which rules "
+            "to trust. It was chosen against unlabelled output and is not validated. Every "
+            "discarded candidate is in analysis.json under low_confidence_hits_dropped."
+        )})
+
+    surviving = (raw - filtered["dropped"]) if raw else None
+    if surviving and detected and surviving > detected * _CONSOLIDATION_RATIO:
+        out.append({"level": "warn", "text": (
+            f"{surviving} candidates survived to consolidation and became {detected} hits, so "
+            f"{detected} is a merged count rather than a count of independent detections. "
+            "Every merge is listed in analysis.json under hit_consolidation."
         )})
 
     during = rally_cov.get("both_players_fraction")
@@ -206,6 +230,7 @@ def build_report(analysis: dict[str, Any]) -> dict[str, Any]:
         },
         "tempo": tempo,
         "consolidation": consolidation_stats(analysis),
+        "filtered": filter_stats(analysis),
         "rallies": rows,
         "caveats": _caveats(analysis, rows),
     }

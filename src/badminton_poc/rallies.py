@@ -20,6 +20,40 @@ from .parsing import BallTrack, ShuttleEvent
 TERMINAL_TYPES = frozenset({"landing", "out_of_frame", "shuttle_absent"})
 
 
+def drop_low_confidence(
+    events: list[ShuttleEvent],
+    min_confidence: float,
+    event_type: str = "hit",
+) -> tuple[list[ShuttleEvent], list[dict[str, Any]]]:
+    """Discard candidates of one type below a confidence floor, recording each one.
+
+    Applied before consolidation, not after: suppression keeps the strongest candidate in a
+    neighbourhood, so a weak candidate with nothing stronger near it survives on its own and
+    becomes a hit. Filtering afterwards would leave exactly those in place.
+
+    The threshold is a judgement about upstream's rules, not a measurement. On the second test
+    clip 613 of 777 hit candidates came from ``acceleration_peak`` at a flat confidence of
+    0.75, and every dropped candidate is written to analysis.json so the choice can be argued
+    with rather than taken on trust.
+    """
+    if min_confidence <= 0:
+        return list(events), []
+    kept: list[ShuttleEvent] = []
+    dropped: list[dict[str, Any]] = []
+    for event in events:
+        if event.event_type == event_type and (event.confidence or 0.0) < min_confidence:
+            dropped.append({
+                "frame": event.frame,
+                "event_type": event.event_type,
+                "confidence": event.confidence,
+                "rule": event.rule,
+                "threshold": min_confidence,
+            })
+        else:
+            kept.append(event)
+    return kept, dropped
+
+
 def consolidate_events(
     events: list[ShuttleEvent],
     fps: float,
