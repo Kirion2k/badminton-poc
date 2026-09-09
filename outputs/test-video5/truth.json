@@ -1,0 +1,577 @@
+{
+  "_format": "badminton-poc/truth-v2",
+  "_instructions": "Watch annotated.mp4 and record what happened in the video, not what the pipeline said. contacts: one entry per real racket contact, with hitter 'near' or 'far'. rallies: one entry per rally actually played. Delete any contact you cannot see happen. Set labelled=true when finished. Nothing here should describe a detector.",
+  "clip": "test-video5",
+  "fps": 33.754346904573154,
+  "frame_reference": "outputs/<clip>/work.mp4; metadata.json holds the offset to source",
+  "labelled": false,
+  "contacts": [
+    {
+      "frame": 215,
+      "time_s": 6.37,
+      "hitter": null,
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 251,
+      "time_s": 7.436,
+      "hitter": null,
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 285,
+      "time_s": 8.443,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 357,
+      "time_s": 10.576,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 369,
+      "time_s": 10.932,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 397,
+      "time_s": 11.761,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 426,
+      "time_s": 12.621,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 452,
+      "time_s": 13.391,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 532,
+      "time_s": 15.761,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 570,
+      "time_s": 16.887,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 609,
+      "time_s": 18.042,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 650,
+      "time_s": 19.257,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 679,
+      "time_s": 20.116,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 708,
+      "time_s": 20.975,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 745,
+      "time_s": 22.071,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 768,
+      "time_s": 22.753,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 796,
+      "time_s": 23.582,
+      "hitter": null,
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 1002,
+      "time_s": 29.685,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 1054,
+      "time_s": 31.226,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 1203,
+      "time_s": 35.64,
+      "hitter": null,
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 1289,
+      "time_s": 38.188,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 1674,
+      "time_s": 49.594,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 1700,
+      "time_s": 50.364,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 1753,
+      "time_s": 51.934,
+      "hitter": null,
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 1782,
+      "time_s": 52.793,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 1851,
+      "time_s": 54.837,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 1890,
+      "time_s": 55.993,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 1921,
+      "time_s": 56.911,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 1982,
+      "time_s": 58.718,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 2031,
+      "time_s": 60.17,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 2060,
+      "time_s": 61.029,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 2089,
+      "time_s": 61.888,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 2116,
+      "time_s": 62.688,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 2149,
+      "time_s": 63.666,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 2181,
+      "time_s": 64.614,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 2236,
+      "time_s": 66.243,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 2257,
+      "time_s": 66.865,
+      "hitter": null,
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 2287,
+      "time_s": 67.754,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 2335,
+      "time_s": 69.176,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 2384,
+      "time_s": 70.628,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 2418,
+      "time_s": 71.635,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 2479,
+      "time_s": 73.442,
+      "hitter": null,
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 2569,
+      "time_s": 76.109,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 2646,
+      "time_s": 78.39,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 2725,
+      "time_s": 80.73,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 3003,
+      "time_s": 88.966,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 3036,
+      "time_s": 89.944,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 3097,
+      "time_s": 91.751,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 3197,
+      "time_s": 94.714,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 3249,
+      "time_s": 96.254,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 3507,
+      "time_s": 103.898,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 3542,
+      "time_s": 104.935,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 3571,
+      "time_s": 105.794,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 3612,
+      "time_s": 107.008,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 3656,
+      "time_s": 108.312,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 3696,
+      "time_s": 109.497,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 3744,
+      "time_s": 110.919,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 3775,
+      "time_s": 111.837,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 3806,
+      "time_s": 112.756,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 3865,
+      "time_s": 114.504,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 3935,
+      "time_s": 116.578,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 3995,
+      "time_s": 118.355,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 4032,
+      "time_s": 119.451,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 4114,
+      "time_s": 121.881,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 4136,
+      "time_s": 122.532,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 4401,
+      "time_s": 130.383,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 4428,
+      "time_s": 131.183,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 4460,
+      "time_s": 132.131,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 4489,
+      "time_s": 132.99,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 4508,
+      "time_s": 133.553,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 4526,
+      "time_s": 134.086,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 4543,
+      "time_s": 134.59,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    }
+  ],
+  "_contacts_help": "[{\"frame\": 1234, \"hitter\": \"near\"|\"far\"|null, \"notes\": \"\"}] -- every racket contact in the clip, whether or not anything detected it.",
+  "rallies": [
+    {
+      "rally": 1,
+      "start_frame": 215,
+      "end_frame": 865,
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "rally": 2,
+      "start_frame": 1002,
+      "end_frame": 1064,
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "rally": 3,
+      "start_frame": 1674,
+      "end_frame": 2505,
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "rally": 4,
+      "start_frame": 2569,
+      "end_frame": 2767,
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "rally": 5,
+      "start_frame": 3003,
+      "end_frame": 3120,
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "rally": 6,
+      "start_frame": 3197,
+      "end_frame": 3267,
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "rally": 7,
+      "start_frame": 3507,
+      "end_frame": 4146,
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "rally": 8,
+      "start_frame": 4401,
+      "end_frame": 4564,
+      "reviewed": false,
+      "notes": ""
+    }
+  ],
+  "_rallies_help": "[{\"rally\": 1, \"start_frame\": 83, \"end_frame\": 236, \"notes\": \"\"}] -- inclusive spans where a rally was in progress.",
+  "tracking_failures": [],
+  "_tracking_failures_help": "Optional. [{\"start_frame\": 1918, \"end_frame\": 3291, \"kind\": \"...\", \"notes\": \"...\"}] -- stretches where the vision stack visibly followed the wrong thing. Not scored; kept so a known failure is not rediscovered twice.",
+  "_draft_warning": "Seeded from detector output as a place to start. Delete every row that is not a real racket contact, correct the hitters, add the contacts nothing detected, fix the rally spans, then set reviewed=true on what remains and labelled=true at the top."
+}

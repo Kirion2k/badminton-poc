@@ -1,0 +1,73 @@
+{
+  "notes": "Court fitted by measurement. Near player x 0.203-0.740 y 0.713-0.944; far player x 0.51-0.67 y 0.574-0.620 at about 100px tall. WARNING: this camera is low and the far half is compressed into roughly 0.046 of frame height, with seated line judges at y 0.579-0.596 -- the same image depth as the far player. No polygon can separate them; only the mobility filter can, and the far player's tracks are short-lived. Both-player coverage on the calibration pass was 46%. DETECTOR SETTINGS COPIED FROM CLIP 2 UNCHANGED.",
+  "court": {
+    "polygon": [
+      [
+        0.38,
+        0.555
+      ],
+      [
+        0.76,
+        0.555
+      ],
+      [
+        0.97,
+        0.96
+      ],
+      [
+        0.06,
+        0.96
+      ]
+    ],
+    "net_line": [
+      [
+        0.38,
+        0.675
+      ],
+      [
+        0.76,
+        0.655
+      ]
+    ],
+    "shuttle_polygon": [
+      [
+        0.1,
+        0.0
+      ],
+      [
+        0.95,
+        0.0
+      ],
+      [
+        0.98,
+        1.0
+      ],
+      [
+        0.03,
+        1.0
+      ]
+    ]
+  },
+  "target_width": 1920,
+  "players": {
+    "model": "yolo11m-pose.pt",
+    "imgsz": 1920,
+    "conf": 0.25,
+    "min_box_height_frac": 0.03,
+    "max_box_height_frac": 0.8,
+    "identity_smoothing_frames": 20
+  },
+  "shuttle": {
+    "repo": "../BadmintonTrackNet",
+    "device": "auto",
+    "batch_size": 8
+  },
+  "analysis": {
+    "hit_search_radius_frames": 4,
+    "assignment_margin_px": 40.0,
+    "rally_gap_seconds": 2.5,
+    "shuttle_absent_seconds": 1.0,
+    "min_hit_confidence": 0.85,
+    "play_gate_min_speed_px": 0.0
+  }
+}
