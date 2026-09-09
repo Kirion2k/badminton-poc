@@ -1,11 +1,28 @@
+# environments
 .venv/
 __pycache__/
 *.py[cod]
+
+# model weights - never commit these (see README for official sources)
+ckpts/
+models/
+*.pt
+*.pth
+*.onnx
+
+# input footage and everything the pipeline generates
+data/input/*
+!data/input/.gitkeep
 outputs/
+
+# media, wherever it lands
 *.mp4
 *.mov
 *.avi
 *.mkv
-models/
-ckpts/
+
+# WSL / Windows cruft
+*:Zone.Identifier
 .DS_Store
+egg-info/
+*.egg-info/

@@ -1,14 +1,570 @@
 {
-  "summary": {
-    "rallies_detected": 12,
-    "hits_detected": 94,
-    "near_hits": 47,
-    "far_hits": 45,
-    "unassigned_hits": 2,
-    "average_hits_per_rally": 7.83,
-    "longest_rally_hits": 19,
-    "ball_visible_frame_fraction": 0.61,
-    "two_players_detected_frame_fraction": 0.94
+  "metadata": {
+    "source_video": "/home/kirion2k/projects/all-badminton-projects/another-badminton/badminton-poc-claude-ready/data/input/test-video.mp4",
+    "working_video": "outputs/test-video/work.mp4",
+    "source_frame_offset": 0,
+    "frame_count": 3026
   },
-  "rallies": []
+  "config": {
+    "analysis": {
+      "hit_search_radius_frames": 4,
+      "assignment_margin_px": 40.0,
+      "max_assignment_distance_frac": 0.35,
+      "rally_gap_seconds": 2.5,
+      "min_hits_per_rally": 2,
+      "min_hit_interval_seconds": 0.3,
+      "min_landing_interval_seconds": 0.75,
+      "shuttle_absent_seconds": 1.0
+    },
+    "court": {
+      "polygon": [
+        [
+          0.42,
+          0.47
+        ],
+        [
+          0.755,
+          0.44
+        ],
+        [
+          0.96,
+          0.94
+        ],
+        [
+          0.15,
+          0.985
+        ]
+      ],
+      "net_line": [
+        [
+          0.435,
+          0.52
+        ],
+        [
+          0.79,
+          0.6
+        ]
+      ],
+      "net_y": null,
+      "shuttle_polygon": [
+        [
+          0.37,
+          0.0
+        ],
+        [
+          1.0,
+          0.0
+        ],
+        [
+          1.0,
+          1.0
+        ],
+        [
+          0.22,
+          1.0
+        ]
+      ]
+    },
+    "fps": 27.996291173380467
+  },
+  "summary": {
+    "frames_analysed": 3026,
+    "two_player_coverage": {
+      "both_players_frames": 2298,
+      "both_players_fraction": 0.7594,
+      "near_detected_fraction": 0.8814,
+      "far_detected_fraction": 0.8711,
+      "no_player_frames": 21,
+      "note": "Fraction is over every analysed frame, including frames between rallies and frames where a passer-by occludes the court. Compare against the active-play subset in evaluation.json for the acceptance-criteria number.",
+      "during_detected_rallies": {
+        "frames": 1385,
+        "both_players_frames": 1134,
+        "both_players_fraction": 0.8188,
+        "near_detected_fraction": 0.9502,
+        "far_detected_fraction": 0.8686,
+        "note": "Diagnostic only: rally spans are pipeline output, not ground truth. The acceptance-criteria figure comes from hand-labelled active_play_ranges."
+      }
+    },
+    "shuttle_coverage": {
+      "trajectory_frames": 3026,
+      "visible_frames": 1977,
+      "visible_fraction": 0.6533,
+      "offcourt_frames": 918,
+      "offcourt_fraction": 0.3034,
+      "offcourt_events_dropped": 147,
+      "offcourt_note": "TrackNetV3 emits one shuttle per frame; with more than one court in view it locks onto a neighbouring court's shuttle. These samples fell outside the configured shuttle airspace polygon and were excluded from association. They remain in tracknet/ unchanged."
+    },
+    "hits": {
+      "detected": 58,
+      "near": 34,
+      "far": 14,
+      "unassigned": 10,
+      "assigned_fraction": 0.8276,
+      "inferred_by_alternation": 1,
+      "assignment_reasons": {
+        "closest_anchor": 39,
+        "ambiguous_both_players_close": 10,
+        "only_near_detected": 7,
+        "inferred_by_alternation": 1,
+        "only_far_detected": 1
+      },
+      "raw_detector_candidates": 153
+    },
+    "rallies": {
+      "detected": 10,
+      "average_hits": 5.4,
+      "longest_hits": 13,
+      "average_duration_s": 4.91,
+      "longest_duration_s": 13.002,
+      "total_rally_seconds": 49.11
+    },
+    "events_by_type": {
+      "hit": 58,
+      "landing": 17,
+      "shuttle_absent": 13
+    },
+    "caveat": "All numbers here are pipeline outputs, not accuracy measurements. Precision, recall, hitter accuracy and rally-boundary accuracy require the manual labels in ground_truth.json; run 'badminton-poc evaluate' once those are filled in.",
+    "raw_detector_candidates": {
+      "hit": 153,
+      "landing": 240
+    },
+    "merged_bursts": 48
+  },
+  "rallies": [
+    {
+      "rally": 1,
+      "start_frame": 261,
+      "end_frame": 368,
+      "start_s": 9.323,
+      "end_s": 13.145,
+      "duration_s": 3.822,
+      "hit_count": 4,
+      "near_hits": 0,
+      "far_hits": 1,
+      "unassigned_hits": 3,
+      "terminating_event": "landing",
+      "terminating_event_source": "tracknet",
+      "termination_reason": "terminal_event",
+      "hits": [
+        {
+          "index": 0,
+          "frame": 261,
+          "time_s": 9.323,
+          "hitter": null,
+          "detector_confidence": 0.95,
+          "assignment_separation": null,
+          "assignment_reason": "ambiguous_both_players_close"
+        },
+        {
+          "index": 1,
+          "frame": 274,
+          "time_s": 9.787,
+          "hitter": null,
+          "detector_confidence": 0.95,
+          "assignment_separation": null,
+          "assignment_reason": "ambiguous_both_players_close"
+        },
+        {
+          "index": 2,
+          "frame": 299,
+          "time_s": 10.68,
+          "hitter": null,
+          "detector_confidence": 0.75,
+          "assignment_separation": null,
+          "assignment_reason": "ambiguous_both_players_close"
+        },
+        {
+          "index": 3,
+          "frame": 308,
+          "time_s": 11.001,
+          "hitter": "far",
+          "detector_confidence": 0.9,
+          "assignment_separation": 0.2539,
+          "assignment_reason": "closest_anchor"
+        }
+      ]
+    },
+    {
+      "rally": 2,
+      "start_frame": 392,
+      "end_frame": 756,
+      "start_s": 14.002,
+      "end_s": 27.004,
+      "duration_s": 13.002,
+      "hit_count": 13,
+      "near_hits": 8,
+      "far_hits": 5,
+      "unassigned_hits": 0,
+      "terminating_event": "shuttle_absent",
+      "terminating_event_source": "shuttle_absence",
+      "termination_reason": "terminal_event",
+      "hits": [
+        {
+          "index": 0,
+          "frame": 392,
+          "time_s": 14.002,
+          "hitter": "far",
+          "detector_confidence": 0.95,
+          "assignment_separation": 0.2938,
+          "assignment_reason": "closest_anchor"
+        },
+        {
+          "index": 1,
+          "frame": 427,
+          "time_s": 15.252,
+          "hitter": "far",
+          "detector_confidence": 0.85,
+          "assignment_separation": 0.5694,
+          "assignment_reason": "closest_anchor"
+        },
+        {
+          "index": 2,
+          "frame": 441,
+          "time_s": 15.752,
+          "hitter": "far",
+          "detector_confidence": 0.9,
+          "assignment_separation": 0.5471,
+          "assignment_reason": "closest_anchor"
+        },
+        {
+          "index": 3,
+          "frame": 456,
+          "time_s": 16.288,
+          "hitter": "near",
+          "detector_confidence": 0.9,
+          "assignment_separation": 0.5824,
+          "assignment_reason": "closest_anchor"
+        },
+        {
+          "index": 4,
+          "frame": 509,
+          "time_s": 18.181,
+          "hitter": "near",
+          "detector_confidence": 0.85,
+          "assignment_separation": 0.7908,
+          "assignment_reason": "closest_anchor"
+        },
+        {
+          "index": 5,
+          "frame": 539,
+          "time_s": 19.253,
+          "hitter": "far",
+          "detector_confidence": 0.9,
+          "assignment_separation": 0.8185,
+          "assignment_reason": "closest_anchor"
+        },
+        {
+          "index": 6,
+          "frame": 565,
+          "time_s": 20.181,
+          "hitter": "near",
+          "detector_confidence": 0.8,
+          "assignment_separation": 0.3374,
+          "assignment_reason": "closest_anchor"
+        },
+        {
+          "index": 7,
+          "frame": 585,
+          "time_s": 20.896,
+          "hitter": "far",
+          "detector_confidence": 0.9,
+          "assignment_separation": 0.7545,
+          "assignment_reason": "closest_anchor"
+        },
+        {
+          "index": 8,
+          "frame": 611,
+          "time_s": 21.824,
+          "hitter": "near",
+          "detector_confidence": 0.85,
+          "assignment_separation": 0.6288,
+          "assignment_reason": "closest_anchor"
+        },
+        {
+          "index": 9,
+          "frame": 636,
+          "time_s": 22.717,
+          "hitter": "near",
+          "detector_confidence": 0.9,
+          "assignment_separation": 0.4397,
+          "assignment_reason": "closest_anchor"
+        },
+        {
+          "index": 10,
+          "frame": 662,
+          "time_s": 23.646,
+          "hitter": "near",
+          "detector_confidence": 0.85,
+          "assignment_separation": 0.0,
+          "assignment_reason": "only_near_detected"
+        },
+        {
+          "index": 11,
+          "frame": 689,
+          "time_s": 24.61,
+          "hitter": "near",
+          "detector_confidence": 0.9,
+          "assignment_separation": 0.0,
+          "assignment_reason": "only_near_detected"
+        },
+        {
+          "index": 12,
+          "frame": 740,
+          "time_s": 26.432,
+          "hitter": "near",
+          "detector_confidence": 0.9,
+          "assignment_separation": 0.7268,
+          "assignment_reason": "closest_anchor"
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "frame": 0,
+      "time_s": 0.0,
+      "event_type": "shuttle_absent",
+      "source": "shuttle_absence",
+      "span_frames": 121,
+      "span_seconds": 4.322,
+      "note": "derived by this project from TrackNet visibility, not an upstream detection"
+    },
+    {
+      "frame": 124,
+      "time_s": 4.429,
+      "event_type": "hit",
+      "source": "tracknet",
+      "hitter": "near",
+      "detector_confidence": 0.85,
+      "rule": "vy_reversal",
+      "position": [
+        914.6,
+        220.0
+      ],
+      "assignment_separation": 0.3095,
+      "assignment_reason": "closest_anchor",
+      "assignment_evidence": {
+        "frame": 124,
+        "shuttle_source": "trajectory",
+        "shuttle_frame_offset": 0,
+        "shuttle": [
+          914.6,
+          220.0
+        ],
+        "near": {
+          "anchor": "box_top_centre",
+          "point": [
+            1043.7,
+            348.7
+          ],
+          "distance_px": 182.2
+        },
+        "far": {
+          "anchor": "box_top_centre",
+          "point": [
+            1162.0,
+            311.8
+          ],
+          "distance_px": 263.9
+        },
+        "max_distance_px": 739.8,
+        "distance_gap_px": 81.7
+      }
+    },
+    {
+      "frame": 129,
+      "time_s": 4.608,
+      "event_type": "shuttle_absent",
+      "source": "shuttle_absence",
+      "span_frames": 96,
+      "span_seconds": 3.429,
+      "note": "derived by this project from TrackNet visibility, not an upstream detection"
+    },
+    {
+      "frame": 261,
+      "time_s": 9.323,
+      "event_type": "hit",
+      "source": "tracknet",
+      "hitter": null,
+      "detector_confidence": 0.95,
+      "rule": "vy_reversal",
+      "position": [
+        1140.0,
+        383.7
+      ],
+      "assignment_separation": null,
+      "assignment_reason": "ambiguous_both_players_close",
+      "assignment_evidence": {
+        "frame": 261,
+        "shuttle_source": "trajectory",
+        "shuttle_frame_offset": 0,
+        "shuttle": [
+          1140.0,
+          383.7
+        ],
+        "near": {
+          "anchor": "box_top_centre",
+          "point": [
+            1092.5,
+            385.5
+          ],
+          "distance_px": 47.5
+        },
+        "far": {
+          "anchor": "box_centre",
+          "point": [
+            1148.5,
+            396.0
+          ],
+          "distance_px": 15.0
+        },
+        "max_distance_px": 739.8,
+        "distance_gap_px": 32.5,
+        "margin_px": 40.0
+      }
+    },
+    {
+      "frame": 274,
+      "time_s": 9.787,
+      "event_type": "hit",
+      "source": "tracknet",
+      "hitter": null,
+      "detector_confidence": 0.95,
+      "rule": "vy_reversal",
+      "position": [
+        1110.0,
+        377.5
+      ],
+      "assignment_separation": null,
+      "assignment_reason": "ambiguous_both_players_close",
+      "assignment_evidence": {
+        "frame": 274,
+        "shuttle_source": "trajectory",
+        "shuttle_frame_offset": 0,
+        "shuttle": [
+          1110.0,
+          377.5
+        ],
+        "near": {
+          "anchor": "box_top_centre",
+          "point": [
+            1054.2,
+            370.5
+          ],
+          "distance_px": 56.2
+        },
+        "far": {
+          "anchor": "wrist_1",
+          "point": [
+            1104.4,
+            398.7
+          ],
+          "distance_px": 21.9
+        },
+        "max_distance_px": 739.8,
+        "distance_gap_px": 34.3,
+        "margin_px": 40.0
+      }
+    },
+    {
+      "frame": 299,
+      "time_s": 10.68,
+      "event_type": "hit",
+      "source": "tracknet",
+      "hitter": null,
+      "detector_confidence": 0.75,
+      "rule": "acceleration_peak",
+      "position": [
+        1224.4,
+        41.4
+      ],
+      "assignment_separation": null,
+      "assignment_reason": "ambiguous_both_players_close",
+      "assignment_evidence": {
+        "frame": 299,
+        "shuttle_source": "trajectory",
+        "shuttle_frame_offset": 0,
+        "shuttle": [
+          1224.4,
+          41.4
+        ],
+        "near": {
+          "anchor": "wrist_0",
+          "point": [
+            1096.3,
+            303.9
+          ],
+          "distance_px": 292.0
+        },
+        "far": {
+          "anchor": "box_top_centre",
+          "point": [
+            1185.9,
+            326.7
+          ],
+          "distance_px": 287.8
+        },
+        "max_distance_px": 739.8,
+        "distance_gap_px": 4.2,
+        "margin_px": 40.0
+      }
+    }
+  ],
+  "hit_consolidation": [
+    {
+      "kept_frame": 124,
+      "merged_frames": [
+        124,
+        126
+      ],
+      "kept_confidence": 0.85,
+      "event_type": "hit",
+      "reason": "hit candidates within 8 frames of each other"
+    },
+    {
+      "kept_frame": 261,
+      "merged_frames": [
+        228,
+        235,
+        241,
+        248,
+        250,
+        258,
+        261,
+        265
+      ],
+      "kept_confidence": 0.95,
+      "event_type": "hit",
+      "reason": "hit candidates within 8 frames of each other"
+    }
+  ],
+  "offcourt_events_dropped": [
+    {
+      "frame": 102,
+      "event_type": "hit",
+      "position": [
+        541.9,
+        400.6
+      ],
+      "position_norm": [
+        0.2822,
+        0.4531
+      ],
+      "reason": "outside shuttle airspace polygon (likely a neighbouring court)"
+    },
+    {
+      "frame": 114,
+      "event_type": "hit",
+      "position": [
+        196.9,
+        170.4
+      ],
+      "position_norm": [
+        0.1025,
+        0.1927
+      ],
+      "reason": "outside shuttle airspace polygon (likely a neighbouring court)"
+    }
+  ],
+  "_note": "Trimmed real output from data/input/test-video.mp4. rallies/events/audit lists truncated."
 }

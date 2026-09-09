@@ -1,147 +1,239 @@
+"""Merge player tracks with shuttle trajectory and events into analysis.json."""
 from __future__ import annotations
 
 import json
-import math
 from pathlib import Path
 from statistics import mean
 from typing import Any
 
-from .io import load_ball_csv, load_events_json, load_jsonl
-
-WRIST_INDICES = (9, 10)  # COCO left/right wrist
-
-
-def _distance(a: tuple[float, float], b: tuple[float, float]) -> float:
-    return math.hypot(a[0] - b[0], a[1] - b[1])
-
-
-def _player_contact_distance(player: dict[str, Any] | None, shuttle: tuple[float, float]) -> float:
-    if not player:
-        return float("inf")
-    bbox = player.get("bbox")
-    kpts = player.get("keypoints") or []
-    distances: list[float] = []
-    for idx in WRIST_INDICES:
-        if idx < len(kpts) and len(kpts[idx]) >= 2:
-            x, y = float(kpts[idx][0]), float(kpts[idx][1])
-            conf = float(kpts[idx][2]) if len(kpts[idx]) > 2 else 1.0
-            if conf >= 0.15:
-                distances.append(_distance((x, y), shuttle))
-    if distances:
-        return min(distances)
-    if bbox:
-        bx1, by1, bx2, by2 = map(float, bbox)
-        cx, cy = (bx1 + bx2) / 2.0, (by1 + by2) / 2.0
-        return _distance((cx, cy), shuttle)
-    return float("inf")
-
-
-def _nearest_visible_ball(ball: dict[int, dict[str, float | int]], frame: int, radius: int = 3):
-    for offset in [0, -1, 1, -2, 2, -3, 3][: 2 * radius + 1]:
-        row = ball.get(frame + offset)
-        if row and int(row["visibility"]) > 0:
-            return row
-    return None
-
-
-def _group_rallies(events: list[dict[str, Any]], fps: float) -> list[dict[str, Any]]:
-    meaningful = [e for e in events if e.get("event_type") in {"hit", "landing", "out_of_frame"}]
-    if not meaningful:
-        return []
-
-    gap_frames = max(1, int(round(3.0 * fps)))
-    rallies: list[dict[str, Any]] = []
-    current: list[dict[str, Any]] = []
-
-    for event in meaningful:
-        if current and event["frame"] - current[-1]["frame"] > gap_frames:
-            rallies.append(_finalize_rally(current, fps))
-            current = []
-        current.append(event)
-        if event["event_type"] in {"landing", "out_of_frame"} and any(e["event_type"] == "hit" for e in current):
-            rallies.append(_finalize_rally(current, fps))
-            current = []
-
-    if current and any(e["event_type"] == "hit" for e in current):
-        rallies.append(_finalize_rally(current, fps))
-    return rallies
-
-
-def _finalize_rally(events: list[dict[str, Any]], fps: float) -> dict[str, Any]:
-    hits = [e for e in events if e["event_type"] == "hit"]
-    start = hits[0]["frame"] if hits else events[0]["frame"]
-    end = events[-1]["frame"]
-    return {
-        "start_frame": start,
-        "end_frame": end,
-        "start_s": start / fps,
-        "end_s": end / fps,
-        "duration_s": max(0.0, (end - start) / fps),
-        "hit_count": len(hits),
-        "hits": hits,
-        "end_event": events[-1]["event_type"],
-    }
+from .assoc import assign_hit, enforce_alternation
+from .config import AnalysisConfig, CourtROI
+from .parsing import BallTrack, load_ball_csv, load_events_json, load_jsonl
+from .rallies import build_timeline, consolidate_events, segment_rallies
 
 
 def analyze(
-    players_jsonl: str,
-    ball_csv: str,
-    events_json: str,
-    output_json: str,
+    players_jsonl: str | Path,
+    ball_csv: str | Path,
+    events_json: str | Path,
+    output_json: str | Path,
+    *,
     fps: float,
+    court: CourtROI,
+    cfg: AnalysisConfig,
+    width: int,
+    height: int,
+    metadata: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    players = {int(r["frame"]): r for r in load_jsonl(players_jsonl)}
-    ball = load_ball_csv(ball_csv)
-    events = load_events_json(events_json)
+    if fps <= 0:
+        raise ValueError("fps must be positive")
 
-    assigned_events: list[dict[str, Any]] = []
-    for event in events:
-        event = dict(event)
-        if event["event_type"] == "hit":
-            frame = int(event["frame"])
-            ball_row = _nearest_visible_ball(ball, frame)
-            player_row = players.get(frame)
-            hitter = None
-            confidence = None
-            distances = None
-            if ball_row and player_row:
-                shuttle = (float(ball_row["x"]), float(ball_row["y"]))
-                near_d = _player_contact_distance(player_row.get("near"), shuttle)
-                far_d = _player_contact_distance(player_row.get("far"), shuttle)
-                distances = {"near": near_d, "far": far_d}
-                if math.isfinite(min(near_d, far_d)):
-                    hitter = "near" if near_d <= far_d else "far"
-                    other = max(near_d, far_d)
-                    best = min(near_d, far_d)
-                    # Not a calibrated probability, just a useful POC confidence score.
-                    confidence = float(max(0.0, min(1.0, (other - best) / max(other, 1.0))))
-            event["hitter"] = hitter
-            event["assignment_confidence"] = confidence
-            event["player_distances_px"] = distances
-        assigned_events.append(event)
+    player_rows = load_jsonl(players_jsonl)
+    players_by_frame = {int(row["frame"]): row for row in player_rows}
+    ball_raw = load_ball_csv(ball_csv)
+    ball, offcourt_frames = mask_offcourt_shuttle(ball_raw, court, width, height)
+    raw_events = load_events_json(events_json)
+    raw_events, offcourt_events = drop_offcourt_events(raw_events, court, width, height)
+    raw_counts: dict[str, int] = {}
+    for event in raw_events:
+        raw_counts[event.event_type] = raw_counts.get(event.event_type, 0) + 1
+    events, merge_audit = consolidate_events(
+        raw_events, fps, cfg.min_hit_interval_seconds, "hit"
+    )
+    events, landing_audit = consolidate_events(
+        events, fps, cfg.min_landing_interval_seconds, "landing"
+    )
+    merge_audit = merge_audit + landing_audit
 
-    rallies = _group_rallies(assigned_events, fps)
+    hits = [e for e in events if e.event_type == "hit"]
+    raw_assignments = [
+        assign_hit(event, ball, players_by_frame, court, cfg, width=width, height=height)
+        for event in hits
+    ]
+    max_gap = max(1, int(round(cfg.rally_gap_seconds * fps)))
+    assignments = enforce_alternation(raw_assignments, max_gap)
+    by_frame = {a.frame: a for a in assignments}
 
-    near_hits = sum(1 for e in assigned_events if e.get("event_type") == "hit" and e.get("hitter") == "near")
-    far_hits = sum(1 for e in assigned_events if e.get("event_type") == "hit" and e.get("hitter") == "far")
-    unassigned_hits = sum(1 for e in assigned_events if e.get("event_type") == "hit" and not e.get("hitter"))
-    all_hit_counts = [r["hit_count"] for r in rallies]
-    visible_ball_frames = sum(1 for r in ball.values() if int(r["visibility"]) > 0)
-    player_two_track_frames = sum(1 for r in players.values() if r.get("near") and r.get("far"))
+    timeline = build_timeline(events, by_frame, ball, fps, cfg.shuttle_absent_seconds)
+    rallies = segment_rallies(
+        timeline, fps, gap_seconds=cfg.rally_gap_seconds, min_hits=cfg.min_hits_per_rally
+    )
 
-    summary = {
-        "rallies_detected": len(rallies),
-        "hits_detected": near_hits + far_hits + unassigned_hits,
-        "near_hits": near_hits,
-        "far_hits": far_hits,
-        "unassigned_hits": unassigned_hits,
-        "average_hits_per_rally": mean(all_hit_counts) if all_hit_counts else 0.0,
-        "longest_rally_hits": max(all_hit_counts) if all_hit_counts else 0,
-        "ball_visible_frame_fraction": visible_ball_frames / max(len(ball), 1),
-        "two_players_detected_frame_fraction": player_two_track_frames / max(len(players), 1),
+    summary = _summarise(player_rows, ball, timeline, rallies, assignments, fps)
+    summary["two_player_coverage"]["during_detected_rallies"] = _rally_coverage(
+        player_rows, rallies
+    )
+    summary["hits"]["raw_detector_candidates"] = raw_counts.get("hit", 0)
+    summary["raw_detector_candidates"] = raw_counts
+    summary["merged_bursts"] = len(merge_audit)
+    summary["shuttle_coverage"]["offcourt_frames"] = offcourt_frames
+    summary["shuttle_coverage"]["offcourt_fraction"] = _frac(offcourt_frames, len(ball_raw))
+    summary["shuttle_coverage"]["offcourt_events_dropped"] = len(offcourt_events)
+    summary["shuttle_coverage"]["offcourt_note"] = (
+        "TrackNetV3 emits one shuttle per frame; with more than one court in view it locks onto "
+        "a neighbouring court's shuttle. These samples fell outside the configured shuttle "
+        "airspace polygon and were excluded from association. They remain in tracknet/ unchanged."
+    )
+    output = {
+        "metadata": metadata or {},
+        "config": {"analysis": vars(cfg), "court": court.to_dict(), "fps": fps},
+        "summary": summary,
+        "rallies": rallies,
+        "events": [e.to_dict(fps) for e in timeline],
+        "hit_consolidation": merge_audit,
+        "offcourt_events_dropped": offcourt_events,
+    }
+    out = Path(output_json)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(output, indent=2), encoding="utf-8")
+    return output
+
+
+def _rally_coverage(player_rows, rallies) -> dict[str, Any]:
+    """Two-player coverage restricted to the frames we believe are rallies.
+
+    This is a diagnostic, not the acceptance-criteria number: the spans come from the pipeline's
+    own rally detection, so a rally the pipeline missed entirely cannot lower it. The real
+    figure needs the hand-labelled active_play_ranges in ground_truth.json.
+    """
+    spans = [(r["start_frame"], r["end_frame"]) for r in rallies]
+    if not spans:
+        return {"both_players_fraction": None, "note": "no rallies detected"}
+    frames = {f for start, end in spans for f in range(start, end + 1)}
+    rows = [r for r in player_rows if int(r["frame"]) in frames]
+    both = sum(1 for r in rows if r.get("near") and r.get("far"))
+    return {
+        "frames": len(rows),
+        "both_players_frames": both,
+        "both_players_fraction": _frac(both, len(rows)),
+        "near_detected_fraction": _frac(sum(1 for r in rows if r.get("near")), len(rows)),
+        "far_detected_fraction": _frac(sum(1 for r in rows if r.get("far")), len(rows)),
+        "note": (
+            "Diagnostic only: rally spans are pipeline output, not ground truth. The "
+            "acceptance-criteria figure comes from hand-labelled active_play_ranges."
+        ),
     }
 
-    output = {"summary": summary, "rallies": rallies, "events": assigned_events}
-    Path(output_json).parent.mkdir(parents=True, exist_ok=True)
-    Path(output_json).write_text(json.dumps(output, indent=2), encoding="utf-8")
-    return output
+
+def mask_offcourt_shuttle(
+    ball: BallTrack, court: CourtROI, width: int, height: int
+) -> tuple[BallTrack, int]:
+    """Mark shuttle samples outside our court's airspace as not visible.
+
+    The raw values are preserved on the sample so nothing is silently rewritten; they simply
+    stop counting as evidence for hit association.
+    """
+    from dataclasses import replace
+
+    masked = []
+    dropped = 0
+    for sample in ball:
+        if sample.visible and not court.shuttle_contains_normalized(
+            sample.x / width, sample.y / height
+        ):
+            dropped += 1
+            masked.append(replace(sample, visible=False))
+        else:
+            masked.append(sample)
+    return BallTrack(masked), dropped
+
+
+def drop_offcourt_events(events, court: CourtROI, width: int, height: int):
+    """Remove shuttle events whose position is over another court, recording each one."""
+    kept, dropped = [], []
+    for event in events:
+        if (
+            event.x is not None
+            and event.y is not None
+            and not court.shuttle_contains_normalized(event.x / width, event.y / height)
+        ):
+            dropped.append({
+                "frame": event.frame,
+                "event_type": event.event_type,
+                "position": [round(event.x, 1), round(event.y, 1)],
+                "position_norm": [round(event.x / width, 4), round(event.y / height, 4)],
+                "reason": "outside shuttle airspace polygon (likely a neighbouring court)",
+            })
+            continue
+        kept.append(event)
+    return kept, dropped
+
+
+def _summarise(player_rows, ball, timeline, rallies, assignments, fps: float) -> dict[str, Any]:
+    total_frames = len(player_rows)
+    both = sum(1 for r in player_rows if r.get("near") and r.get("far"))
+    near_any = sum(1 for r in player_rows if r.get("near"))
+    far_any = sum(1 for r in player_rows if r.get("far"))
+    neither = sum(1 for r in player_rows if not r.get("near") and not r.get("far"))
+
+    hit_events = [e for e in timeline if e.event_type == "hit"]
+    near_hits = sum(1 for e in hit_events if e.hitter == "near")
+    far_hits = sum(1 for e in hit_events if e.hitter == "far")
+    unassigned = sum(1 for e in hit_events if e.hitter is None)
+    inferred = sum(
+        1 for a in assignments if a.reason == "inferred_by_alternation" and a.hitter is not None
+    )
+
+    reasons: dict[str, int] = {}
+    for assignment in assignments:
+        reasons[assignment.reason] = reasons.get(assignment.reason, 0) + 1
+
+    hit_counts = [r["hit_count"] for r in rallies]
+    durations = [r["duration_s"] for r in rallies]
+    ball_frames = len(ball)
+    visible = ball.visible_count()
+
+    return {
+        "frames_analysed": total_frames,
+        "two_player_coverage": {
+            "both_players_frames": both,
+            "both_players_fraction": _frac(both, total_frames),
+            "near_detected_fraction": _frac(near_any, total_frames),
+            "far_detected_fraction": _frac(far_any, total_frames),
+            "no_player_frames": neither,
+            "note": (
+                "Fraction is over every analysed frame, including frames between rallies and "
+                "frames where a passer-by occludes the court. Compare against the active-play "
+                "subset in evaluation.json for the acceptance-criteria number."
+            ),
+        },
+        "shuttle_coverage": {
+            "trajectory_frames": ball_frames,
+            "visible_frames": visible,
+            "visible_fraction": _frac(visible, ball_frames),
+        },
+        "hits": {
+            "detected": len(hit_events),
+            "near": near_hits,
+            "far": far_hits,
+            "unassigned": unassigned,
+            "assigned_fraction": _frac(near_hits + far_hits, len(hit_events)),
+            "inferred_by_alternation": inferred,
+            "assignment_reasons": dict(sorted(reasons.items(), key=lambda kv: -kv[1])),
+        },
+        "rallies": {
+            "detected": len(rallies),
+            "average_hits": round(mean(hit_counts), 2) if hit_counts else 0.0,
+            "longest_hits": max(hit_counts) if hit_counts else 0,
+            "average_duration_s": round(mean(durations), 2) if durations else 0.0,
+            "longest_duration_s": max(durations) if durations else 0.0,
+            "total_rally_seconds": round(sum(durations), 2),
+        },
+        "events_by_type": _counts(timeline),
+        "caveat": (
+            "All numbers here are pipeline outputs, not accuracy measurements. Precision, "
+            "recall, hitter accuracy and rally-boundary accuracy require the manual labels in "
+            "ground_truth.json; run 'badminton-poc evaluate' once those are filled in."
+        ),
+    }
+
+
+def _counts(timeline) -> dict[str, int]:
+    out: dict[str, int] = {}
+    for event in timeline:
+        out[event.event_type] = out.get(event.event_type, 0) + 1
+    return dict(sorted(out.items(), key=lambda kv: -kv[1]))
+
+
+def _frac(numerator: int, denominator: int) -> float:
+    return round(numerator / denominator, 4) if denominator else 0.0

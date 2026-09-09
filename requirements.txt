@@ -1,3 +1,16 @@
-ultralytics
-opencv-python
-numpy
+# Versions verified working together on 2026-09-09 (Ubuntu 22.04 WSL2, CUDA 13.0, RTX 3070).
+#
+# IMPORTANT: use a real CPython 3.11 release, not Ubuntu jammy's python3.11 package, which is
+# 3.11.0rc1 and lacks sys.get_int_max_str_digits. torch._dynamo assumes that attribute exists,
+# so `import torchvision` (and therefore Ultralytics) fails on it. See README "Environment".
+ultralytics==8.4.143
+torch==2.14.0
+torchvision==0.29.0
+opencv-python==5.0.0
+numpy==2.4.6
+pandas==3.0.5
+tqdm
+parse
+matplotlib
+Pillow
+pytest==9.1.1

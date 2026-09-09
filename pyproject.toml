@@ -4,17 +4,27 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "badminton-poc"
-version = "0.1.0"
-description = "Small technical POC for badminton video analysis"
+version = "0.2.0"
+description = "Technical POC: fixed-camera singles badminton video -> machine-readable rally timeline"
 requires-python = ">=3.11"
 dependencies = [
-  "ultralytics",
-  "opencv-python",
-  "numpy",
+  "ultralytics>=8.3",
+  "opencv-python>=4.8",
+  "numpy>=1.24",
 ]
+
+[project.optional-dependencies]
+# Needed only to run upstream BadmintonTrackNet in the same environment. Keep them separate so
+# it stays easy to move shuttle inference into its own interpreter (see ShuttleConfig.python).
+tracknet = ["torch>=2.0", "pandas>=1.4", "tqdm", "parse", "matplotlib", "Pillow>=9"]
+dev = ["pytest>=7"]
 
 [project.scripts]
 badminton-poc = "badminton_poc.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

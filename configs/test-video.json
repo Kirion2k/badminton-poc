@@ -1,0 +1,71 @@
+{
+  "notes": "Court ROI calibrated on outputs/test-video/work.mp4 (1920x884). Top edge stops short of x=0.78 to exclude the umpire, whose elevated chair puts their apparent foot point (0.796, 0.438) above the net line and therefore on the 'far' side. Bottom edge reaches y~0.985 because the near player's feet get to y=0.949 at the baseline. Verify with: badminton-poc calibrate --video outputs/test-video/work.mp4 --output /tmp/roi.png --config configs/test-video.json --no-grid",
+  "court": {
+    "polygon": [
+      [
+        0.42,
+        0.47
+      ],
+      [
+        0.755,
+        0.44
+      ],
+      [
+        0.96,
+        0.94
+      ],
+      [
+        0.15,
+        0.985
+      ]
+    ],
+    "net_line": [
+      [
+        0.435,
+        0.52
+      ],
+      [
+        0.79,
+        0.6
+      ]
+    ],
+    "shuttle_polygon": [
+      [
+        0.37,
+        0.0
+      ],
+      [
+        1.0,
+        0.0
+      ],
+      [
+        1.0,
+        1.0
+      ],
+      [
+        0.22,
+        1.0
+      ]
+    ]
+  },
+  "target_width": 1920,
+  "players": {
+    "model": "yolo11m-pose.pt",
+    "imgsz": 1920,
+    "conf": 0.25,
+    "min_box_height_frac": 0.06,
+    "max_box_height_frac": 0.62,
+    "identity_smoothing_frames": 20
+  },
+  "shuttle": {
+    "repo": "../BadmintonTrackNet",
+    "device": "auto",
+    "batch_size": 8
+  },
+  "analysis": {
+    "hit_search_radius_frames": 4,
+    "assignment_margin_px": 40.0,
+    "rally_gap_seconds": 2.5,
+    "shuttle_absent_seconds": 1.0
+  }
+}
