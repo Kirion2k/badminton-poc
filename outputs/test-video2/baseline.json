@@ -1,0 +1,107 @@
+{
+  "_format": "badminton-poc/truth-v2",
+  "clip": "test-video2",
+  "fps": 59.986172678840134,
+  "labelled_contacts": 62,
+  "labelled_rallies": 6,
+  "hit_detection": {
+    "true_positives": 55,
+    "false_positives": 33,
+    "false_negatives": 6,
+    "precision": 0.625,
+    "recall": 0.9016,
+    "f1": 0.7383,
+    "predicted": 88,
+    "labelled_contacts": 62
+  },
+  "hitter_assignment": {
+    "matched_hits": 55,
+    "scored": 54,
+    "correct": 50,
+    "incorrect": 4,
+    "unassigned": 1,
+    "accuracy": 0.9259
+  },
+  "rally_segmentation": {
+    "labelled_rallies": 6,
+    "predicted_rallies": 8,
+    "recovered": 4,
+    "accuracy": 0.6666666666666666,
+    "split": 1,
+    "missed": 0,
+    "spurious": 1,
+    "median_start_error_s": -0.183,
+    "median_end_error_s": 0.517,
+    "median_abs_start_error_s": 0.183,
+    "median_abs_end_error_s": 0.683,
+    "tolerance_seconds": 1.0,
+    "detail": [
+      {
+        "rally": 1,
+        "true_start_frame": 83,
+        "true_end_frame": 236,
+        "predicted_count": 1,
+        "start_error_s": 0.0,
+        "end_error_s": 4.284,
+        "verdict": "edges outside tolerance"
+      },
+      {
+        "rally": 2,
+        "true_start_frame": 773,
+        "true_end_frame": 1098,
+        "predicted_count": 1,
+        "start_error_s": 0.0,
+        "end_error_s": 0.934,
+        "verdict": "recovered"
+      },
+      {
+        "rally": 3,
+        "true_start_frame": 1502,
+        "true_end_frame": 2767,
+        "predicted_count": 2,
+        "verdict": "split across several predicted rallies"
+      },
+      {
+        "rally": 4,
+        "true_start_frame": 3821,
+        "true_end_frame": 5217,
+        "predicted_count": 1,
+        "start_error_s": -0.183,
+        "end_error_s": -0.1,
+        "verdict": "recovered"
+      },
+      {
+        "rally": 5,
+        "true_start_frame": 6185,
+        "true_end_frame": 6439,
+        "predicted_count": 1,
+        "start_error_s": -0.233,
+        "end_error_s": 0.517,
+        "verdict": "recovered"
+      },
+      {
+        "rally": 6,
+        "true_start_frame": 7024,
+        "true_end_frame": 7355,
+        "predicted_count": 1,
+        "start_error_s": -0.183,
+        "end_error_s": -0.683,
+        "verdict": "recovered"
+      }
+    ]
+  },
+  "player_tracking": {
+    "active_play_frames": 3730,
+    "both_players_frames": 3458,
+    "both_players_fraction": 0.9271,
+    "near_fraction": 1.0,
+    "far_fraction": 0.9271,
+    "no_player_frames": 0,
+    "near_identity_breaks": 0,
+    "far_identity_breaks": 7,
+    "identity_swaps": 0,
+    "note": "Coverage says a slot was filled, not that it held the right person. A slot following a bystander reads as 100%; record those in tracking_failures."
+  },
+  "tracking_failures_recorded": 0,
+  "caveat": "Scored against hand labels for this clip only. A configuration that has been tuned on this clip is not validated by it."
+}

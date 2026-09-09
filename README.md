@@ -308,20 +308,52 @@ kept, so no two survivors can be closer than the interval and no chain can form.
 properties now hold on real data — the closest pair of hits on either clip is 0.32s, and the
 widest hit merge is 0.583s against a healthy limit of 0.6s.
 
-### Measured accuracy on a fully labelled clip
+### Ground truth is what happened in the video, not what a detector said
 
-All 189 hits the pipeline can emit on clip 2 are judged, so any configuration can be scored
-against one labelling: a labelled real hit a run no longer emits counts as a miss, which is
-what recall means.
+The first labelling format stored one row per *detected candidate* with an `is_real_hit` flag.
+That makes the labels a property of the configuration that produced them, and it went wrong
+three separate times:
 
-| Metric | Result | Target | |
-|---|---|---|---|
-| Two-player tracking, active play | 92.7% | ≥ 90% | **PASS** |
-| Hitter assignment | 98.1% (53/54) | ≥ 90% | **PASS** |
-| Rally boundaries | 66.7% (4/6) | ≥ 85% | **FAIL** |
-| Hit precision / recall | 62.5% / 88.7% | — | |
+- a precision figure was reported for a configuration nobody had labelled, because the labels
+  covered only the hits an earlier threshold had let through;
+- every threshold change needed a frame-matching migration command to carry judgements across;
+- the template's `detected_hitter` field was seeded once and never refreshed, so hitter accuracy
+  was being scored against a run that no longer existed. Eight assignments had drifted, and the
+  reported 98.1% was really **92.6%**.
 
-**61 of 189 candidates are real hits.** Two out of three the detector emits are not.
+`truth.json` stores only what is true of the video: the racket contacts that happened with the
+player who made each one, the frame spans where rallies ran, and optional notes about visible
+tracking failures. Nothing about any detector. A false positive is not recorded because it is
+not a property of the video -- it is re-derived for whatever configuration is being scored, as
+any prediction matching no contact. One labelling therefore scores every configuration.
+
+Predictions are matched to contacts closest-pair-first within a tolerance (0.25s by default,
+comfortably inside the 0.3s minimum interval between two real contacts, so it cannot merge
+them). Each contact is claimed once, so a burst surviving consolidation scores one true positive
+and one false positive rather than two hits.
+
+```bash
+badminton-poc truth --video <clip>.mp4 [--migrate]   # create or migrate the truth file
+badminton-poc baseline --video <clip>.mp4            # score the current run, save baseline.json
+```
+
+Clip 2's labels migrated losslessly: 62 contacts, 6 rallies, 128 candidate verdicts discarded as
+detector-specific.
+
+### Baseline, clip 2, current configuration
+
+| | |
+|---|---|
+| hit detection | P **0.625** / R **0.902** / F1 **0.738** — 55 TP, 33 FP, 6 FN |
+| hitter assignment | **92.6%** (50 correct, 4 wrong, 1 unassigned, of 55 matched) |
+| rally segmentation | 4 of 6 recovered; 1 split, 1 spurious, 0 missed |
+| — median start error | −0.18s |
+| — median end error | **+0.52s** (median absolute 0.68s) |
+| two-player coverage, active play | **92.7%** (near 100%, far 92.7%) |
+| far identity breaks | 7 · swaps 0 |
+
+Every figure comes from one recording, and both the confidence and swing thresholds were chosen
+on it. This is a development baseline, not a validation.
 
 ### One frame of absence could hand a slot to a bystander
 

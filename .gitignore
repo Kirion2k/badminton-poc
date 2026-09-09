@@ -19,6 +19,8 @@ outputs/*
 !outputs/*/
 outputs/*/*
 !outputs/*/ground_truth.json
+!outputs/*/truth.json
+!outputs/*/baseline.json
 !outputs/*/evaluation.json
 
 # media, wherever it lands

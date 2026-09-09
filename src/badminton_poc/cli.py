@@ -80,6 +80,22 @@ def build_parser() -> argparse.ArgumentParser:
     p_eval.add_argument("--video", required=True, help="source video, used to locate outputs/<stem>/")
     common(p_eval)
 
+    p_truth = sub.add_parser(
+        "truth", help="create or migrate the detector-independent truth file for a clip")
+    p_truth.add_argument("--video", required=True, help="source video, used to locate outputs/<stem>/")
+    p_truth.add_argument("--migrate", action="store_true",
+                         help="seed it from an existing labelled ground_truth.json")
+    common(p_truth)
+
+    p_baseline = sub.add_parser(
+        "baseline", help="score the current run against truth.json and save the report")
+    p_baseline.add_argument("--video", required=True, help="source video, used to locate outputs/<stem>/")
+    p_baseline.add_argument("--match-tolerance", type=float, default=0.25,
+                            help="seconds either side of a labelled contact that a prediction may match")
+    p_baseline.add_argument("--rally-tolerance", type=float, default=1.0,
+                            help="seconds either side of a labelled rally edge counted as recovered")
+    common(p_baseline)
+
     p_refresh = sub.add_parser(
         "refresh-labels",
         help="re-seed ground_truth.json against the current run, keeping judgements already made")
@@ -177,6 +193,47 @@ def main(argv: list[str] | None = None) -> int:
         out = paths.root / "evaluation.json"
         out.write_text(json.dumps(result, indent=2), encoding="utf-8")
         print(json.dumps(result, indent=2))
+        return 0
+
+    if args.command == "truth":
+        from .truth import empty_truth, migrate_legacy_ground_truth
+
+        paths = Paths(Path(args.output_root), Path(args.video).stem)
+        clip = Path(args.video).stem
+        if paths.truth.exists():
+            print(f"{paths.truth} already exists; not overwriting labelling work", file=sys.stderr)
+            return 2
+        if args.migrate:
+            legacy = json.loads(paths.ground_truth.read_text(encoding="utf-8"))
+            truth = migrate_legacy_ground_truth(legacy, clip=clip)
+            note = (f"migrated {truth['migrated_from']['contacts_kept']} contacts, discarded "
+                    f"{truth['migrated_from']['discarded_candidate_verdicts']} candidate verdicts")
+        else:
+            analysis = json.loads(paths.analysis.read_text(encoding="utf-8"))
+            truth = empty_truth(clip, float(analysis.get("config", {}).get("fps") or 0.0))
+            note = "empty; label contacts and rallies by watching annotated.mp4"
+        paths.truth.write_text(json.dumps(truth, indent=2), encoding="utf-8")
+        print(f"{paths.truth}\n  {note}")
+        return 0
+
+    if args.command == "baseline":
+        from .parsing import load_jsonl
+        from .truth import evaluate_against_truth
+
+        paths = Paths(Path(args.output_root), Path(args.video).stem)
+        analysis = json.loads(paths.analysis.read_text(encoding="utf-8"))
+        truth = json.loads(paths.truth.read_text(encoding="utf-8"))
+        players = load_jsonl(paths.players)
+        try:
+            report = evaluate_against_truth(
+                analysis, truth, players,
+                match_tolerance_seconds=args.match_tolerance,
+                rally_tolerance_seconds=args.rally_tolerance)
+        except ValueError as exc:
+            print(f"cannot produce a baseline: {exc}", file=sys.stderr)
+            return 2
+        paths.baseline.write_text(json.dumps(report, indent=2), encoding="utf-8")
+        print(json.dumps(report, indent=2))
         return 0
 
     if args.command == "refresh-labels":

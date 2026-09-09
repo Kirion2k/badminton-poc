@@ -28,6 +28,8 @@ class Paths:
         self.analysis = self.root / "analysis.json"
         self.annotated = self.root / "annotated.mp4"
         self.ground_truth = self.root / "ground_truth.json"
+        self.truth = self.root / "truth.json"
+        self.baseline = self.root / "baseline.json"
         self.logs = self.root / "logs"
         self.court_preview = self.root / "court_roi.png"
 

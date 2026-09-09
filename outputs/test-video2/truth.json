@@ -1,0 +1,368 @@
+{
+  "_format": "badminton-poc/truth-v2",
+  "_instructions": "Watch annotated.mp4 and record what happened in the video, not what the pipeline said. contacts: one entry per real racket contact, with hitter 'near' or 'far'. rallies: one entry per rally actually played. Delete any contact you cannot see happen. Set labelled=true when finished. Nothing here should describe a detector.",
+  "clip": "test-video2",
+  "fps": 59.986172678840134,
+  "frame_reference": "outputs/<clip>/work.mp4; metadata.json holds the offset to source",
+  "labelled": true,
+  "contacts": [
+    {
+      "frame": 83,
+      "hitter": "near",
+      "notes": ""
+    },
+    {
+      "frame": 139,
+      "hitter": "far",
+      "notes": ""
+    },
+    {
+      "frame": 395,
+      "hitter": "near",
+      "notes": ""
+    },
+    {
+      "frame": 773,
+      "hitter": "far",
+      "notes": ""
+    },
+    {
+      "frame": 822,
+      "hitter": "near",
+      "notes": ""
+    },
+    {
+      "frame": 870,
+      "hitter": "near",
+      "notes": ""
+    },
+    {
+      "frame": 916,
+      "hitter": "near",
+      "notes": ""
+    },
+    {
+      "frame": 1124,
+      "hitter": "far",
+      "notes": "the shuttle was technically hit by the player, but he hit the shuttle to himself?"
+    },
+    {
+      "frame": 1502,
+      "hitter": "far",
+      "notes": ""
+    },
+    {
+      "frame": 1549,
+      "hitter": "near",
+      "notes": ""
+    },
+    {
+      "frame": 1622,
+      "hitter": "far",
+      "notes": ""
+    },
+    {
+      "frame": 1670,
+      "hitter": "near",
+      "notes": ""
+    },
+    {
+      "frame": 1717,
+      "hitter": "far",
+      "notes": ""
+    },
+    {
+      "frame": 1743,
+      "hitter": null,
+      "notes": ""
+    },
+    {
+      "frame": 1801,
+      "hitter": "near",
+      "notes": "real hit you flagged as missed at frame 1803; now detected. CONFIRM true_hitter. the shuttle goes out of view from the camera but you can still see the player hit it, while the shuttle is coming down"
+    },
+    {
+      "frame": 1877,
+      "hitter": "near",
+      "notes": "real hit you flagged as missed at frame 1886; now detected. CONFIRM true_hitter. model doesnt detect the far player for some reason and hence doesnt detect the shuttle being hit?"
+    },
+    {
+      "frame": 1931,
+      "hitter": "near",
+      "notes": ""
+    },
+    {
+      "frame": 2006,
+      "hitter": "far",
+      "notes": ""
+    },
+    {
+      "frame": 2006,
+      "hitter": "far",
+      "notes": ""
+    },
+    {
+      "frame": 2077,
+      "hitter": "near",
+      "notes": "real hit you flagged as missed at frame 2079; now detected. CONFIRM true_hitter. near player hits the shuttle, doesnt get registered, but the far player is not being properly registered, its being registered as someone on the sideline"
+    },
+    {
+      "frame": 2120,
+      "hitter": "far",
+      "notes": ""
+    },
+    {
+      "frame": 2194,
+      "hitter": "near",
+      "notes": "real hit you flagged as missed at frame 2189; now detected. CONFIRM true_hitter. same thing as 2079, near player hits the shuttle, doesnt get registered, but the far player is not being properly registered, its being registered as someone on the sideline"
+    },
+    {
+      "frame": 2217,
+      "hitter": "far",
+      "notes": ""
+    },
+    {
+      "frame": 2292,
+      "hitter": "near",
+      "notes": ""
+    },
+    {
+      "frame": 2388,
+      "hitter": "far",
+      "notes": ""
+    },
+    {
+      "frame": 2452,
+      "hitter": "near",
+      "notes": ""
+    },
+    {
+      "frame": 2540,
+      "hitter": "far",
+      "notes": ""
+    },
+    {
+      "frame": 2597,
+      "hitter": "near",
+      "notes": ""
+    },
+    {
+      "frame": 2689,
+      "hitter": "near",
+      "notes": ""
+    },
+    {
+      "frame": 3810,
+      "hitter": "near",
+      "notes": ""
+    },
+    {
+      "frame": 3868,
+      "hitter": "far",
+      "notes": ""
+    },
+    {
+      "frame": 3935,
+      "hitter": "near",
+      "notes": ""
+    },
+    {
+      "frame": 3980,
+      "hitter": "far",
+      "notes": "real hit you flagged as missed at frame 3972; now detected. CONFIRM true_hitter. hit doenst get detected?"
+    },
+    {
+      "frame": 4095,
+      "hitter": "far",
+      "notes": ""
+    },
+    {
+      "frame": 4151,
+      "hitter": "near",
+      "notes": ""
+    },
+    {
+      "frame": 4238,
+      "hitter": "far",
+      "notes": ""
+    },
+    {
+      "frame": 4348,
+      "hitter": "far",
+      "notes": ""
+    },
+    {
+      "frame": 4407,
+      "hitter": "near",
+      "notes": ""
+    },
+    {
+      "frame": 4510,
+      "hitter": "near",
+      "notes": ""
+    },
+    {
+      "frame": 4556,
+      "hitter": "near",
+      "notes": ""
+    },
+    {
+      "frame": 4614,
+      "hitter": "far",
+      "notes": ""
+    },
+    {
+      "frame": 4704,
+      "hitter": "near",
+      "notes": ""
+    },
+    {
+      "frame": 4750,
+      "hitter": "far",
+      "notes": ""
+    },
+    {
+      "frame": 4814,
+      "hitter": "near",
+      "notes": ""
+    },
+    {
+      "frame": 4888,
+      "hitter": "far",
+      "notes": ""
+    },
+    {
+      "frame": 4936,
+      "hitter": "near",
+      "notes": ""
+    },
+    {
+      "frame": 5007,
+      "hitter": "far",
+      "notes": ""
+    },
+    {
+      "frame": 5060,
+      "hitter": "far",
+      "notes": ""
+    },
+    {
+      "frame": 5123,
+      "hitter": "far",
+      "notes": ""
+    },
+    {
+      "frame": 6171,
+      "hitter": "near",
+      "notes": ""
+    },
+    {
+      "frame": 6223,
+      "hitter": "far",
+      "notes": ""
+    },
+    {
+      "frame": 6285,
+      "hitter": "near",
+      "notes": "real hit you flagged as missed at frame 6286; now detected. CONFIRM true_hitter. near player hits a backhand shot"
+    },
+    {
+      "frame": 6326,
+      "hitter": "far",
+      "notes": ""
+    },
+    {
+      "frame": 6355,
+      "hitter": "near",
+      "notes": ""
+    },
+    {
+      "frame": 7013,
+      "hitter": "far",
+      "notes": ""
+    },
+    {
+      "frame": 7057,
+      "hitter": "near",
+      "notes": ""
+    },
+    {
+      "frame": 7114,
+      "hitter": "far",
+      "notes": ""
+    },
+    {
+      "frame": 7196,
+      "hitter": "near",
+      "notes": ""
+    },
+    {
+      "frame": 7227,
+      "hitter": "near",
+      "notes": ""
+    },
+    {
+      "frame": 7248,
+      "hitter": "near",
+      "notes": ""
+    },
+    {
+      "frame": 7286,
+      "hitter": "far",
+      "notes": ""
+    },
+    {
+      "frame": 7314,
+      "hitter": "near",
+      "notes": ""
+    }
+  ],
+  "_contacts_help": "[{\"frame\": 1234, \"hitter\": \"near\"|\"far\"|null, \"notes\": \"\"}] -- every racket contact in the clip, whether or not anything detected it.",
+  "rallies": [
+    {
+      "rally": 1,
+      "start_frame": 83,
+      "end_frame": 236,
+      "notes": ""
+    },
+    {
+      "rally": 2,
+      "start_frame": 773,
+      "end_frame": 1098,
+      "notes": ""
+    },
+    {
+      "rally": 3,
+      "start_frame": 1502,
+      "end_frame": 2767,
+      "notes": ""
+    },
+    {
+      "rally": 4,
+      "start_frame": 3821,
+      "end_frame": 5217,
+      "notes": ""
+    },
+    {
+      "rally": 5,
+      "start_frame": 6185,
+      "end_frame": 6439,
+      "notes": ""
+    },
+    {
+      "rally": 6,
+      "start_frame": 7024,
+      "end_frame": 7355,
+      "notes": ""
+    }
+  ],
+  "_rallies_help": "[{\"rally\": 1, \"start_frame\": 83, \"end_frame\": 236, \"notes\": \"\"}] -- inclusive spans where a rally was in progress.",
+  "tracking_failures": [],
+  "_tracking_failures_help": "Optional. [{\"start_frame\": 1918, \"end_frame\": 3291, \"kind\": \"...\", \"notes\": \"...\"}] -- stretches where the vision stack visibly followed the wrong thing. Not scored; kept so a known failure is not rediscovered twice.",
+  "migrated_from": {
+    "format": "candidate verdicts (ground_truth.json)",
+    "contacts_kept": 62,
+    "discarded_candidate_verdicts": 128,
+    "note": "Discarded rows recorded that a particular candidate was not a hit, which is true of a configuration rather than of the video. The matcher re-derives false positives for whatever configuration is scored."
+  }
+}
