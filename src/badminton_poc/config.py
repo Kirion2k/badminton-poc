@@ -127,9 +127,31 @@ class CourtROI:
         ys = [y for _, y in self.polygon]
         return (min(ys) + max(ys)) / 2.0
 
-    def side_of(self, x_norm: float, y_norm: float) -> str:
-        """'near' if the point is on the camera side of the net, else 'far'."""
-        return "near" if y_norm >= self.net_y_at(x_norm) else "far"
+    def side_of(
+        self,
+        x_norm: float,
+        y_norm: float,
+        *,
+        bias: str | None = None,
+        hysteresis: float = 0.0,
+    ) -> str:
+        """'near' if the point is on the camera side of the net, else 'far'.
+
+        Bare, this is a hard threshold, and a player standing at the net sits on it: on the
+        test clip the far player crossed the line by 0.0004 normalized -- under one pixel --
+        and was reclassified as near, emptying the far pool for 32 frames. Within
+        ``hysteresis`` of the line the answer is genuinely not knowable from geometry, so
+        ``bias`` -- the side that already owns this track -- decides instead. Beyond the band
+        geometry always wins, so a player who really does change ends changes sides.
+        """
+        delta = y_norm - self.net_y_at(x_norm)
+        if bias is not None and abs(delta) <= hysteresis:
+            return bias
+        return "near" if delta >= 0 else "far"
+
+    def net_delta(self, x_norm: float, y_norm: float) -> float:
+        """Signed normalized distance from the net floor line; negative is the far side."""
+        return y_norm - self.net_y_at(x_norm)
 
     def net_endpoints_pixels(self, width: int, height: int) -> tuple[tuple[int, int], tuple[int, int]]:
         return (
@@ -193,15 +215,36 @@ class PlayerConfig:
     The foot-point-in-polygon test is what actually separates them."""
     identity_smoothing_frames: int = 15
     """How long a near/far slot keeps claiming a track id after it stops being seen."""
-    static_track_min_travel_frac: float = 0.02
-    """A track that has never moved this far (as a fraction of frame width) is not a player.
+    static_track_min_travel_heights: float = 0.12
+    """A track that has never moved this far, measured in its own box heights, is not a player.
 
     Spectators, umpires and equipment produce perfectly stable detections, and stability is
     exactly what the identity-continuity bonus rewards, so without this they out-compete a real
-    player whose track keeps breaking."""
+    player whose track keeps breaking.
+
+    Measured in body heights rather than pixels because of perspective. The far player is half
+    the size of the near player in frame and moves a third as many pixels for the same distance
+    on court, so an absolute pixel threshold judges the two ends of the court by different
+    standards: on the test clip it rejected a real far player who had moved 35.4 px while being
+    88 px tall. Scaled, the observed populations separate by an order of magnitude -- real
+    players travelled 0.21 to 0.40 box heights over the window in which they were judged,
+    against 0.007 to 0.02 for the umpire and a static bag."""
     static_track_min_observations: int = 45
-    """Observations required before a track can be judged static, so a player is never
-    discarded on the strength of a couple of frames."""
+    """Observations required before a track can be judged static, and the length of the
+    sliding window its motion is measured over, so a player is never discarded on the strength
+    of a couple of frames and a static object never accumulates jitter into apparent motion."""
+    static_track_handoff_frames: int = 15
+    """How long a proven-mobile track's mobility remains claimable after it disappears.
+
+    ByteTrack broke the far player's identity repeatedly on the test clip. Judging each fresh
+    id from scratch is what let a player with 143 px of real movement be rejected as static for
+    78 consecutive frames: the new id inherited none of the evidence."""
+    static_track_handoff_heights: float = 1.0
+    """How close a new track must appear to a vanished mobile track to inherit its mobility,
+    in box heights. Spatial, or every new id in the frame inherits a player's mobility."""
+    net_hysteresis_frac: float = 0.01
+    """Normalized band around the net floor line inside which track identity, not geometry,
+    decides which side a player is on. See ``CourtROI.side_of``."""
 
 
 @dataclass(frozen=True)

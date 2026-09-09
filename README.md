@@ -174,6 +174,12 @@ input), event JSON parsing, nearest-shuttle lookup, court geometry, player selec
 identity continuity, hitter assignment, hit consolidation, rally segmentation, and the
 evaluation scorer. None of it needs a GPU or a model.
 
+Every failure diagnosed on the test clip has a test that reproduces it with the real numbers:
+the far player rejected for moving 0.40 of their own body height, the umpire's slow lifetime
+creep, mobility surviving an id break but not transferring to a track somewhere else, the
+sub-pixel net-line crossing, and the unproven track that fills a slot only when nothing proven
+is offered.
+
 ## Not in this milestone
 
 smash/drop/clear classification · winner/error inference · LLM coaching · scoreboard OCR ·
@@ -196,7 +202,7 @@ what follows.
 | Detector emits ~4 hits/second and 250 landings for 12 rallies | 215 of 250 landing gaps are exactly 4 frames | see below |
 | TrackNetV3 tracks the neighbouring court's shuttle | "hits" 365–760 px from *both* players, at x≈0.28 | `shuttle_polygon` airspace ROI; **30% of shuttle frames were off-court** |
 | Spectators walk between camera and court | ~18 separate occlusion episodes | recorded, not hidden; visible in `annotated.mp4` |
-| Three courts and an umpire in frame | far slot locked onto a detection with **0.0 px** positional spread over 1348 frames | court polygon + static-track rejection |
+| Three courts and an umpire in frame | far slot locked onto a detection with **0.0 px** positional spread over 1348 frames | court polygon + static-track rejection; see the far-player section below for how that filter then misfired |
 
 ### Why the event detector over-fires
 
@@ -221,19 +227,86 @@ the moment of a hit the shuttle is in the air and sits high in frame regardless 
 is over — that test disagreed with 33 of 50 assignments. Doing this properly needs court
 homography plus a height estimate.
 
+### Why the far player was missing, and what was actually wrong
+
+The first pass reported the far player as the weak link and blamed their ByteTrack id breaks.
+The id breaks are real — twelve id runs across the clip — but attributing all 390 frames where
+the far slot was empty showed that they cause only a fifth of the loss:
+
+| Cause | Frames | Share | Code defect? |
+|---|---|---|---|
+| Occluded, never detected | 276 | 70.8% | no — a property of the recording |
+| `static_track` rejected the real player | 79 | 20.3% | yes |
+| Net-line side misclassification | 32 | 8.2% | yes |
+| Foot just outside the far baseline | 3 | 0.8% | marginal, config |
+
+**Occlusion dominates and is not fixable here.** On frame 1610 the pipeline reports eight
+detections, one on-court, `FAR MISS` — while a spectator carrying a racket bag walks straight
+through the far half of the court. There is no detection to select, reject or re-identify.
+
+**The static-track filter was rejecting the player it was built to protect.** It judged
+mobility per track id, over the track's whole life, in raw pixels against a threshold scaled to
+frame width (38.4 px). Three things were wrong with that, and all three are visible in the data:
+
+- *Per id.* A fresh id starts with no evidence, so every id break re-ran the warm-up. Track 168
+  — 143 px of real movement — was judged at 27.9 px and rejected for 78 consecutive frames.
+- *Whole life.* A bounding extent only grows, so a static detection's jitter accumulates until
+  it crosses any fixed threshold: the umpire drifted 12.4 px over 1348 frames.
+- *Raw pixels.* Perspective makes the far player move a third as many pixels as the near player
+  for the same distance on court (median per-frame foot movement 1.2 px against 3.4 px), so a
+  frame-width threshold judged the two ends of the court by different standards. 33% of any
+  45-frame window of genuine far-player motion fell below it, against 10% for near.
+
+Mobility is now measured over a **sliding window**, in **box heights**, and is **inherited by a
+replacement track id** that appears where a proven one just vanished. Recent motion in body
+heights separates the populations by an order of magnitude: real players 0.21–0.40 over the
+window in which they were judged, the umpire and a static bag 0.007–0.02.
+
+Scaling by height was overcorrected on the first attempt — 0.35 box heights rejected the *near*
+player, whose box is 265 px tall, for 17 frames. The coefficient came from lifetime travel
+while the decision is made at judgement time. Both directions had to be measured before the
+threshold was defensible.
+
+**The net line is a sub-pixel threshold.** `side_of` is a hard test, and a player at the net
+stands on it: the far player crossed by 0.0001–0.0009 normalized — under one pixel — and was
+reclassified as near, emptying the far pool. Track identity was available and thrown away,
+because the side was decided geometrically before scoring. Within a configurable band around
+the line, the side that already owns the track now decides; beyond it geometry always wins, so
+a player who really changes ends changes sides.
+
+**A static bag held the far slot for 40 frames** during its warm-up, simply by being the only
+candidate on that side. Refusing to fill a slot without a proven-mobile candidate was tried and
+measured: it cost 101 frames of real player to save those 40, because a player waiting to serve
+— or re-emerging from a 60-frame occlusion under a fresh id — is genuinely motionless and
+indistinguishable from a bag on motion evidence alone. Proven-mobile is therefore a preference,
+not a gate, and an unproven pick is recorded as `proven_mobile: false` rather than hidden.
+
 ### Where it stands
 
 Pipeline output on the trimmed clip (3026 frames, 108 s) — **these are counts, not accuracy**:
 
-| | |
-|---|---|
-| two players detected, all frames | 75.9% |
-| two players detected, during detected rallies | 81.9% (near 95.0%, far 86.9%) |
-| shuttle visible and on our court | 65.3% |
-| shuttle frames rejected as another court's | 30.3% |
-| hits (from 153 raw candidates) | 58 — near 34, far 14, unassigned 10 |
-| rallies | 10, mean 5.4 hits, longest 13 |
+| | before | after |
+|---|---|---|
+| two players detected, all frames | 75.9% | **79.0%** |
+| two players detected, during detected rallies | 81.9% | **84.8%** |
+| — near | 95.0% | 95.0% |
+| — far | 86.9% | **89.8%** |
+| shuttle visible and on our court | 65.3% | 65.3% |
+| shuttle frames rejected as another court's | 30.3% | 30.3% |
+| hits (from 153 raw candidates) | 58 — near 34, far 14, unassigned 10 | 58 — near 33, far 13, unassigned 12 |
+| rallies | 10, mean 5.4 hits, longest 13 | unchanged |
 
-The far player is the weak link: smaller in frame, and their ByteTrack id breaks repeatedly
-(three separate ids cover most of the clip). Precision, recall, hitter accuracy and
-rally-boundary accuracy are **not** reported, because `ground_truth.json` has not been labelled.
+Far-slot misses fell from 390 frames to 298, and `static_track` now rejects only the umpire and
+the bag — no real player is rejected anywhere in the clip. Of the 298 remaining, **96% are
+frames where the far player is occluded and never detected at all**.
+
+Two hits moved from `near` to unassigned. That is not a regression: both sat inside the
+78-frame window where the far player had been wrongly rejected, so they had been assigned by
+elimination — `only_near_detected`, with the other player invisible. With both players detected
+they are 44.8 px and 46.3 px from the shuttle, which is genuinely ambiguous. False confidence
+was replaced by a recorded ambiguity.
+
+**Coverage is now limited by the recording, not by the code.** Occlusion alone costs about ten
+points of far coverage, so the ≥ 90% acceptance criterion cannot be met on this clip however
+good the tracker is. Precision, recall, hitter accuracy and rally-boundary accuracy are still
+**not** reported, because `ground_truth.json` has not been labelled.

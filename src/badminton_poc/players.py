@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import json
 import math
+from collections import deque
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterator
@@ -154,11 +155,38 @@ def select_players(
     height: int,
     diagonal: float,
     forget_after: int,
+    mobile: set[int] | None = None,
+    net_hysteresis: float = 0.0,
 ) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
     """Pick one player per side of the net. Pure function over already-filtered candidates,
-    so it can be unit-tested without running any model."""
+    so it can be unit-tested without running any model.
+
+    ``mobile`` is the set of track ids proven to move like a player. A proven track outranks an
+    unproven one on the same side, whatever it scores: on the test clip a static bag held the
+    far slot for 40 frames while the real far player stood next to it, because the continuity
+    bonus rewards a detection that never breaks and nothing breaks less than furniture.
+
+    Preference, not a gate. Refusing to fill a slot at all without a proven candidate was tried
+    and measured: it cost 101 frames of real player to save 40 frames of furniture, because a
+    player waiting to serve, or re-emerging from a 60-frame occlusion under a fresh track id,
+    is genuinely motionless and indistinguishable from a bag on motion evidence alone. An
+    unproven pick is recorded as ``proven_mobile: false`` rather than withheld, so downstream
+    can see what it is resting on.
+    """
+    owner: dict[int, str] = {}
+    for slot_state, name in ((near_slot, "near"), (far_slot, "far")):
+        if slot_state.track_id is None:
+            continue
+        # A track claimed by both slots tells us nothing about which side it is on.
+        owner[slot_state.track_id] = "" if slot_state.track_id in owner else name
     sides = {
-        id(c): court.side_of(c.foot[0] / width, c.foot[1] / height) for c in candidates
+        id(c): court.side_of(
+            c.foot[0] / width,
+            c.foot[1] / height,
+            bias=(owner.get(c.track_id) or None) if c.track_id is not None else None,
+            hysteresis=net_hysteresis,
+        )
+        for c in candidates
     }
     near_pool = [c for c in candidates if sides[id(c)] == "near"]
     far_pool = [c for c in candidates if sides[id(c)] == "far"]
@@ -170,7 +198,11 @@ def select_players(
             slot_state.miss(forget_after)
             chosen[slot] = None
             continue
-        scored = [(*_score(c, slot_state, diagonal), c) for c in pool]
+        eligible = pool
+        if mobile is not None:
+            proven = [c for c in pool if c.track_id is None or c.track_id in mobile]
+            eligible = proven or pool
+        scored = [(*_score(c, slot_state, diagonal), c) for c in eligible]
         scored.sort(key=lambda item: item[0], reverse=True)
         total, terms, best = scored[0]
         runner_up = round(scored[1][0], 4) if len(scored) > 1 else None
@@ -186,6 +218,8 @@ def select_players(
                 "terms": terms,
                 "runner_up_score": runner_up,
                 "pool_size": len(pool),
+                "eligible_size": len(eligible),
+                "proven_mobile": mobile is not None and best.track_id in mobile,
             },
         }
     return chosen["near"], chosen["far"]
@@ -211,13 +245,53 @@ class CandidateFilter:
         self.cfg = cfg
         self.width = width
         self.height = height
-        self.min_travel_px = cfg.static_track_min_travel_frac * width
-        self._extent: dict[int, list[float]] = {}
+        self._window: dict[int, deque[tuple[float, float]]] = {}
+        self._max_height: dict[int, float] = {}
         self._seen: dict[int, int] = {}
+        self._last_seen: dict[int, int] = {}
+        self._last_foot: dict[int, tuple[float, float]] = {}
+        self._frame = -1
         self.mobile: set[int] = set()
+        self.handoffs: dict[int, dict[str, Any]] = {}
+
+    def _limit_px(self, track_id: int) -> float:
+        return self.cfg.static_track_min_travel_heights * self._max_height.get(track_id, 0.0)
+
+    def _inherit_mobility(self, track_id: int, foot: tuple[float, float], height: float) -> None:
+        """Let a brand-new track claim the mobility of a proven player that just vanished.
+
+        ByteTrack re-issues an id when it loses a player, and the replacement starts with no
+        evidence of its own. Only a track that is *not* also visible right now can be handed
+        over, so a second person standing next to a player does not inherit their mobility.
+        """
+        limit = self.cfg.static_track_handoff_heights * height
+        best: tuple[float, int] | None = None
+        for other in self.mobile:
+            last_frame = self._last_seen.get(other)
+            last_foot = self._last_foot.get(other)
+            if last_foot is None or last_frame is None or last_frame >= self._frame:
+                continue
+            if self._frame - last_frame > self.cfg.static_track_handoff_frames:
+                continue
+            distance = math.dist(foot, last_foot)
+            if distance <= limit and (best is None or distance < best[0]):
+                best = (distance, other)
+        if best is not None:
+            self.mobile.add(track_id)
+            self.handoffs[track_id] = {
+                "inherited_from": best[1],
+                "distance_px": round(best[0], 1),
+                "frame": self._frame,
+            }
 
     def _travel(self, candidate: Candidate) -> float | None:
-        """Largest distance this track has ever moved from its own bounding extent.
+        """How far this track's foot point has ranged over its most recent observations.
+
+        A sliding window, not the track's whole life: a lifetime extent only ever grows, so a
+        static detection's per-frame jitter accumulates until it crosses any fixed threshold
+        (the umpire drifted 12.4 px over 1348 frames). A player covers that distance in a
+        fraction of a second, so recent motion separates the two by an order of magnitude
+        whatever the clip length.
 
         Returns None while the track has too few observations to judge.
         """
@@ -225,18 +299,26 @@ class CandidateFilter:
         if track_id is None:
             return None
         fx, fy = candidate.foot
-        extent = self._extent.get(track_id)
-        if extent is None:
-            self._extent[track_id] = [fx, fx, fy, fy]
+        self._max_height[track_id] = max(self._max_height.get(track_id, 0.0), candidate.height)
+        window = self._window.get(track_id)
+        if window is None:
+            self._inherit_mobility(track_id, (fx, fy), candidate.height)
+            self._window[track_id] = deque(
+                [(fx, fy)], maxlen=self.cfg.static_track_min_observations
+            )
             self._seen[track_id] = 1
+            self._last_seen[track_id] = self._frame
+            self._last_foot[track_id] = (fx, fy)
             return None
-        extent[0] = min(extent[0], fx)
-        extent[1] = max(extent[1], fx)
-        extent[2] = min(extent[2], fy)
-        extent[3] = max(extent[3], fy)
+        window.append((fx, fy))
         self._seen[track_id] = self._seen[track_id] + 1
-        travel = math.hypot(extent[1] - extent[0], extent[3] - extent[2])
-        if travel >= self.min_travel_px:
+        self._last_seen[track_id] = self._frame
+        self._last_foot[track_id] = (fx, fy)
+        travel = math.hypot(
+            max(p[0] for p in window) - min(p[0] for p in window),
+            max(p[1] for p in window) - min(p[1] for p in window),
+        )
+        if travel >= self._limit_px(track_id):
             self.mobile.add(track_id)
         if self._seen[track_id] < self.cfg.static_track_min_observations:
             return None
@@ -249,6 +331,7 @@ class CandidateFilter:
         was dropped from a bare reason string means re-deriving the geometry by hand, which is
         exactly the debugging loop this project is supposed to avoid.
         """
+        self._frame += 1
         kept: list[Candidate] = []
         rejected: list[dict[str, Any]] = []
         for candidate in raw:
@@ -276,9 +359,12 @@ class CandidateFilter:
                 and candidate.track_id not in self.mobile
                 and travel is not None
             ):
+                box_height = self._max_height.get(candidate.track_id, 0.0)
                 rejected.append({**detail, "reason": "static_track",
                                  "travel_px": round(travel, 1),
-                                 "limit_px": round(self.min_travel_px, 1),
+                                 "travel_heights": round(travel / box_height, 3) if box_height else None,
+                                 "limit_px": round(self._limit_px(candidate.track_id), 1),
+                                 "limit_heights": self.cfg.static_track_min_travel_heights,
                                  "observations": self._seen[candidate.track_id]})
                 continue
             kept.append(candidate)
@@ -342,6 +428,8 @@ def iter_player_frames(
             height=height,
             diagonal=math.hypot(width, height),
             forget_after=cfg.identity_smoothing_frames,
+            mobile=candidate_filter.mobile,
+            net_hysteresis=cfg.net_hysteresis_frac,
         )
         chosen_ids = {
             p["track_id"] for p in (near, far) if p and p.get("track_id") is not None
@@ -352,6 +440,9 @@ def iter_player_frames(
                 "foot_norm": [round(candidate.foot[0] / width, 4),
                               round(candidate.foot[1] / height, 4)],
                 "side": court.side_of(candidate.foot[0] / width, candidate.foot[1] / height),
+                "net_delta": round(court.net_delta(candidate.foot[0] / width,
+                                                   candidate.foot[1] / height), 4),
+                "proven_mobile": candidate.track_id in candidate_filter.mobile,
             }
             for candidate in kept
             if candidate.track_id is None or candidate.track_id not in chosen_ids
