@@ -458,6 +458,23 @@ is the signature of a detector firing continuously while suppression samples it.
 stays at frame 493 under every configuration tried, +4.28s past the truth, because no amount of
 hit filtering moves an end that a metronome sets.
 
+### Not every racket contact is a rally shot
+
+The labels contained a contradiction: rally 1 runs frames 83-236, and frame 395 is marked a
+real racket contact, 2.65 seconds past the end of the rally it sits in. Asked about it, the
+labeller's answer was that both are correct -- frame 395 is the near player *handing the shuttle
+back* to the server. A real contact, and not a rally shot.
+
+That is a flaw in the schema rather than in the labelling. Scoring a handback as a missed hit
+punishes the pipeline for not reporting something that must never appear in a rally timeline;
+scoring a detection of it as a false positive punishes the pipeline for seeing something that
+genuinely happened. Contacts now carry `in_rally`, and a contact marked false is counted in
+neither column, with detections and misses of them reported separately.
+
+The same labelling session identified what the pipeline saw at frame 232: the shuttle landing
+on the floor, after which TrackNet jumped to tracking a ceiling light. That is a false-positive
+category worth naming.
+
 **Ending a rally at its last hit instead** was the obvious follow-up and does not help either:
 4 of 6, unchanged. Rally 1's end moves only from frame 493 to 482, because its last *hit* is
 itself a false positive during dead time. The landing metronome was not the whole story -- the

@@ -55,8 +55,12 @@ def empty_truth(clip: str, fps: float) -> dict[str, Any]:
         "labelled": False,
         "contacts": [],
         "_contacts_help": (
-            "[{\"frame\": 1234, \"hitter\": \"near\"|\"far\"|null, \"notes\": \"\"}] -- every "
-            "racket contact in the clip, whether or not anything detected it."
+            "[{\"frame\": 1234, \"hitter\": \"near\"|\"far\"|null, \"in_rally\": true, "
+            "\"notes\": \"\"}] -- every racket contact in the clip, whether or not anything "
+            "detected it. Set in_rally=false for a contact that is not a rally shot: handing "
+            "the shuttle back to the server, a knock-up between points. Those are real, but "
+            "they do not belong in a rally timeline, so they are scored as neither hits nor "
+            "misses."
         ),
         "rallies": [],
         "_rallies_help": (
@@ -228,7 +232,15 @@ def score_hit_detection(
     """Precision, recall and F1 of hit detection against the labelled contacts."""
     match = match_contacts(predicted_frames, contacts, fps=fps,
                            tolerance_seconds=tolerance_seconds)
-    tp, fp, fn = len(match["matched"]), len(match["false_positives"]), len(match["missed"])
+    # A racket contact that is not a rally shot -- handing the shuttle back to the server, a
+    # knock-up between points -- is real but has no place in a rally timeline. Detecting one is
+    # not a false positive and missing one is not a miss; it belongs in neither column.
+    out_of_rally = {int(c["frame"]) for c in contacts if c.get("in_rally") is False}
+    matched = [(p, t) for p, t in match["matched"] if t not in out_of_rally]
+    out_matched = len(match["matched"]) - len(matched)
+    missed = [t for t in match["missed"] if t not in out_of_rally]
+    out_missed = len(match["missed"]) - len(missed)
+    tp, fp, fn = len(matched), len(match["false_positives"]), len(missed)
     precision = tp / (tp + fp) if tp + fp else 0.0
     recall = tp / (tp + fn) if tp + fn else 0.0
     f1 = (2 * precision * recall / (precision + recall)) if precision + recall else 0.0
@@ -241,6 +253,9 @@ def score_hit_detection(
         "f1": round(f1, 4),
         "predicted": tp + fp,
         "labelled_contacts": len(contacts),
+        "rally_shots": len(contacts) - len(out_of_rally),
+        "out_of_rally_matched": out_matched,
+        "out_of_rally_missed": out_missed,
         "match": match,
     }
 
@@ -259,7 +274,9 @@ def score_hitter_assignment(
     hitter is counted separately: refusing to guess is not the same kind of event as guessing
     wrong, and the pipeline reports it deliberately.
     """
-    by_frame = {int(c["frame"]): c.get("hitter") for c in contacts}
+    by_frame = {
+        int(c["frame"]): c.get("hitter") for c in contacts if c.get("in_rally") is not False
+    }
     match = match_contacts(predicted_hitters.keys(), contacts, fps=fps,
                            tolerance_seconds=tolerance_seconds)
     correct = incorrect = unassigned = scored = 0

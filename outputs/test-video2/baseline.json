@@ -5,22 +5,25 @@
   "labelled_contacts": 62,
   "labelled_rallies": 6,
   "hit_detection": {
-    "true_positives": 55,
+    "true_positives": 53,
     "false_positives": 33,
     "false_negatives": 6,
-    "precision": 0.625,
-    "recall": 0.9016,
-    "f1": 0.7383,
-    "predicted": 88,
-    "labelled_contacts": 62
+    "precision": 0.6163,
+    "recall": 0.8983,
+    "f1": 0.731,
+    "predicted": 86,
+    "labelled_contacts": 62,
+    "rally_shots": 60,
+    "out_of_rally_matched": 2,
+    "out_of_rally_missed": 0
   },
   "hitter_assignment": {
     "matched_hits": 55,
-    "scored": 54,
-    "correct": 50,
+    "scored": 52,
+    "correct": 48,
     "incorrect": 4,
     "unassigned": 1,
-    "accuracy": 0.9259
+    "accuracy": 0.9231
   },
   "rally_segmentation": {
     "labelled_rallies": 6,

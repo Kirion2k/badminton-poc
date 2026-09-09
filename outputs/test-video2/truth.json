@@ -19,7 +19,8 @@
     {
       "frame": 395,
       "hitter": "near",
-      "notes": ""
+      "notes": "near player handing the shuttle back to the far player - a real contact, not a rally shot",
+      "in_rally": false
     },
     {
       "frame": 773,
@@ -44,7 +45,8 @@
     {
       "frame": 1124,
       "hitter": "far",
-      "notes": "the shuttle was technically hit by the player, but he hit the shuttle to himself?"
+      "notes": "past the labelled end of rally 2; check whether this is a handback too",
+      "in_rally": false
     },
     {
       "frame": 1502,

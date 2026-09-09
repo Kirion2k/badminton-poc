@@ -339,3 +339,42 @@ def test_a_hand_added_contact_needs_no_reviewed_flag():
     report = evaluate_against_truth(
         {"config": {"fps": FPS}, "events": [], "rallies": []}, truth, [])
     assert report["labelled_contacts"] == 1
+
+
+# --- contacts that are not rally shots -------------------------------------------------
+
+def test_a_contact_outside_a_rally_is_neither_a_hit_nor_a_miss():
+    """Handing the shuttle back to the server is a real racket contact and not a rally shot.
+    Counting it as a missed hit punishes the pipeline for not reporting something that should
+    never appear in a rally timeline; counting a detection of it as a false positive punishes
+    the pipeline for seeing something that genuinely happened. It belongs in neither column."""
+    result = score_hit_detection(
+        [100, 400], [_c(103), {"frame": 398, "hitter": "near", "in_rally": False}],
+        fps=FPS, tolerance_seconds=0.25)
+    assert result["true_positives"] == 1
+    assert result["false_positives"] == 0          # 400 matched a real, non-rally contact
+    assert result["false_negatives"] == 0
+    assert result["out_of_rally_matched"] == 1
+    assert result["precision"] == pytest.approx(1.0)
+
+
+def test_an_undetected_out_of_rally_contact_is_not_a_miss():
+    result = score_hit_detection(
+        [100], [_c(103), {"frame": 900, "hitter": "near", "in_rally": False}],
+        fps=FPS, tolerance_seconds=0.25)
+    assert result["false_negatives"] == 0
+    assert result["recall"] == pytest.approx(1.0)
+    assert result["out_of_rally_missed"] == 1
+
+
+def test_out_of_rally_contacts_do_not_affect_hitter_accuracy():
+    result = score_hitter_assignment(
+        {400: "far"}, [{"frame": 398, "hitter": "near", "in_rally": False}],
+        fps=FPS, tolerance_seconds=0.25)
+    assert result["scored"] == 0 and result["accuracy"] is None
+
+
+def test_contacts_default_to_being_rally_shots():
+    """Existing labels have no in_rally field and every one of them is a rally shot."""
+    result = score_hit_detection([100], [_c(103)], fps=FPS, tolerance_seconds=0.25)
+    assert result["true_positives"] == 1 and result["out_of_rally_matched"] == 0
