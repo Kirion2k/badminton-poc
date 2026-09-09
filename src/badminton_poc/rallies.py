@@ -50,32 +50,46 @@ def consolidate_events(
     hits = sorted([e for e in events if e.event_type == event_type], key=lambda e: e.frame)
     others = [e for e in events if e.event_type != event_type]
 
-    merged: list[ShuttleEvent] = []
-    audit: list[dict[str, Any]] = []
-    burst: list[ShuttleEvent] = []
+    # Non-maximum suppression: take the most confident candidate, suppress everything within
+    # min_gap of it, repeat. Two earlier shapes of this were both wrong, in opposite ways.
+    #
+    # Growing a burst while each candidate is within min_gap of the *previous* one makes
+    # merging transitive, so a dense stream chains without limit: on the second test clip one
+    # burst swallowed 84 candidates across 8.15 seconds and called them a single hit.
+    #
+    # Cutting the stream into fixed windows instead fixes the chaining but not the guarantee
+    # that matters. Each window keeps its own winner, so a winner at the end of one window and
+    # a winner at the start of the next survive a few frames apart -- 5% of consolidated hits
+    # ended up inside 0.12s of each other, well under the 0.3s floor.
+    #
+    # Suppression is defined by distance from what was kept, so no two survivors can be closer
+    # than min_gap and no chain can form. That is exactly the property the parameter claims.
+    order = sorted(hits, key=lambda e: (-(e.confidence or 0.0), e.frame))
+    kept: list[ShuttleEvent] = []
+    absorbed: dict[int, list[int]] = {}
 
-    def flush() -> None:
-        if not burst:
-            return
-        best = max(burst, key=lambda e: (e.confidence or 0.0, -abs(e.frame - burst[0].frame)))
-        merged.append(best)
-        if len(burst) > 1:
+    for event in order:
+        near = [k for k in kept if abs(event.frame - k.frame) <= min_gap]
+        if near:
+            winner = min(near, key=lambda k: (abs(event.frame - k.frame), k.frame))
+            absorbed.setdefault(winner.frame, []).append(event.frame)
+        else:
+            kept.append(event)
+            absorbed.setdefault(event.frame, [])
+
+    audit: list[dict[str, Any]] = []
+    for event in sorted(kept, key=lambda e: e.frame):
+        merged_frames = sorted(absorbed[event.frame] + [event.frame])
+        if len(merged_frames) > 1:
             audit.append({
-                "kept_frame": best.frame,
-                "merged_frames": [e.frame for e in burst],
-                "kept_confidence": best.confidence,
+                "kept_frame": event.frame,
+                "merged_frames": merged_frames,
+                "kept_confidence": event.confidence,
                 "event_type": event_type,
-                "reason": f"{event_type} candidates within {min_gap} frames of each other",
+                "reason": f"{event_type} candidates within {min_gap} frames of a stronger one",
             })
 
-    for event in hits:
-        if burst and event.frame - burst[-1].frame > min_gap:
-            flush()
-            burst = []
-        burst.append(event)
-    flush()
-
-    return sorted(merged + others, key=lambda e: e.frame), audit
+    return sorted(kept + others, key=lambda e: e.frame), audit
 
 
 @dataclass

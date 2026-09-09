@@ -281,32 +281,63 @@ measured: it cost 101 frames of real player to save those 40, because a player w
 indistinguishable from a bag on motion evidence alone. Proven-mobile is therefore a preference,
 not a gate, and an unproven pick is recorded as `proven_mobile: false` rather than hidden.
 
+### Consolidation was chaining whole rallies into one hit
+
+A second clip made this unmissable. Bursts of candidates were merged by comparing each one to
+the *previous* candidate, which makes merging transitive: a dense enough stream chains without
+limit. On clip 2 one merge swallowed 84 candidates across 8.15 seconds and reported them as a
+single hit; 33 of 39 merges spanned longer than a shot, and 1430 of 1437 candidates were
+absorbed. That is why 772 raw candidates became 30 hits and rallies averaged three shots.
+
+It was present on clip 1 too — one merge there spanned 2 seconds — but masked. At 28 fps with a
+shuttle track that was only 65% usable there were just 153 candidates, so the chains stayed
+short. Clip 2's genuine 60 fps and 97% shuttle visibility produce five times the candidate
+density, which turned a latent bug into the dominant one. **Better input made this failure
+worse, not better:** the tracker improved and the event layer collapsed behind it.
+
+Bounding each burst by its *first* candidate instead fixes the chaining but not the guarantee
+that matters. Fixed windows each keep their own winner, so a winner at the end of one window
+and a winner at the start of the next survive a few frames apart — 5% of consolidated hits
+ended up within 0.12s of each other, well inside the 0.3s floor the parameter claims to
+enforce. The test that was supposed to catch this passed, because every candidate in it had the
+same confidence and the tie-break hid the defect.
+
+Consolidation is now **non-maximum suppression**: take the most confident candidate, suppress
+everything within one interval of it, repeat. Suppression is defined by distance from what was
+kept, so no two survivors can be closer than the interval and no chain can form. Both
+properties now hold on real data — the closest pair of hits on either clip is 0.32s, and the
+widest hit merge is 0.583s against a healthy limit of 0.6s.
+
 ### Where it stands
 
-Pipeline output on the trimmed clip (3026 frames, 108 s) — **these are counts, not accuracy**:
+Pipeline output on both clips — **these are counts, not accuracy**:
 
-| | before | after |
+| | clip 1 | clip 2 |
 |---|---|---|
-| two players detected, all frames | 75.9% | **79.0%** |
-| two players detected, during detected rallies | 81.9% | **84.8%** |
-| — near | 95.0% | 95.0% |
-| — far | 86.9% | **89.8%** |
-| shuttle visible and on our court | 65.3% | 65.3% |
-| shuttle frames rejected as another court's | 30.3% | 30.3% |
-| hits (from 153 raw candidates) | 58 — near 34, far 14, unassigned 10 | 58 — near 33, far 13, unassigned 12 |
-| rallies | 10, mean 5.4 hits, longest 13 | unchanged |
+| source | screen recording of YouTube, VFR 60→28 fps | download, genuine 60 fps |
+| two players, during rallies | 85.4% | **94.9%** |
+| — near | 95.0% | **100.0%** |
+| — far | 89.8% | **94.9%** |
+| shuttle visible and on our court | 65.3% | **97.3%** |
+| shuttle rejected as another court's | 30.3% | **0.3%** |
+| hits (from raw candidates) | 78 (from 153) | 189 (from 772) |
+| rallies | 9, longest 28 hits | 6, longest 72 hits |
+| widest hit merge | 0.500s | 0.583s (limit 0.6s) |
 
-Far-slot misses fell from 390 frames to 298, and `static_track` now rejects only the umpire and
-the bag — no real player is rejected anywhere in the clip. Of the 298 remaining, **96% are
-frames where the far player is occluded and never detected at all**.
+**Clip 2 clears the tracking acceptance criterion.** Both players are detected on 94.9% of
+rally frames against a ≥90% target, the near player on every frame of the clip, and no frame
+has neither player. That is a better camera position and a real constant frame rate, not a code
+change — the far-player work on clip 1 is what stopped it being wasted.
 
-Two hits moved from `near` to unassigned. That is not a regression: both sat inside the
-78-frame window where the far player had been wrongly rejected, so they had been assigned by
-elimination — `only_near_detected`, with the other player invisible. With both players detected
-they are 44.8 px and 46.3 px from the shuttle, which is genuinely ambiguous. False confidence
-was replaced by a recorded ambiguity.
+**Clip 2 does not yet give a believable shot count.** 189 hits over 123 seconds is 1.5 a
+second, and two of its six rallies are reported at 56 and 72 shots. Consolidation is no longer
+the cause: it is now provably correct and the caveat that detects chaining does not fire. The
+remaining cause is upstream candidate quality — **613 of 777 raw candidates come from a single
+rule, `acceleration_peak`, all at confidence 0.75**. Filtering to confidence ≥ 0.85 leaves 128
+candidates and 89 hits, which is 0.72 a second and matches clip 1's rate. That threshold has
+not been applied, because picking it against unlabelled output would be fitting a number to a
+guess. It is the first thing to test once `ground_truth.json` is labelled.
 
-**Coverage is now limited by the recording, not by the code.** Occlusion alone costs about ten
-points of far coverage, so the ≥ 90% acceptance criterion cannot be met on this clip however
-good the tracker is. Precision, recall, hitter accuracy and rally-boundary accuracy are still
-**not** reported, because `ground_truth.json` has not been labelled.
+Precision, recall, hitter accuracy and rally-boundary accuracy are still **not** reported.
+`badminton-poc report` renders any clip's `analysis.json` as a page, with every figure carrying
+the caveat it rests on.

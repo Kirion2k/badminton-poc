@@ -140,16 +140,18 @@ def test_html_defines_every_colour_token_before_any_theme_block():
         assert token in html[root:dark], f"{token} is not defined in the bare :root block"
 
 
-def test_a_merge_that_spans_longer_than_a_shot_is_flagged():
-    """Consolidation chains: candidates each within the merge window of the next collapse
-    transitively, so on clip 2 one merge swallowed 84 candidates across 8.15 seconds and
-    reported them as a single hit. A rally has a shot about every second, so a merge that
-    spans several is destroying rallies, not cleaning them up."""
+def test_a_merge_that_spans_longer_than_two_windows_is_flagged():
+    """Consolidation used to chain: candidates each within the merge window of the next
+    collapsed transitively, so on clip 2 one merge swallowed 84 candidates across 8.15 seconds
+    and reported them as a single hit. Suppression absorbs candidates within one window on
+    each side of what it keeps, so twice the window is the widest a healthy merge can be;
+    anything beyond it means chaining is back."""
     a = _analysis()
     a["config"]["fps"] = 60.0
+    a["config"]["analysis"] = {"min_hit_interval_seconds": 0.30}
     a["hit_consolidation"] = [
-        {"kept_frame": 100, "merged_frames": [98, 100, 102]},
-        {"kept_frame": 2006, "merged_frames": list(range(1877, 2367, 6))},
+        {"kept_frame": 100, "merged_frames": [98, 100, 102], "event_type": "hit"},
+        {"kept_frame": 2006, "merged_frames": list(range(1877, 2367, 6)), "event_type": "hit"},
     ]
     report = build_report(a)
     flagged = [c for c in report["caveats"] if "merge" in c["text"].lower()]
@@ -158,10 +160,41 @@ def test_a_merge_that_spans_longer_than_a_shot_is_flagged():
     assert report["consolidation"]["longest_merge_s"] == pytest.approx(8.1, abs=0.02)
 
 
+def test_a_merge_spanning_a_window_either_side_is_healthy():
+    """Suppression keeps the strongest candidate and absorbs everything within one window of
+    it, so a merge up to twice the window wide is the algorithm working, not chaining."""
+    a = _analysis()
+    a["config"]["fps"] = 60.0
+    a["config"]["analysis"] = {"min_hit_interval_seconds": 0.30}
+    a["hit_consolidation"] = [
+        {"kept_frame": 100, "merged_frames": list(range(82, 119, 6)), "event_type": "hit"},
+    ]
+    report = build_report(a)
+    assert report["consolidation"]["longest_merge_s"] == pytest.approx(0.6, abs=0.02)
+    assert not [c for c in report["caveats"] if "merge" in c["text"].lower()]
+
+
+def test_landing_merges_do_not_count_against_the_hit_merge_bound():
+    """analysis.json concatenates the hit and landing audits into one list, and landings use a
+    window more than twice as wide. Measuring them together made the caveat fire on healthy
+    output."""
+    a = _analysis()
+    a["config"]["fps"] = 60.0
+    a["config"]["analysis"] = {"min_hit_interval_seconds": 0.30}
+    a["hit_consolidation"] = [
+        {"kept_frame": 100, "merged_frames": [98, 100, 102], "event_type": "hit"},
+        {"kept_frame": 500, "merged_frames": [455, 500, 545], "event_type": "landing"},
+    ]
+    report = build_report(a)
+    assert report["consolidation"]["merges"] == 1
+    assert not [c for c in report["caveats"] if "merge" in c["text"].lower()]
+
+
 def test_short_merges_are_not_flagged():
     """Merging a two-frame flicker into one hit is the feature working."""
     a = _analysis()
     a["config"]["fps"] = 60.0
-    a["hit_consolidation"] = [{"kept_frame": 100, "merged_frames": [98, 100, 102]}]
+    a["hit_consolidation"] = [
+        {"kept_frame": 100, "merged_frames": [98, 100, 102], "event_type": "hit"}]
     report = build_report(a)
     assert not [c for c in report["caveats"] if "merge" in c["text"].lower()]

@@ -260,15 +260,78 @@ def test_terminator_must_fall_before_the_next_rally_starts():
     assert rallies[1]["end_frame"] == 500
 
 
+def _landing(frame, conf=0.9):
+    return ShuttleEvent(frame, "landing", 1.0, 2.0, conf, "speed_step", ("speed_step",))
+
+
 def test_consolidate_events_handles_landings_with_their_own_window():
     from badminton_poc.rallies import consolidate_events
 
-    def landing(frame, conf):
-        return ShuttleEvent(frame, "landing", 1.0, 2.0, conf, "speed_step", ("speed_step",))
-
-    # the exact pathology from the test clip: candidates spaced four frames apart
-    events = [landing(f, 0.9) for f in range(100, 132, 4)]
+    # the exact pathology from the test clip: candidates spaced four frames apart. 0.75s at
+    # 28 fps is a 21-frame window, and this run sits inside it.
+    events = [_landing(f) for f in range(100, 120, 4)]
     merged, audit = consolidate_events(events, FPS, 0.75, "landing")
     assert len(merged) == 1
     assert audit[0]["event_type"] == "landing"
-    assert len(audit[0]["merged_frames"]) == 8
+    assert len(audit[0]["merged_frames"]) == 5
+
+
+def test_a_landing_run_longer_than_its_own_window_is_not_one_landing():
+    """This case used to merge into a single landing, and that was the chaining bug rather
+    than a feature: min_landing_interval_seconds says two real landings can be 0.75s apart, so
+    a run spanning 1.0s admits two by the parameter's own definition. Merging it regardless is
+    what let a hit burst swallow eight seconds of a rally elsewhere. The rule cannot be
+    generous here and strict there -- it is the same rule."""
+    from badminton_poc.rallies import consolidate_events
+
+    events = [_landing(f) for f in range(100, 132, 4)]   # 28 frames = 1.0s at 28 fps
+    merged, _ = consolidate_events(events, FPS, 0.75, "landing")
+    assert [e.frame for e in merged] == [100, 124]
+
+
+def test_consolidation_does_not_chain_an_entire_rally_into_one_hit():
+    """The clip-2 defect. Merging compared each candidate to the *previous* one, so a dense
+    stream chained without bound: one merge swallowed 84 candidates across 8.15 seconds and
+    reported them as a single hit, and 33 of 39 merges spanned longer than a shot. A burst may
+    not span longer than the minimum time between two real hits, because if it does it contains
+    more than one of them.
+    """
+    from badminton_poc.rallies import consolidate_events
+
+    def h(frame):
+        return ShuttleEvent(frame, "hit", 1.0, 2.0, 0.8, "r", ("r",))
+
+    # A candidate every 6 frames for 8 seconds at 60 fps. Every consecutive pair is inside the
+    # 18-frame window, which is exactly what let the old rule swallow the lot.
+    events = [h(f) for f in range(0, 480, 6)]
+    merged, audit = consolidate_events(events, 60.0, 0.30)
+
+    assert len(merged) == 20
+    spans = [max(a["merged_frames"]) - min(a["merged_frames"]) for a in audit]
+    assert max(spans) <= 18
+
+
+def test_consolidated_hits_are_never_closer_than_the_minimum_interval():
+    """The parameter's whole meaning: two real hits cannot be closer than this, so no two
+    consolidated hits may be either.
+
+    Splitting a candidate stream into fixed windows and keeping each window's best does not
+    give this: if one window's winner sits at its end and the next window's at its start, the
+    two survive a few frames apart. On clip 2 that put 5% of consolidated hits within 0.12s of
+    each other, well inside the 0.3s floor. Confidences here rise across each window so the
+    winners are pushed together, which equal confidences would hide.
+    """
+    from badminton_poc.rallies import consolidate_events
+
+    # Windows fall at [0..18] and [24..42]; the confident candidate in the first sits at its
+    # end and in the second at its start, so window-local winners land 6 frames apart.
+    peaks = {18, 24}
+    events = [
+        ShuttleEvent(f, "hit", 1.0, 2.0, 0.95 if f in peaks else 0.5, "r", ("r",))
+        for f in range(0, 480, 6)
+    ]
+    merged, _ = consolidate_events(events, 60.0, 0.30)
+    frames = [e.frame for e in merged]
+    assert frames, "consolidation dropped everything"
+    closest = min((b - a for a, b in zip(frames, frames[1:])), default=999)
+    assert closest > 18, f"two hits {closest} frames apart, inside the 18-frame floor"
