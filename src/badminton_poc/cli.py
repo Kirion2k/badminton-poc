@@ -85,6 +85,8 @@ def build_parser() -> argparse.ArgumentParser:
     p_truth.add_argument("--video", required=True, help="source video, used to locate outputs/<stem>/")
     p_truth.add_argument("--migrate", action="store_true",
                          help="seed it from an existing labelled ground_truth.json")
+    p_truth.add_argument("--draft", action="store_true",
+                         help="seed contacts and rallies from the current run, all unreviewed")
     common(p_truth)
 
     p_baseline = sub.add_parser(
@@ -208,6 +210,14 @@ def main(argv: list[str] | None = None) -> int:
             truth = migrate_legacy_ground_truth(legacy, clip=clip)
             note = (f"migrated {truth['migrated_from']['contacts_kept']} contacts, discarded "
                     f"{truth['migrated_from']['discarded_candidate_verdicts']} candidate verdicts")
+        elif args.draft:
+            from .truth import draft_truth_from_analysis
+
+            analysis = json.loads(paths.analysis.read_text(encoding="utf-8"))
+            truth = draft_truth_from_analysis(analysis, clip=clip)
+            note = (f"drafted {len(truth['contacts'])} contacts and {len(truth['rallies'])} "
+                    "rallies from the current run, all unreviewed - review every one, add what "
+                    "was missed, then set reviewed=true and labelled=true")
         else:
             analysis = json.loads(paths.analysis.read_text(encoding="utf-8"))
             truth = empty_truth(clip, float(analysis.get("config", {}).get("fps") or 0.0))

@@ -294,3 +294,48 @@ def test_the_report_refuses_an_unlabelled_truth_file():
     with pytest.raises(ValueError, match="not labelled"):
         evaluate_against_truth({"config": {"fps": FPS}, "events": [], "rallies": []},
                                {"labelled": False, "contacts": [], "rallies": []}, [])
+
+
+# --- draft seeding --------------------------------------------------------------------
+
+def test_a_seeded_draft_marks_every_contact_unreviewed():
+    """Typing forty frame numbers by hand is not a workflow, so the draft is seeded from what
+    the detector emitted. That is a labour-saving suggestion, not evidence: every row starts
+    unreviewed and the file cannot be scored until a human has been through them."""
+    from badminton_poc.truth import draft_truth_from_analysis
+
+    analysis = {
+        "config": {"fps": FPS},
+        "events": [{"event_type": "hit", "frame": 100, "time_s": 1.67, "hitter": "near"},
+                   {"event_type": "hit", "frame": 300, "time_s": 5.0, "hitter": "far"}],
+        "rallies": [{"rally": 1, "start_frame": 90, "end_frame": 320}],
+    }
+    draft = draft_truth_from_analysis(analysis, clip="c3")
+    assert [c["frame"] for c in draft["contacts"]] == [100, 300]
+    assert all(c["reviewed"] is False for c in draft["contacts"])
+    assert draft["labelled"] is False
+    assert draft["rallies"][0]["reviewed"] is False
+
+
+def test_an_unreviewed_contact_blocks_scoring():
+    """The failure this prevents: a seeded draft returned unedited and scored as if it were
+    ground truth, which makes the detector agree with itself by construction."""
+    from badminton_poc.truth import evaluate_against_truth
+
+    truth = {"labelled": True, "fps": FPS, "clip": "c3",
+             "contacts": [{"frame": 100, "hitter": "near", "reviewed": False}],
+             "rallies": [{"start_frame": 90, "end_frame": 200}]}
+    with pytest.raises(ValueError, match="unreviewed"):
+        evaluate_against_truth({"config": {"fps": FPS}, "events": [], "rallies": []}, truth, [])
+
+
+def test_a_hand_added_contact_needs_no_reviewed_flag():
+    """A contact a human typed in is reviewed by definition -- they saw it happen."""
+    from badminton_poc.truth import evaluate_against_truth
+
+    truth = {"labelled": True, "fps": FPS, "clip": "c3",
+             "contacts": [{"frame": 100, "hitter": "near"}],
+             "rallies": [{"start_frame": 90, "end_frame": 200}]}
+    report = evaluate_against_truth(
+        {"config": {"fps": FPS}, "events": [], "rallies": []}, truth, [])
+    assert report["labelled_contacts"] == 1

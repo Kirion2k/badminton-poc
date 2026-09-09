@@ -1,0 +1,77 @@
+{
+  "notes": "Court fitted to clip 3 by measurement, not by eye: the near player's foot cloud spans x 0.384-0.676 y 0.620-0.845 and the far player's x 0.281-0.525 y 0.490-0.605, with a gap of 0.038-0.069 between far-max and near-min in every overlapping x band. The net line is a least-squares fit through those band midpoints. Five vertices: the bottom edge cuts at y=0.90 to exclude a spectator sitting in the foreground at y=0.995, and the right edge excludes the umpire's chair at (0.653,0.435). DETECTOR SETTINGS ARE COPIED FROM CLIP 2 UNCHANGED. Clip 3 is a validation clip; nothing here has been tuned against it, and nothing should be until a baseline is recorded.",
+  "court": {
+    "polygon": [
+      [
+        0.245,
+        0.47
+      ],
+      [
+        0.575,
+        0.43
+      ],
+      [
+        0.9,
+        0.7
+      ],
+      [
+        0.92,
+        0.9
+      ],
+      [
+        0.3,
+        0.9
+      ]
+    ],
+    "net_line": [
+      [
+        0.25,
+        0.662
+      ],
+      [
+        0.7,
+        0.555
+      ]
+    ],
+    "shuttle_polygon": [
+      [
+        0.2,
+        0.0
+      ],
+      [
+        0.95,
+        0.0
+      ],
+      [
+        0.98,
+        1.0
+      ],
+      [
+        0.22,
+        1.0
+      ]
+    ]
+  },
+  "target_width": 1920,
+  "players": {
+    "model": "yolo11m-pose.pt",
+    "imgsz": 1920,
+    "conf": 0.25,
+    "min_box_height_frac": 0.04,
+    "max_box_height_frac": 0.8,
+    "identity_smoothing_frames": 20
+  },
+  "shuttle": {
+    "repo": "../BadmintonTrackNet",
+    "device": "auto",
+    "batch_size": 8
+  },
+  "analysis": {
+    "hit_search_radius_frames": 4,
+    "assignment_margin_px": 40.0,
+    "rally_gap_seconds": 2.5,
+    "shuttle_absent_seconds": 1.0,
+    "min_hit_confidence": 0.85,
+    "play_gate_min_speed_px": 0.0
+  }
+}

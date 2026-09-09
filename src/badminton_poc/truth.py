@@ -129,6 +129,49 @@ def migrate_legacy_ground_truth(legacy: dict[str, Any], *, clip: str) -> dict[st
     return out
 
 
+def draft_truth_from_analysis(analysis: dict[str, Any], *, clip: str) -> dict[str, Any]:
+    """A truth file seeded from what the detector emitted, with every row unreviewed.
+
+    Typing forty frame numbers by hand is not a workflow, so the draft suggests where to look.
+    That is labour-saving, not evidence: nothing here is ground truth until a human has watched
+    each row and either kept it, corrected its hitter, or deleted it -- and added the contacts
+    the detector missed, which by definition are not in this list.
+
+    Scoring is blocked while any row is unreviewed. A seeded draft returned unedited and scored
+    as truth would make the detector agree with itself by construction, which is the specific
+    accident that produced a rally-boundary figure contradicting its own labelled ranges
+    earlier in this project.
+    """
+    fps = float(analysis.get("config", {}).get("fps") or 0.0)
+    out = empty_truth(clip, fps)
+    out["contacts"] = [
+        {
+            "frame": int(e["frame"]),
+            "time_s": e.get("time_s"),
+            "hitter": e.get("hitter"),
+            "reviewed": False,
+            "notes": "",
+        }
+        for e in analysis.get("events", []) if e.get("event_type") == "hit"
+    ]
+    out["rallies"] = [
+        {
+            "rally": r.get("rally", i),
+            "start_frame": int(r["start_frame"]),
+            "end_frame": int(r["end_frame"]),
+            "reviewed": False,
+            "notes": "",
+        }
+        for i, r in enumerate(analysis.get("rallies", []), start=1)
+    ]
+    out["_draft_warning"] = (
+        "Seeded from detector output as a place to start. Delete every row that is not a real "
+        "racket contact, correct the hitters, add the contacts nothing detected, fix the rally "
+        "spans, then set reviewed=true on what remains and labelled=true at the top."
+    )
+    return out
+
+
 def match_contacts(
     predicted_frames: Iterable[int],
     contacts: list[dict[str, Any]],
@@ -432,6 +475,12 @@ def evaluate_against_truth(
     if not truth.get("labelled"):
         raise ValueError(
             "truth file is not labelled; refusing to report accuracy from an unfinished file"
+        )
+    unreviewed = [c for c in (truth.get("contacts") or []) if c.get("reviewed") is False]
+    if unreviewed:
+        raise ValueError(
+            f"{len(unreviewed)} contacts are still marked unreviewed. They were seeded from "
+            "detector output; scoring them as truth would make the detector agree with itself."
         )
     fps = float(truth.get("fps") or analysis.get("config", {}).get("fps") or 0.0)
     if fps <= 0:

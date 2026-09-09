@@ -1,0 +1,350 @@
+{
+  "_instructions": "Fill this in by watching annotated.mp4. Set labelled=true when done. Frame numbers refer to the working video (outputs/<clip>/work.mp4); metadata.json records the offset back to the source video.",
+  "labelled": false,
+  "fps": 59.17531005597808,
+  "active_play_ranges": [
+    [
+      9,
+      477
+    ],
+    [
+      768,
+      1220
+    ],
+    [
+      1563,
+      1702
+    ],
+    [
+      1915,
+      2167
+    ],
+    [
+      2296,
+      2460
+    ],
+    [
+      3949,
+      4034
+    ]
+  ],
+  "_active_play_help": "Inclusive [start_frame, end_frame] ranges where a rally is actually in progress. The >=90% two-player tracking target is measured over these frames only, because coverage between rallies is not what the criterion is about.",
+  "missed_hits": [],
+  "_missed_hits_help": "Frames of real hits the pipeline did not detect at all: [{\"frame\": 123}]",
+  "hits": [
+    {
+      "frame": 9,
+      "time_s": 0.152,
+      "detected_hitter": null,
+      "true_hitter": null,
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 109,
+      "time_s": 1.842,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 156,
+      "time_s": 2.636,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 251,
+      "time_s": 4.242,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 314,
+      "time_s": 5.306,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 374,
+      "time_s": 6.32,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 467,
+      "time_s": 7.892,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 768,
+      "time_s": 12.978,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 813,
+      "time_s": 13.739,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 883,
+      "time_s": 14.922,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 998,
+      "time_s": 16.865,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 1068,
+      "time_s": 18.048,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 1152,
+      "time_s": 19.468,
+      "detected_hitter": null,
+      "true_hitter": null,
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 1563,
+      "time_s": 26.413,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 1621,
+      "time_s": 27.393,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 1672,
+      "time_s": 28.255,
+      "detected_hitter": null,
+      "true_hitter": null,
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 1915,
+      "time_s": 32.361,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 2010,
+      "time_s": 33.967,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 2036,
+      "time_s": 34.406,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 2065,
+      "time_s": 34.896,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 2123,
+      "time_s": 35.876,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 2144,
+      "time_s": 36.231,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 2296,
+      "time_s": 38.8,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 2388,
+      "time_s": 40.355,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 2449,
+      "time_s": 41.386,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 3034,
+      "time_s": 51.271,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 3425,
+      "time_s": 57.879,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 3949,
+      "time_s": 66.734,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 4010,
+      "time_s": 67.765,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 4228,
+      "time_s": 71.449,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 4431,
+      "time_s": 74.879,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    },
+    {
+      "frame": 4914,
+      "time_s": 83.041,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": true,
+      "notes": ""
+    }
+  ],
+  "_hits_help": "One row per detected hit. Set is_real_hit=false for a false positive. Correct true_hitter to 'near' or 'far' where the assignment is wrong.",
+  "rallies": [
+    {
+      "rally": 1,
+      "detected_start_frame": 9,
+      "detected_end_frame": 477,
+      "true_start_frame": 9,
+      "true_end_frame": 477,
+      "boundary_ok": null,
+      "notes": ""
+    },
+    {
+      "rally": 2,
+      "detected_start_frame": 768,
+      "detected_end_frame": 1220,
+      "true_start_frame": 768,
+      "true_end_frame": 1220,
+      "boundary_ok": null,
+      "notes": ""
+    },
+    {
+      "rally": 3,
+      "detected_start_frame": 1563,
+      "detected_end_frame": 1702,
+      "true_start_frame": 1563,
+      "true_end_frame": 1702,
+      "boundary_ok": null,
+      "notes": ""
+    },
+    {
+      "rally": 4,
+      "detected_start_frame": 1915,
+      "detected_end_frame": 2167,
+      "true_start_frame": 1915,
+      "true_end_frame": 2167,
+      "boundary_ok": null,
+      "notes": ""
+    },
+    {
+      "rally": 5,
+      "detected_start_frame": 2296,
+      "detected_end_frame": 2460,
+      "true_start_frame": 2296,
+      "true_end_frame": 2460,
+      "boundary_ok": null,
+      "notes": ""
+    },
+    {
+      "rally": 6,
+      "detected_start_frame": 3949,
+      "detected_end_frame": 4034,
+      "true_start_frame": 3949,
+      "true_end_frame": 4034,
+      "boundary_ok": null,
+      "notes": ""
+    }
+  ],
+  "_rallies_help": "Set boundary_ok=true/false for each detected rally."
+}

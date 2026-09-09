@@ -1,0 +1,283 @@
+{
+  "_format": "badminton-poc/truth-v2",
+  "_instructions": "Watch annotated.mp4 and record what happened in the video, not what the pipeline said. contacts: one entry per real racket contact, with hitter 'near' or 'far'. rallies: one entry per rally actually played. Delete any contact you cannot see happen. Set labelled=true when finished. Nothing here should describe a detector.",
+  "clip": "test-video3",
+  "fps": 59.17531005597808,
+  "frame_reference": "outputs/<clip>/work.mp4; metadata.json holds the offset to source",
+  "labelled": false,
+  "contacts": [
+    {
+      "frame": 9,
+      "time_s": 0.152,
+      "hitter": null,
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 109,
+      "time_s": 1.842,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 156,
+      "time_s": 2.636,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 251,
+      "time_s": 4.242,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 314,
+      "time_s": 5.306,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 374,
+      "time_s": 6.32,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 467,
+      "time_s": 7.892,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 768,
+      "time_s": 12.978,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 813,
+      "time_s": 13.739,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 883,
+      "time_s": 14.922,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 998,
+      "time_s": 16.865,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 1068,
+      "time_s": 18.048,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 1152,
+      "time_s": 19.468,
+      "hitter": null,
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 1563,
+      "time_s": 26.413,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 1621,
+      "time_s": 27.393,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 1672,
+      "time_s": 28.255,
+      "hitter": null,
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 1915,
+      "time_s": 32.361,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 2010,
+      "time_s": 33.967,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 2036,
+      "time_s": 34.406,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 2065,
+      "time_s": 34.896,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 2123,
+      "time_s": 35.876,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 2144,
+      "time_s": 36.231,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 2296,
+      "time_s": 38.8,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 2388,
+      "time_s": 40.355,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 2449,
+      "time_s": 41.386,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 3034,
+      "time_s": 51.271,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 3425,
+      "time_s": 57.879,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 3949,
+      "time_s": 66.734,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 4010,
+      "time_s": 67.765,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 4228,
+      "time_s": 71.449,
+      "hitter": "near",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 4431,
+      "time_s": 74.879,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "frame": 4914,
+      "time_s": 83.041,
+      "hitter": "far",
+      "reviewed": false,
+      "notes": ""
+    }
+  ],
+  "_contacts_help": "[{\"frame\": 1234, \"hitter\": \"near\"|\"far\"|null, \"notes\": \"\"}] -- every racket contact in the clip, whether or not anything detected it.",
+  "rallies": [
+    {
+      "rally": 1,
+      "start_frame": 9,
+      "end_frame": 477,
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "rally": 2,
+      "start_frame": 768,
+      "end_frame": 1220,
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "rally": 3,
+      "start_frame": 1563,
+      "end_frame": 1702,
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "rally": 4,
+      "start_frame": 1915,
+      "end_frame": 2167,
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "rally": 5,
+      "start_frame": 2296,
+      "end_frame": 2460,
+      "reviewed": false,
+      "notes": ""
+    },
+    {
+      "rally": 6,
+      "start_frame": 3949,
+      "end_frame": 4034,
+      "reviewed": false,
+      "notes": ""
+    }
+  ],
+  "_rallies_help": "[{\"rally\": 1, \"start_frame\": 83, \"end_frame\": 236, \"notes\": \"\"}] -- inclusive spans where a rally was in progress.",
+  "tracking_failures": [],
+  "_tracking_failures_help": "Optional. [{\"start_frame\": 1918, \"end_frame\": 3291, \"kind\": \"...\", \"notes\": \"...\"}] -- stretches where the vision stack visibly followed the wrong thing. Not scored; kept so a known failure is not rediscovered twice.",
+  "_draft_warning": "Seeded from detector output as a place to start. Delete every row that is not a real racket contact, correct the hitters, add the contacts nothing detected, fix the rally spans, then set reviewed=true on what remains and labelled=true at the top."
+}
