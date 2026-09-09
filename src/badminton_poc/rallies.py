@@ -124,6 +124,47 @@ def reject_hits_outside_play(
     return kept, dropped
 
 
+def trim_trailing_weak_hits(
+    rally: dict[str, Any], min_speed: float, *, fps: float
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Walk back from a rally's last hit while the swing evidence is weak.
+
+    A swing gate applied to every hit removes real contacts mid-rally, opening gaps longer than
+    the rally break and cutting the rally in two: on the development clip that took rally
+    accuracy from 4 of 6 to 1 of 6 while precision improved. Applied only to the tail it cannot
+    split anything, because it never removes a hit with surviving hits after it.
+
+    The rally always keeps at least one hit. If every candidate looks weak, something still
+    happened there and reporting nothing would be worse than reporting a rally with a doubtful
+    end.
+    """
+    if min_speed <= 0:
+        return rally, []
+    hits = list(rally.get("hits") or [])
+    dropped: list[dict[str, Any]] = []
+    while len(hits) > 1:
+        peak = hits[-1].get("swing_peak_wrist_speed")
+        if peak is None or peak >= min_speed:
+            break
+        dropped.append({**hits[-1], "reason": "weak swing at the end of a rally",
+                        "threshold": min_speed})
+        hits.pop()
+    if not dropped:
+        return rally, []
+    dropped.reverse()   # report in frame order, not the order they were peeled off
+    out = dict(rally)
+    out["hits"] = hits
+    out["end_frame"] = hits[-1]["frame"]
+    out["end_s"] = round(hits[-1]["frame"] / fps, 3)
+    out["duration_s"] = round(max(0.0, (out["end_frame"] - out["start_frame"]) / fps), 3)
+    out["hit_count"] = len(hits)
+    out["near_hits"] = sum(1 for h in hits if h.get("hitter") == "near")
+    out["far_hits"] = sum(1 for h in hits if h.get("hitter") == "far")
+    out["unassigned_hits"] = sum(1 for h in hits if h.get("hitter") is None)
+    out["termination_reason"] = "trimmed_trailing_weak_hits"
+    return out, dropped
+
+
 def drop_weak_swings(
     events: list[ShuttleEvent],
     swing_by_frame: dict[int, dict[str, Any]],

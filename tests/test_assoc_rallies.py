@@ -537,3 +537,43 @@ def test_ending_at_the_last_hit_still_reports_a_duration():
     events = timeline((10, "hit", "near"), (40, "hit", "far"), (300, "landing", None))
     r = segment_rallies(events, FPS, gap_seconds=2.5, min_hits=2, end_at_last_hit=True)[0]
     assert r["duration_s"] == pytest.approx(30 / FPS, abs=1e-3)
+
+
+def test_trailing_weak_hits_are_trimmed_without_splitting_the_rally():
+    """A swing gate applied to every hit removes real ones mid-rally and cuts the rally in two.
+    Applied only to the tail it cannot split anything: it walks back from the last hit while
+    the evidence is weak and stops at the first hit worth believing."""
+    from badminton_poc.rallies import trim_trailing_weak_hits
+
+    rally = {"rally": 1, "start_frame": 10, "end_frame": 300,
+             "hits": [{"frame": 10, "swing_peak_wrist_speed": 8.0},
+                      {"frame": 60, "swing_peak_wrist_speed": 0.5},   # weak, but mid-rally
+                      {"frame": 120, "swing_peak_wrist_speed": 9.0},
+                      {"frame": 200, "swing_peak_wrist_speed": 1.0},  # weak tail
+                      {"frame": 260, "swing_peak_wrist_speed": 0.8}]} # weak tail
+    out, dropped = trim_trailing_weak_hits(rally, 3.0, fps=60.0)
+    assert [h["frame"] for h in out["hits"]] == [10, 60, 120]
+    assert out["end_frame"] == 120
+    assert [d["frame"] for d in dropped] == [200, 260]
+    assert out["hit_count"] == 3
+
+
+def test_trimming_stops_at_the_first_strong_hit():
+    from badminton_poc.rallies import trim_trailing_weak_hits
+
+    rally = {"rally": 1, "start_frame": 10, "end_frame": 300,
+             "hits": [{"frame": 10, "swing_peak_wrist_speed": 8.0},
+                      {"frame": 200, "swing_peak_wrist_speed": 9.0}]}
+    out, dropped = trim_trailing_weak_hits(rally, 3.0, fps=60.0)
+    assert dropped == [] and out["end_frame"] == 300
+
+
+def test_trimming_never_empties_a_rally():
+    """If every hit looks weak the rally is still a rally; something happened there."""
+    from badminton_poc.rallies import trim_trailing_weak_hits
+
+    rally = {"rally": 1, "start_frame": 10, "end_frame": 300,
+             "hits": [{"frame": 10, "swing_peak_wrist_speed": 0.2},
+                      {"frame": 60, "swing_peak_wrist_speed": 0.3}]}
+    out, dropped = trim_trailing_weak_hits(rally, 3.0, fps=60.0)
+    assert len(out["hits"]) >= 1

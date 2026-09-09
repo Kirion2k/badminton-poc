@@ -288,6 +288,13 @@ class AnalysisConfig:
     rally_gap_seconds: float = 2.5
     """Silence between events longer than this starts a new rally."""
     min_hits_per_rally: int = 2
+    trailing_swing_trim: float = 0.0
+    """Walk back from a rally's last hit while the swing evidence is below this, in
+    body-heights per second.
+
+    Zero disables it. A swing gate on every hit splits rallies by removing real contacts in the
+    middle; applied only to the tail it cannot, because it never removes a hit with surviving
+    hits after it."""
     rally_end_at_last_hit: bool = False
     """End a rally at its last hit rather than at the terminating landing.
 

@@ -15,6 +15,7 @@ from .rallies import (
     consolidate_events,
     detect_play_spans,
     drop_weak_swings,
+    trim_trailing_weak_hits,
     drop_low_confidence,
     reject_hits_outside_play,
     segment_rallies,
@@ -96,6 +97,15 @@ def analyze(
         end_at_last_hit=cfg.rally_end_at_last_hit,
     )
 
+    trailing_trimmed: list[dict[str, Any]] = []
+    if cfg.trailing_swing_trim > 0:
+        trimmed = []
+        for rally in rallies:
+            out, dropped = trim_trailing_weak_hits(rally, cfg.trailing_swing_trim, fps=fps)
+            trimmed.append(out)
+            trailing_trimmed.extend(dropped)
+        rallies = trimmed
+
     summary = _summarise(player_rows, ball, timeline, rallies, assignments, fps)
     summary["two_player_coverage"]["during_detected_rallies"] = _rally_coverage(
         player_rows, rallies
@@ -126,6 +136,7 @@ def analyze(
         ],
         "hits_outside_play_dropped": off_play,
         "weak_swing_hits_dropped": weak_swings,
+        "trailing_hits_trimmed": trailing_trimmed,
         "offcourt_events_dropped": offcourt_events,
     }
     out = Path(output_json)
