@@ -9,7 +9,14 @@ from typing import Any
 from .assoc import assign_hit, enforce_alternation
 from .config import AnalysisConfig, CourtROI
 from .parsing import BallTrack, load_ball_csv, load_events_json, load_jsonl
-from .rallies import build_timeline, consolidate_events, drop_low_confidence, segment_rallies
+from .rallies import (
+    build_timeline,
+    consolidate_events,
+    detect_play_spans,
+    drop_low_confidence,
+    reject_hits_outside_play,
+    segment_rallies,
+)
 
 
 def analyze(
@@ -37,6 +44,14 @@ def analyze(
     raw_counts: dict[str, int] = {}
     for event in raw_events:
         raw_counts[event.event_type] = raw_counts.get(event.event_type, 0) + 1
+    play_spans = detect_play_spans(
+        ball, fps,
+        min_speed_px=cfg.play_gate_min_speed_px,
+        smooth_seconds=cfg.play_gate_smooth_seconds,
+        bridge_seconds=cfg.play_gate_bridge_seconds,
+        min_span_seconds=cfg.play_gate_min_span_seconds,
+    ) if cfg.play_gate_min_speed_px > 0 else []
+    raw_events, off_play = reject_hits_outside_play(raw_events, play_spans, fps=fps)
     raw_events, low_confidence = drop_low_confidence(
         raw_events, cfg.min_hit_confidence, "hit"
     )
@@ -85,6 +100,12 @@ def analyze(
         "events": [e.to_dict(fps) for e in timeline],
         "hit_consolidation": merge_audit,
         "low_confidence_hits_dropped": low_confidence,
+        "play_spans": [
+            {"start_frame": s, "end_frame": e, "start_s": round(s / fps, 3),
+             "end_s": round(e / fps, 3), "duration_s": round((e - s + 1) / fps, 3)}
+            for s, e in play_spans
+        ],
+        "hits_outside_play_dropped": off_play,
         "offcourt_events_dropped": offcourt_events,
     }
     out = Path(output_json)

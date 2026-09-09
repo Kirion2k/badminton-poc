@@ -372,3 +372,100 @@ def test_the_confidence_filter_leaves_other_event_types_alone():
     events = [ShuttleEvent(10, "landing", 1.0, 2.0, 0.5, "speed_step", ("speed_step",))]
     kept, dropped = drop_low_confidence(events, 0.85, "hit")
     assert len(kept) == 1 and dropped == []
+
+
+def _track(points):
+    """BallTrack from {frame: (x, y) or None}."""
+    from badminton_poc.parsing import BallSample, BallTrack
+    return BallTrack([
+        BallSample(frame=f, visible=p is not None, x=(p[0] if p else 0.0),
+                   y=(p[1] if p else 0.0), inpainted=False)
+        for f, p in sorted(points.items())
+    ])
+
+
+def test_a_frozen_false_shuttle_is_not_play():
+    """Between rallies TrackNetV3 still emits a shuttle every frame, pinned at a fixed
+    position -- on clip 2 it sat at exactly y=219 with a median speed of 0.00 px/frame across
+    every dead period. A visible shuttle is not evidence that a rally is happening; a moving
+    one is."""
+    from badminton_poc.rallies import detect_play_spans
+
+    frozen = {f: (900.0, 219.0) for f in range(0, 600)}
+    spans = detect_play_spans(_track(frozen), fps=60.0, min_speed_px=4.0)
+    assert spans == []
+
+
+def test_a_moving_shuttle_is_play():
+    from badminton_poc.rallies import detect_play_spans
+
+    moving = {f: (100.0 + 8.0 * f, 300.0) for f in range(0, 600)}
+    spans = detect_play_spans(_track(moving), fps=60.0, min_speed_px=4.0)
+    assert len(spans) == 1
+    assert spans[0][0] <= 30 and spans[0][1] >= 570
+
+
+def test_a_shuttle_leaving_the_frame_does_not_end_a_rally():
+    """A high clear goes above the top of frame and TrackNet loses it. On clip 2 the shuttle
+    exited at y=6, was absent for 0.80s, and returned at y=12 -- play never stopped. A gap
+    shorter than the bridge must not split the span."""
+    from badminton_poc.rallies import detect_play_spans
+
+    points = {}
+    for f in range(0, 200):
+        points[f] = (100.0 + 8.0 * f, 300.0)
+    for f in range(200, 248):          # 0.80s out of frame
+        points[f] = None
+    for f in range(248, 500):
+        points[f] = (100.0 + 8.0 * (f - 48), 300.0)
+    spans = detect_play_spans(_track(points), fps=60.0, min_speed_px=4.0,
+                              bridge_seconds=1.5)
+    assert len(spans) == 1, f"the out-of-frame gap split the span: {spans}"
+
+
+def test_a_gap_longer_than_the_bridge_does_split():
+    from badminton_poc.rallies import detect_play_spans
+
+    points = {f: (100.0 + 8.0 * f, 300.0) for f in range(0, 200)}
+    points.update({f: (900.0, 219.0) for f in range(200, 500)})     # long dead stretch
+    points.update({f: (100.0 + 8.0 * (f - 300), 300.0) for f in range(500, 700)})
+    spans = detect_play_spans(_track(points), fps=60.0, min_speed_px=4.0,
+                              bridge_seconds=1.5)
+    assert len(spans) == 2
+
+
+def test_a_flicker_of_motion_is_not_a_rally():
+    """A couple of fast frames in dead time -- someone picking the shuttle up -- must not
+    become a play span."""
+    from badminton_poc.rallies import detect_play_spans
+
+    points = {f: (900.0, 219.0) for f in range(0, 600)}
+    for f in range(300, 306):
+        points[f] = (900.0 + 20.0 * (f - 300), 219.0)
+    spans = detect_play_spans(_track(points), fps=60.0, min_speed_px=4.0,
+                              min_span_seconds=1.0)
+    assert spans == []
+
+
+def test_hits_outside_a_play_span_are_dropped_and_recorded():
+    """Hits fired during dead time are what kept rallies alive past their end and invented one
+    outright. Rejecting them needs a signal independent of the hits themselves."""
+    from badminton_poc.rallies import reject_hits_outside_play
+
+    events = [ShuttleEvent(f, "hit", 1.0, 2.0, 0.9, "r", ("r",)) for f in (50, 150, 400)]
+    events.append(ShuttleEvent(160, "landing", 1.0, 2.0, 0.9, "r", ("r",)))
+    kept, dropped = reject_hits_outside_play(events, [(100, 200)], fps=60.0)
+
+    assert [e.frame for e in kept] == [150, 160]      # the landing survives regardless
+    assert [d["frame"] for d in dropped] == [50, 400]
+    assert dropped[0]["reason"] == "outside detected play"
+
+
+def test_no_play_spans_means_no_gate():
+    """If shuttle motion never says play is happening, refusing every hit would be worse than
+    saying nothing. The gate is off rather than total."""
+    from badminton_poc.rallies import reject_hits_outside_play
+
+    events = [ShuttleEvent(50, "hit", 1.0, 2.0, 0.9, "r", ("r",))]
+    kept, dropped = reject_hits_outside_play(events, [], fps=60.0)
+    assert len(kept) == 1 and dropped == []

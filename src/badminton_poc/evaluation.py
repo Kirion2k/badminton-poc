@@ -192,6 +192,17 @@ def evaluate(analysis: dict[str, Any], ground_truth: dict[str, Any], players: li
     false_positives = [h for h in hits if not h.get("is_real_hit")]
     missed = ground_truth.get("missed_hits", [])
 
+    # Labels describe the run that produced them. Change a threshold and the pipeline emits a
+    # different set of hits while ground_truth.json still holds the old rows; scoring those
+    # yields a precision figure for a configuration nobody labelled.
+    detected_frames = {
+        e["frame"] for e in analysis.get("events", []) if e.get("event_type") == "hit"
+    }
+    labelled_frames = {h["frame"] for h in hits if h.get("frame") is not None}
+    unlabelled = detected_frames - labelled_frames
+    stale = labelled_frames - detected_frames
+    labels_match_run = not unlabelled and not stale
+
     precision = _ratio(len(true_positives), len(true_positives) + len(false_positives))
     recall = _ratio(len(true_positives), len(true_positives) + len(missed))
 
@@ -222,13 +233,10 @@ def evaluate(analysis: dict[str, Any], ground_truth: dict[str, Any], players: li
             "visible_fraction_all_frames": analysis["summary"]["shuttle_coverage"]["visible_fraction"],
             "note": "Coherence through rallies is a visual judgement; record it in notes.",
         },
-        "hit_detection": {
-            "true_positives": len(true_positives),
-            "false_positives": len(false_positives),
-            "missed": len(missed),
-            "precision": precision,
-            "recall": recall,
-        },
+        "hit_detection": _hit_detection(
+            true_positives, false_positives, missed, precision, recall,
+            labels_match_run, unlabelled, stale, len(detected_frames),
+        ),
         "hitter_assignment": {
             "scored_hits": len(scorable),
             "correct": len(correct),
@@ -250,6 +258,43 @@ def _targets(coverage: float | None, hitter: float | None, rally: float | None) 
         "hitter_assignment_accuracy >= 0.90": verdict(hitter, 0.90),
         "rally_boundary_accuracy >= 0.85": verdict(rally, 0.85),
     }
+
+
+def _hit_detection(
+    true_positives: list[Any],
+    false_positives: list[Any],
+    missed: list[Any],
+    precision: float | None,
+    recall: float | None,
+    labels_match_run: bool,
+    unlabelled: set[int],
+    stale: set[int],
+    detected: int,
+) -> dict[str, Any]:
+    out: dict[str, Any] = {
+        "scorable": labels_match_run,
+        "detected_hits": detected,
+        "labelled_hits": len(true_positives) + len(false_positives),
+        "unlabelled_hits": len(unlabelled),
+        "labelled_but_not_detected": len(stale),
+    }
+    if not labels_match_run:
+        out["note"] = (
+            "Precision and recall are withheld: the labels do not describe this run. "
+            f"{len(unlabelled)} detected hits have no label and {len(stale)} labelled hits are "
+            "no longer produced, which happens when a threshold or filter changed after "
+            "labelling. Re-label against the current output, or restore the configuration the "
+            "labels were made against."
+        )
+        return out
+    out.update({
+        "true_positives": len(true_positives),
+        "false_positives": len(false_positives),
+        "missed": len(missed),
+        "precision": precision,
+        "recall": recall,
+    })
+    return out
 
 
 def _active_frames(ranges: list[list[int]]) -> set[int] | None:

@@ -1,5 +1,5 @@
 {
-  "notes": "Court ROI for outputs/test-video2/work.mp4 (1920x884), derived from a permissive calibration pass rather than by eye: the near player's foot cloud spans x 0.20-0.86 y 0.67-1.00, the far player's x 0.20-0.40 y 0.55-0.68, and the courtside crowd sits at x 0.74-0.90 y 0.63-0.72 with the left-hand spectators pinned at x 0.11. Six vertices, not four, because the crowd on the right needs a near-horizontal cut above it while the far court needs a sloping baseline - a quadrilateral cannot do both. The near baseline runs off the bottom of the frame, so the polygon closes on y=1.0. Source is pillarboxed: x<0.09 and x>0.905 are solid black. min_hit_confidence 0.85 drops acceleration_peak-only candidates, which supply 613 of this clip's 777 hit candidates at a flat 0.75; upstream scores by rule identity plus agreement count, so 0.85 means 'vy_reversal fired, or two rules agreed'. Unvalidated: chosen against unlabelled output.",
+  "notes": "Court ROI derived from a permissive calibration pass rather than by eye: the near player's foot cloud spans x 0.20-0.86 y 0.67-1.00, the far player's x 0.20-0.40 y 0.55-0.68, and the courtside crowd sits at x 0.74-0.90 y 0.63-0.72 with the left-hand spectators pinned at x 0.11. Six vertices, not four, because the crowd on the right needs a near-horizontal cut above it while the far court needs a sloping baseline. The near baseline runs off the bottom of the frame, so the polygon closes on y=1.0. Source is pillarboxed: x<0.09 and x>0.905 are solid black. min_hit_confidence is 0: labelling showed 0.85 discarded 7 real hits (every one of the recall losses) and caused a real rally to be split, while removing none of the false positives that matter. play_gate_min_speed_px is 0: shuttle motion was measured and does not separate play from dead time well enough to gate on (>=4 px/frame covers 78% of play frames but also 22% of dead ones).",
   "court": {
     "polygon": [
       [
@@ -75,6 +75,7 @@
     "assignment_margin_px": 40.0,
     "rally_gap_seconds": 2.5,
     "shuttle_absent_seconds": 1.0,
-    "min_hit_confidence": 0.85
+    "min_hit_confidence": 0.85,
+    "play_gate_min_speed_px": 0.0
   }
 }

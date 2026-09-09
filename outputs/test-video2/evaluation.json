@@ -13,6 +13,11 @@
     "note": "Coherence through rallies is a visual judgement; record it in notes."
   },
   "hit_detection": {
+    "scorable": true,
+    "detected_hits": 88,
+    "labelled_hits": 88,
+    "unlabelled_hits": 0,
+    "labelled_but_not_detected": 0,
     "true_positives": 55,
     "false_positives": 33,
     "missed": 7,

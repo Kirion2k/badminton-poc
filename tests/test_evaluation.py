@@ -55,7 +55,12 @@ def test_evaluate_scores_the_six_poc_metrics():
     }
     players = [{"frame": i, "near": {"bbox": []} if i < 9 else None, "far": {"bbox": []}}
                for i in range(10)]
-    analysis = dict(ANALYSIS, rallies=[{"rally": 1, "start_frame": 0, "end_frame": 9}])
+    # The labels have to describe this run, or precision and recall are withheld by design.
+    analysis = dict(
+        ANALYSIS,
+        rallies=[{"rally": 1, "start_frame": 0, "end_frame": 9}],
+        events=[{"event_type": "hit", "frame": f, "time_s": f / 60.0} for f in (10, 30, 40)],
+    )
     result = evaluate(analysis, ground_truth, players)
 
     assert result["hit_detection"]["precision"] == pytest.approx(2 / 3, abs=1e-4)
@@ -147,3 +152,44 @@ def test_scoring_needs_labelled_ranges():
                                     fps=60.0, tolerance_seconds=1.0)
     assert result["accuracy"] is None
     assert result["real_rallies"] == 0
+
+
+def test_evaluation_refuses_to_score_hits_the_labels_do_not_describe():
+    """Labels are tied to the run that produced them. Change a threshold and the pipeline emits
+    a different set of hits, but ground_truth.json still holds the old rows -- and scoring them
+    yields a precision figure for a configuration nobody labelled. That is worse than no number
+    at all, so it has to be visible."""
+    analysis = dict(
+        ANALYSIS,
+        rallies=[],
+        events=[{"event_type": "hit", "frame": f, "time_s": f / 60.0} for f in (10, 20, 30, 40)],
+    )
+    ground_truth = {
+        "labelled": True, "fps": 60.0, "active_play_ranges": [[0, 50]],
+        "hits": [{"frame": 10, "detected_hitter": "near", "true_hitter": "near",
+                  "is_real_hit": True}],
+        "rallies": [],
+    }
+    result = evaluate(analysis, ground_truth, [])
+
+    assert result["hit_detection"]["scorable"] is False
+    assert result["hit_detection"]["unlabelled_hits"] == 3
+    assert "precision" not in result["hit_detection"]
+
+
+def test_hits_are_scored_when_the_labels_match_the_run():
+    analysis = dict(
+        ANALYSIS, rallies=[],
+        events=[{"event_type": "hit", "frame": f, "time_s": f / 60.0} for f in (10, 20)],
+    )
+    ground_truth = {
+        "labelled": True, "fps": 60.0, "active_play_ranges": [[0, 50]],
+        "hits": [
+            {"frame": 10, "detected_hitter": "near", "true_hitter": "near", "is_real_hit": True},
+            {"frame": 20, "detected_hitter": "far", "true_hitter": None, "is_real_hit": False},
+        ],
+        "rallies": [],
+    }
+    result = evaluate(analysis, ground_truth, [])
+    assert result["hit_detection"]["scorable"] is True
+    assert result["hit_detection"]["precision"] == pytest.approx(0.5)

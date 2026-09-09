@@ -11,6 +11,7 @@ are never confused with an upstream detection.
 """
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -18,6 +19,109 @@ from .assoc import HitAssignment
 from .parsing import BallTrack, ShuttleEvent
 
 TERMINAL_TYPES = frozenset({"landing", "out_of_frame", "shuttle_absent"})
+
+
+def detect_play_spans(
+    ball: "BallTrack",
+    fps: float,
+    *,
+    min_speed_px: float = 4.0,
+    smooth_seconds: float = 0.25,
+    bridge_seconds: float = 1.5,
+    min_span_seconds: float = 1.0,
+) -> list[tuple[int, int]]:
+    """Frame spans where a rally is actually in progress, from shuttle motion alone.
+
+    Rally segmentation was driven entirely by hits, which is circular: a hit candidate fired
+    during dead time keeps a rally alive past its end or invents one outright. On the second
+    test clip 22 of 33 false-positive hits fell outside real play, and an entire rally of
+    eleven hits was invented between points.
+
+    Shuttle *visibility* says nothing -- TrackNetV3 emits a shuttle on every frame whether or
+    not one is in play, and between points it pins to a fixed position (y=219 throughout every
+    dead period on that clip). Shuttle *motion* separates cleanly: a median of 4.85 to 11.66
+    px/frame within each real rally against 0.00 in five of six dead stretches.
+
+    Three shaping rules, each for an observed failure:
+
+    - a rolling median rather than a raw frame-to-frame speed, because one noisy sample is not
+      a rally;
+    - short gaps are bridged, because a high clear leaves the top of the frame and TrackNet
+      loses it for the better part of a second while play continues (frames 1750-1797 on the
+      test clip, exiting at y=6 and returning at y=12);
+    - spans shorter than ``min_span_seconds`` are discarded, because somebody picking the
+      shuttle up off the floor is not a rally.
+    """
+    frames = ball.frames
+    if not frames:
+        return []
+    half = max(1, int(round(smooth_seconds * fps / 2)))
+    bridge = int(round(bridge_seconds * fps))
+    min_span = int(round(min_span_seconds * fps))
+
+    speed: dict[int, float] = {}
+    previous: tuple[int, float, float] | None = None
+    for frame in frames:
+        sample = ball.get(frame)
+        if sample is None or not sample.visible:
+            continue
+        if previous is not None and frame - previous[0] <= 2:
+            step = math.hypot(sample.x - previous[1], sample.y - previous[2])
+            speed[frame] = step / (frame - previous[0])
+        previous = (frame, sample.x, sample.y)
+
+    lo, hi = frames[0], frames[-1]
+    active: list[int] = []
+    for frame in range(lo, hi + 1):
+        window = [speed[f] for f in range(frame - half, frame + half + 1) if f in speed]
+        if not window:
+            continue
+        window.sort()
+        if window[len(window) // 2] >= min_speed_px:
+            active.append(frame)
+    if not active:
+        return []
+
+    spans: list[list[int]] = [[active[0], active[0]]]
+    for frame in active[1:]:
+        if frame - spans[-1][1] <= bridge:
+            spans[-1][1] = frame
+        else:
+            spans.append([frame, frame])
+    return [(s, e) for s, e in spans if e - s + 1 >= min_span]
+
+
+def reject_hits_outside_play(
+    events: list[ShuttleEvent],
+    play_spans: list[tuple[int, int]],
+    *,
+    fps: float,
+) -> tuple[list[ShuttleEvent], list[dict[str, Any]]]:
+    """Drop hit candidates that fall outside every detected play span.
+
+    Only hits. A landing or a shuttle-absence marker is what *ends* a rally and legitimately
+    sits at or past its edge, so gating those on play would remove the terminal event the
+    segmentation depends on.
+
+    With no play spans at all the gate is off rather than total: refusing every hit because the
+    shuttle signal was unusable would be a worse answer than saying nothing.
+    """
+    if not play_spans:
+        return list(events), []
+    kept: list[ShuttleEvent] = []
+    dropped: list[dict[str, Any]] = []
+    for event in events:
+        if event.event_type != "hit" or any(s <= event.frame <= e for s, e in play_spans):
+            kept.append(event)
+        else:
+            dropped.append({
+                "frame": event.frame,
+                "time_s": round(event.frame / fps, 3),
+                "confidence": event.confidence,
+                "rule": event.rule,
+                "reason": "outside detected play",
+            })
+    return kept, dropped
 
 
 def drop_low_confidence(

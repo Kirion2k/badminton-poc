@@ -281,6 +281,20 @@ class AnalysisConfig:
     rally_gap_seconds: float = 2.5
     """Silence between events longer than this starts a new rally."""
     min_hits_per_rally: int = 2
+    play_gate_min_speed_px: float = 0.0
+    """Median shuttle speed, in px/frame over a short window, above which play is in progress.
+
+    Zero disables the gate. Rally segmentation is otherwise driven entirely by hits, which is
+    circular: a hit fired during dead time keeps a rally alive past its end or invents one.
+    TrackNetV3 emits a shuttle on every frame whether or not one is in play and pins it to a
+    fixed position between points, so visibility is no signal and motion is."""
+    play_gate_smooth_seconds: float = 0.25
+    play_gate_bridge_seconds: float = 1.5
+    """Play spans separated by less than this are joined. A high clear leaves the top of the
+    frame for the better part of a second while play continues."""
+    play_gate_min_span_seconds: float = 1.0
+    """Shorter bursts of shuttle motion are not rallies -- somebody picking it up off the
+    floor moves it too."""
     min_hit_confidence: float = 0.0
     """Drop hit candidates below this upstream confidence before consolidating.
 
