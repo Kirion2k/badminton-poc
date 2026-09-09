@@ -31,60 +31,12 @@
   "_active_play_help": "Inclusive [start_frame, end_frame] ranges where a rally is actually in progress. The >=90% two-player tracking target is measured over these frames only, because coverage between rallies is not what the criterion is about.",
   "missed_hits": [
     {
-      "frame": 1803,
-      "time_s": 30.08,
-      "detected_hitter": "near",
-      "true_hitter": "near",
-      "is_real_hit": true,
-      "notes": "the shuttle goes out of view from the camera but you can still see the player hit it, while the shuttle is coming down"
-    },
-    {
-      "frame": 1886,
-      "time_s": 31.44,
-      "detected_hitter": "far",
-      "true_hitter": "far",
-      "is_real_hit": true,
-      "notes": "model doesnt detect the far player for some reason and hence doesnt detect the shuttle being hit?"
-    },
-    {
       "frame": 2006,
       "time_s": 33.441,
       "detected_hitter": "far",
       "true_hitter": "far",
       "is_real_hit": true,
       "notes": ""
-    },
-    {
-      "frame": 2079,
-      "time_s": 34.66,
-      "detected_hitter": "near",
-      "true_hitter": "near",
-      "is_real_hit": true,
-      "notes": "near player hits the shuttle, doesnt get registered, but the far player is not being properly registered, its being registered as someone on the sideline "
-    },
-    {
-      "frame": 2189,
-      "time_s": 36.49,
-      "detected_hitter": "near",
-      "true_hitter": "near",
-      "is_real_hit": true,
-      "notes": "same thing as 2079, near player hits the shuttle, doesnt get registered, but the far player is not being properly registered, its being registered as someone on the sideline "
-    },
-    {
-      "frame": 3972,
-      "time_s": 2.317,
-      "detected_hitter": "far",
-      "true_hitter": "far",
-      "is_real_hit": true,
-      "notes": "hit doenst get detected?"
-    },
-    {
-      "frame": 6286,
-      "time_s": 104.81,
-      "detected_hitter": "near",
-      "true_hitter": "near",
-      "is_real_hit": true,
-      "notes": "near player hits a backhand shot"
     }
   ],
   "_missed_hits_help": "Frames of real hits the pipeline did not detect at all: [{\"frame\": 123}]",
@@ -414,16 +366,16 @@
       "time_s": 30.024,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": true,
+      "notes": "real hit you flagged as missed at frame 1803; now detected. CONFIRM true_hitter. the shuttle goes out of view from the camera but you can still see the player hit it, while the shuttle is coming down"
     },
     {
       "frame": 1877,
       "time_s": 31.291,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": true,
+      "notes": "real hit you flagged as missed at frame 1886; now detected. CONFIRM true_hitter. model doesnt detect the far player for some reason and hence doesnt detect the shuttle being hit?"
     },
     {
       "frame": 1901,
@@ -486,8 +438,8 @@
       "time_s": 34.625,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": true,
+      "notes": "real hit you flagged as missed at frame 2079; now detected. CONFIRM true_hitter. near player hits the shuttle, doesnt get registered, but the far player is not being properly registered, its being registered as someone on the sideline"
     },
     {
       "frame": 2097,
@@ -526,8 +478,8 @@
       "time_s": 36.575,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": true,
+      "notes": "real hit you flagged as missed at frame 2189; now detected. CONFIRM true_hitter. same thing as 2079, near player hits the shuttle, doesnt get registered, but the far player is not being properly registered, its being registered as someone on the sideline"
     },
     {
       "frame": 2217,
@@ -846,8 +798,8 @@
       "time_s": 66.349,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": true,
+      "notes": "real hit you flagged as missed at frame 3972; now detected. CONFIRM true_hitter. hit doenst get detected?"
     },
     {
       "frame": 4016,
@@ -1390,8 +1342,8 @@
       "time_s": 104.774,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": true,
+      "notes": "real hit you flagged as missed at frame 6286; now detected. CONFIRM true_hitter. near player hits a backhand shot"
     },
     {
       "frame": 6326,
