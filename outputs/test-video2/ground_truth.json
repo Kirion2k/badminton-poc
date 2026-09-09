@@ -46,24 +46,24 @@
       "time_s": 0.05,
       "detected_hitter": null,
       "true_hitter": null,
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 26,
       "time_s": 0.433,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 45,
       "time_s": 0.75,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 83,
@@ -78,8 +78,8 @@
       "time_s": 1.7,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 139,
@@ -94,24 +94,24 @@
       "time_s": 2.751,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 186,
       "time_s": 3.101,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 207,
       "time_s": 3.451,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 232,
@@ -150,24 +150,24 @@
       "time_s": 6.918,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 435,
       "time_s": 7.252,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 459,
       "time_s": 7.652,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 482,
@@ -190,8 +190,8 @@
       "time_s": 13.253,
       "detected_hitter": null,
       "true_hitter": null,
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 822,
@@ -206,8 +206,8 @@
       "time_s": 14.07,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 870,
@@ -222,8 +222,8 @@
       "time_s": 14.837,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 916,
@@ -238,16 +238,16 @@
       "time_s": 15.637,
       "detected_hitter": null,
       "true_hitter": null,
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 962,
       "time_s": 16.037,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 994,
@@ -294,8 +294,8 @@
       "time_s": 25.356,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 1549,
@@ -310,16 +310,16 @@
       "time_s": 26.189,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 1594,
       "time_s": 26.573,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 1622,
@@ -342,8 +342,8 @@
       "time_s": 28.173,
       "detected_hitter": null,
       "true_hitter": null,
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 1717,
@@ -382,8 +382,8 @@
       "time_s": 31.691,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 1931,
@@ -398,16 +398,16 @@
       "time_s": 32.541,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 1973,
       "time_s": 32.891,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 2006,
@@ -422,16 +422,16 @@
       "time_s": 33.824,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 2053,
       "time_s": 34.225,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 2077,
@@ -446,8 +446,8 @@
       "time_s": 34.958,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 2120,
@@ -462,16 +462,16 @@
       "time_s": 35.775,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 2165,
       "time_s": 36.092,
       "detected_hitter": null,
       "true_hitter": null,
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 2194,
@@ -494,16 +494,16 @@
       "time_s": 37.342,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 2263,
       "time_s": 37.725,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 2292,
@@ -518,24 +518,24 @@
       "time_s": 38.659,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 2340,
       "time_s": 39.009,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 2361,
       "time_s": 39.359,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 2388,
@@ -550,16 +550,16 @@
       "time_s": 40.143,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 2427,
       "time_s": 40.459,
       "detected_hitter": null,
       "true_hitter": null,
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 2452,
@@ -574,16 +574,16 @@
       "time_s": 41.209,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 2494,
       "time_s": 41.576,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 2518,
@@ -606,8 +606,8 @@
       "time_s": 42.677,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 2597,
@@ -622,8 +622,8 @@
       "time_s": 43.627,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 2643,
@@ -646,8 +646,8 @@
       "time_s": 45.227,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 2744,
@@ -686,8 +686,8 @@
       "time_s": 50.462,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 3058,
@@ -702,8 +702,8 @@
       "time_s": 51.362,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 3172,
@@ -718,8 +718,8 @@
       "time_s": 53.196,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 3220,
@@ -742,16 +742,16 @@
       "time_s": 63.848,
       "detected_hitter": null,
       "true_hitter": null,
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 3849,
       "time_s": 64.165,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 3868,
@@ -766,16 +766,16 @@
       "time_s": 64.798,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 3908,
       "time_s": 65.148,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 3935,
@@ -790,8 +790,8 @@
       "time_s": 65.999,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 3980,
@@ -814,24 +814,24 @@
       "time_s": 67.299,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 4056,
       "time_s": 67.616,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 4075,
       "time_s": 67.932,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 4095,
@@ -846,8 +846,8 @@
       "time_s": 68.582,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 4151,
@@ -862,16 +862,16 @@
       "time_s": 69.599,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 4196,
       "time_s": 69.949,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 4238,
@@ -886,8 +886,8 @@
       "time_s": 71.95,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 4348,
@@ -902,8 +902,8 @@
       "time_s": 72.833,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 4407,
@@ -918,32 +918,32 @@
       "time_s": 73.8,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 4446,
       "time_s": 74.117,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 4466,
       "time_s": 74.45,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 4491,
       "time_s": 74.867,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 4510,
@@ -958,8 +958,8 @@
       "time_s": 75.601,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 4556,
@@ -974,8 +974,8 @@
       "time_s": 76.384,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 4614,
@@ -990,8 +990,8 @@
       "time_s": 77.234,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 4704,
@@ -1006,8 +1006,8 @@
       "time_s": 78.801,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 4750,
@@ -1022,16 +1022,16 @@
       "time_s": 79.568,
       "detected_hitter": null,
       "true_hitter": null,
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 4792,
       "time_s": 79.885,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 4814,
@@ -1046,16 +1046,16 @@
       "time_s": 80.569,
       "detected_hitter": null,
       "true_hitter": null,
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 4853,
       "time_s": 80.902,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 4888,
@@ -1070,8 +1070,8 @@
       "time_s": 81.852,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 4936,
@@ -1094,8 +1094,8 @@
       "time_s": 82.952,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 5007,
@@ -1110,8 +1110,8 @@
       "time_s": 83.853,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 5060,
@@ -1126,16 +1126,16 @@
       "time_s": 84.686,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 5102,
       "time_s": 85.053,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 5123,
@@ -1150,8 +1150,8 @@
       "time_s": 85.72,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 5173,
@@ -1166,24 +1166,24 @@
       "time_s": 86.57,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 5219,
       "time_s": 87.003,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 5249,
       "time_s": 87.503,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 5352,
@@ -1230,16 +1230,16 @@
       "time_s": 91.621,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 5520,
       "time_s": 92.021,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 5545,
@@ -1278,8 +1278,8 @@
       "time_s": 95.072,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 5725,
@@ -1294,8 +1294,8 @@
       "time_s": 95.772,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 5779,
@@ -1318,8 +1318,8 @@
       "time_s": 103.207,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 6223,
@@ -1366,24 +1366,24 @@
       "time_s": 106.308,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 6396,
       "time_s": 106.625,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 6416,
       "time_s": 106.958,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 6435,
@@ -1406,40 +1406,40 @@
       "time_s": 108.158,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 6591,
       "time_s": 109.875,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 6611,
       "time_s": 110.209,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 6920,
       "time_s": 115.36,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 6939,
       "time_s": 115.677,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 7013,
@@ -1454,8 +1454,8 @@
       "time_s": 117.227,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 7057,
@@ -1470,8 +1470,8 @@
       "time_s": 118.061,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 7114,
@@ -1486,16 +1486,16 @@
       "time_s": 118.944,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 7155,
       "time_s": 119.277,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 7196,
@@ -1542,16 +1542,16 @@
       "time_s": 122.278,
       "detected_hitter": "far",
       "true_hitter": "far",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     },
     {
       "frame": 7363,
       "time_s": 122.745,
       "detected_hitter": "near",
       "true_hitter": "near",
-      "is_real_hit": null,
-      "notes": "NEW - not yet judged"
+      "is_real_hit": false,
+      "notes": "judged false in the threshold-0 labelling pass"
     }
   ],
   "_hits_help": "One row per detected hit. Set is_real_hit=false for a false positive. Correct true_hitter to 'near' or 'far' where the assignment is wrong.",

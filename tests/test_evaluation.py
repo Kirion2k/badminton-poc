@@ -304,3 +304,33 @@ def test_unjudged_hits_make_the_evaluation_unscorable():
     result = evaluate(analysis, ground_truth, [])
     assert result["hit_detection"]["scorable"] is False
     assert result["hit_detection"]["unjudged_hits"] == 1
+
+
+def test_a_labelled_real_hit_the_run_no_longer_emits_counts_as_missed():
+    """Labels are a superset once a threshold is tightened: every emitted hit still has a
+    judgement, and the ones no longer emitted are known. A real hit the run drops is a miss,
+    which is exactly what recall should say. Refusing to score here made it impossible to
+    compare two configurations against one labelling."""
+    analysis = dict(
+        ANALYSIS, rallies=[],
+        events=[{"event_type": "hit", "frame": 10, "time_s": 0.17}],
+    )
+    ground_truth = {
+        "labelled": True, "fps": 60.0, "active_play_ranges": [[0, 100]],
+        "hits": [
+            {"frame": 10, "detected_hitter": "near", "true_hitter": "near", "is_real_hit": True},
+            {"frame": 50, "detected_hitter": "far", "true_hitter": "far", "is_real_hit": True},
+            {"frame": 80, "detected_hitter": "far", "true_hitter": None, "is_real_hit": False},
+        ],
+        "rallies": [],
+    }
+    result = evaluate(analysis, ground_truth, [])
+    d = result["hit_detection"]
+    assert d["scorable"] is True
+    assert d["true_positives"] == 1
+    assert d["false_positives"] == 0
+    assert d["missed"] == 1                    # frame 50 was real and is no longer emitted
+    assert d["dropped_real_hits"] == 1
+    assert d["dropped_false_hits"] == 1        # frame 80 was false; dropping it is a win
+    assert d["precision"] == pytest.approx(1.0)
+    assert d["recall"] == pytest.approx(0.5)

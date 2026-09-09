@@ -251,20 +251,28 @@ def evaluate(analysis: dict[str, Any], ground_truth: dict[str, Any], players: li
 
     unjudged = [h for h in hits if h.get("is_real_hit") is None]
     judged = [h for h in hits if h.get("is_real_hit") is not None]
-    true_positives = [h for h in judged if h.get("is_real_hit")]
-    false_positives = [h for h in judged if not h.get("is_real_hit")]
-    missed = ground_truth.get("missed_hits", [])
+    emitted_frames = {
+        e["frame"] for e in analysis.get("events", []) if e.get("event_type") == "hit"
+    }
+    # Labels are a superset once a threshold is tightened. Score precision over what this run
+    # emitted, and count a labelled real hit it no longer emits as a miss -- which is what
+    # recall means. Without this, one labelling could not be used to compare two settings.
+    emitted = [h for h in judged if h["frame"] in emitted_frames]
+    dropped = [h for h in judged if h["frame"] not in emitted_frames]
+    dropped_real = [h for h in dropped if h.get("is_real_hit")]
+    dropped_false = [h for h in dropped if not h.get("is_real_hit")]
+    true_positives = [h for h in emitted if h.get("is_real_hit")]
+    false_positives = [h for h in emitted if not h.get("is_real_hit")]
+    missed = list(ground_truth.get("missed_hits", [])) + dropped_real
 
     # Labels describe the run that produced them. Change a threshold and the pipeline emits a
     # different set of hits while ground_truth.json still holds the old rows; scoring those
     # yields a precision figure for a configuration nobody labelled.
-    detected_frames = {
-        e["frame"] for e in analysis.get("events", []) if e.get("event_type") == "hit"
-    }
+    detected_frames = emitted_frames
     labelled_frames = {h["frame"] for h in hits if h.get("frame") is not None}
     unlabelled = detected_frames - labelled_frames
-    stale = labelled_frames - detected_frames
-    labels_match_run = not unlabelled and not stale and not unjudged
+    stale: set[int] = set()          # a label the run does not emit is handled, not a problem
+    labels_match_run = not unlabelled and not unjudged
 
     precision = _ratio(len(true_positives), len(true_positives) + len(false_positives))
     recall = _ratio(len(true_positives), len(true_positives) + len(missed))
@@ -299,6 +307,7 @@ def evaluate(analysis: dict[str, Any], ground_truth: dict[str, Any], players: li
         "hit_detection": _hit_detection(
             true_positives, false_positives, missed, precision, recall,
             labels_match_run, unlabelled, stale, len(detected_frames), len(unjudged),
+            len(dropped_real), len(dropped_false),
         ),
         "hitter_assignment": {
             "scored_hits": len(scorable),
@@ -334,6 +343,8 @@ def _hit_detection(
     stale: set[int],
     detected: int,
     unjudged_count: int = 0,
+    dropped_real_count: int = 0,
+    dropped_false_count: int = 0,
 ) -> dict[str, Any]:
     out: dict[str, Any] = {
         "scorable": labels_match_run,
@@ -341,14 +352,15 @@ def _hit_detection(
         "labelled_hits": len(true_positives) + len(false_positives),
         "unlabelled_hits": len(unlabelled),
         "unjudged_hits": unjudged_count,
-        "labelled_but_not_detected": len(stale),
+        "dropped_real_hits": dropped_real_count,
+        "dropped_false_hits": dropped_false_count,
     }
     if not labels_match_run:
         out["note"] = (
             "Precision and recall are withheld: the labels do not describe this run. "
-            f"{len(unlabelled)} detected hits have no label, {unjudged_count} are present but "
-            f"not yet judged, and {len(stale)} labelled hits are no longer produced. That "
-            "happens when a threshold or filter changed after labelling. Run "
+            f"{len(unlabelled)} detected hits have no label and {unjudged_count} are present "
+            "but not yet judged. That happens when a threshold or filter changed after "
+            "labelling. Run "
             "'badminton-poc refresh-labels' to carry the existing judgements onto the current "
             "run, then judge the rows marked NEW."
         )

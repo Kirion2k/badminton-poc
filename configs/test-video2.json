@@ -75,7 +75,7 @@
     "assignment_margin_px": 40.0,
     "rally_gap_seconds": 2.5,
     "shuttle_absent_seconds": 1.0,
-    "min_hit_confidence": 0.0,
+    "min_hit_confidence": 0.85,
     "play_gate_min_speed_px": 0.0
   }
 }

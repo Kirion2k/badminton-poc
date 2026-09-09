@@ -308,117 +308,82 @@ kept, so no two survivors can be closer than the interval and no chain can form.
 properties now hold on real data — the closest pair of hits on either clip is 0.32s, and the
 widest hit merge is 0.583s against a healthy limit of 0.6s.
 
-### Measured accuracy on a labelled clip
+### Measured accuracy on a fully labelled clip
 
-Clip 2 is hand-labelled: 88 detected hits judged real or false, 7 missed hits added, and the
-six true rally spans marked. `badminton-poc evaluate` scores it.
+All 189 hits the pipeline can emit on clip 2 are judged, so any configuration can be scored
+against one labelling: a labelled real hit a run no longer emits counts as a miss, which is
+what recall means.
 
 | Metric | Result | Target | |
 |---|---|---|---|
 | Two-player tracking, active play | 95.5% | ≥ 90% | **PASS** |
-| Hitter assignment | 100% (54/54) | ≥ 90% | **PASS** |
+| Hitter assignment | 98.3% (59/60) | ≥ 90% | **PASS** |
 | Rally boundaries | 66.7% (4/6) | ≥ 85% | **FAIL** |
-| Hit precision | 62.5% | — | |
-| Hit recall | 88.7% | — | |
+| Hit precision / recall | 62.5% / 88.7% | — | |
 
-Hitter assignment is exact on every real, detected hit. Tracking clears its bar. Everything
-that fails traces back to one thing: **hit precision.**
+**61 of 189 candidates are real hits.** Two out of three the detector emits are not.
 
-### Rally boundaries are downstream of hit precision
+### The confidence threshold, measured
 
-With no confidence threshold the rally *structure* is exactly right — six detected for six
-real, none split, none invented, none missed — and every single end runs long, by a median
-3.69s and never short. Starts are already good at a median −0.21s. The ends run long because
-false-positive hits during dead time are pulled into the rally before its terminating event is
-looked for. 22 of 33 false positives fall outside real play entirely.
+Upstream confidence is a fixed value per rule -- 0.50 `speed_local_max`, 0.75
+`acceleration_peak`, 0.80 `vx_reversal`, 0.85 `vy_reversal` -- raised to 0.90 when two rules
+agree and 0.95 when three do. A threshold selects which rules to trust, not how certain a
+detection is. Scored against the full labelling:
 
-So rally-boundary accuracy and hit precision are one problem. Five discriminators were measured
-against the labels, and four of them do not work:
+| `min_hit_confidence` | hits | precision | recall | F1 | rally boundaries |
+|---|---|---|---|---|---|
+| 0.00 | 189 | 32% | 98% | 0.49 | 0.17 |
+| 0.80 | 96 | 61% | 95% | **0.75** | 0.50 |
+| **0.85** | 88 | 62% | 89% | 0.73 | **0.67** |
+| 0.90 | 33 | 73% | 39% | 0.51 | 0.17 |
 
-| Signal | Real vs false | Verdict |
+0.85 is kept: 0.80 scores marginally better on hits and four real hits more, but 0.85 is
+materially better on rally boundaries, which is the criterion that is actually failing.
+
+An earlier reading of this project's own notes said the threshold did net harm, on the grounds
+that it caused all seven recall failures and one rally split. Both facts are true and the
+conclusion was wrong: it also removes about ninety-five false positives, and dropping it takes
+precision from 62% to 32%. That reading came from labelling that covered only the hits the
+threshold had already let through, which is exactly the trap `evaluate` now refuses to fall
+into.
+
+### The swing signal, re-tested
+
+Peak wrist speed of the assigned player, from the pose model, independent of the shuttle track.
+Real hits sit at a median 4.31 body-heights per second against 2.24 for false ones.
+
+Its first measurement -- 85% precision at 61% recall -- was taken on the 88 hits the threshold
+let through, a population already filtered to one rule. Against the full 189 it reads 53%
+precision at 63% recall against a 34% baseline. Roughly +19 points of precision either way, so
+the effect is real and consistent, but the absolute number depends entirely on what it is
+applied to.
+
+Applied where it belongs -- on top of the 0.85 threshold -- it is the strongest result the
+project has:
+
+| swing ≥ | precision | recall (of all 61 real hits) |
 |---|---|---|
-| Upstream confidence | 57% precision at ≥0.85, 75% at ≥0.90 | **No.** It is a rule id, not a score |
-| Shuttle speed (play gate) | ≥4 px/f covers 78% of play frames and 22% of dead ones | **No.** Not a gate |
-| Landing events | 47 of 68 gaps are 47–49 frames | **No.** A metronome, not events |
-| Trajectory smoothness | residual median 12.4 real vs 18.7 false | **No.** Overlapping |
-| **Player wrist speed** | median 4.30 vs 1.98 body-heights/second | **Best lead.** 85% precision at 61% recall |
+| off | 62% | 90% |
+| 3.0 | 79% | 56% |
+| **3.6** | **85%** | 54% |
 
-The landing result is worth dwelling on. `min_landing_interval_seconds` is 0.75s and the
-suppression floor is 45 frames; 47 of 68 landing gaps are 47–49 frames. The detector fires
-continuously through dead time and suppression simply samples it at the floor. "A landing sits
-within 0.75s of the true rally end" is therefore true *everywhere* and carries no information —
-a spurious correlation that a rally-trimming fix was nearly built on.
-
-Wrist speed is the first signal that clearly beats the 63% baseline, and the only one
-independent of the shuttle track. Every hit now carries it as `swing_evidence`, and the report
-says how many hits have little or no swing behind them. It is **not** used to discard anything:
-it buys precision with recall, and every filter tried against these labels has cost more than
-it gained.
-
-Measured per *second*, not per frame. Per frame it is not comparable across clips -- the same
-swing at 28 fps covers twice the distance per frame as at 60, and clip 1 read a median 0.113
-against clip 2's 0.051 before the correction. Per second they are 3.17 and 3.08: the same
-swing. Any signal normalised by frame has this problem, and this project has now been bitten by
-it twice, the other being the static-track travel threshold.
-
-### The confidence threshold, and why it is a rule filter
-
-Upstream's confidence is a fixed value per rule, raised when rules agree: 0.50
-`speed_local_max`, 0.75 `acceleration_peak`, 0.80 `vx_reversal`, 0.85 `vy_reversal`, 0.90 for
-two rules agreeing, 0.95 for three. A threshold selects which rules to trust, not how certain a
-detection is.
-
-Labelling settled its value. `min_hit_confidence = 0.85` on clip 2:
-
-- caused **all 7 missed hits** — every recall failure is self-inflicted;
-- caused the one **split rally**: the real hits at 1803 and 1886 were discarded, turning a
-  0.97s gap into 3.13s, past the 2.5s rally break;
-- removed **none** of the false positives that matter — all 33 are at 0.85 or 0.90, and 32 come
-  from `vy_reversal`, the same rule producing 55 of the true positives.
-
-Raising it to 0.88 is meaningless: confidence is discrete, so 0.88 behaves as 0.90 and costs 31
-real shots to remove 24 false ones. It is left at 0.85 only because that is the configuration
-the labels describe; `evaluate` now withholds precision and recall when the labels do not match
-the run, which is what caught a 62.5% figure being reported for a 189-hit run scored against 88
-labelled rows.
+It is still not applied. Buying 23 points of precision with 36 points of recall is not
+obviously right, and that trade should be made against a second clip rather than the one the
+threshold was chosen on.
 
 ### Where it stands
 
-| | clip 1 | clip 2 |
-|---|---|---|
-| source | screen recording of YouTube, VFR 60→28 fps | download, genuine 60 fps |
-| two players, active play | — | **95.5%** PASS |
-| hitter assignment | — | **100%** PASS |
-| rally boundaries | — | FAIL |
-| shuttle visible and on our court | 65.3% | 97.3% |
+Two of three POC criteria pass on a real, fully labelled clip. Rally boundaries fail, and the
+cause is understood: rally ends run long because false-positive hits during dead time are pulled
+into the rally before its terminating event is looked for. Boundary accuracy and hit precision
+are one problem.
 
-Two of the three POC criteria pass on a real, labelled clip. The third fails, the cause is
-understood — rally ends run long because false-positive hits during dead time are pulled into
-the rally — and the remaining lever is a hit-quality signal that does not come from the
-upstream event detector.
-
-**Clip 2 is mid-relabelling and deliberately unscorable.** `min_hit_confidence` was set back to
-0, which restores the 7 real hits the threshold was discarding and the rally it was splitting,
-and brings 101 previously hidden candidates into view. The 88 existing judgements were carried
-across by frame -- every one matched exactly -- and the new rows are marked `NEW` with
-`is_real_hit: null`. `evaluate` withholds precision and recall until they are judged rather
-than scoring a run half its labels never saw.
-
-```bash
-badminton-poc refresh-labels --video data/input/<clip>.mp4
-```
-
-re-seeds `ground_truth.json` against the current run, keeping judgements already made,
-preserving `active_play_ranges` and `missed_hits`, and backing the old file up alongside.
-
-Judging those 101 rows answers two questions at once: whether the confidence threshold should
-exist at all, and whether the swing signal holds on the `acceleration_peak` population it was
-never measured against. Both are currently open.
-
-**Every conclusion here rests on one clip.** Clip 1 is a poor recording — occlusion alone costs
+**Every number here comes from one recording.** Clip 1 is a poor clip -- occlusion alone costs
 it ten points of far-player coverage, so it cannot pass the tracking criterion however good the
-code is — and it is kept as a regression clip rather than an acceptance one. Nothing has yet
-been cross-validated on a second usable recording.
+code is -- and is kept as a regression clip, not an acceptance one. Nothing has been
+cross-validated on a second usable recording, and the swing threshold in particular was
+measured on the same clip that set the confidence threshold.
 
 `badminton-poc report --video <clip>` renders any clip's `analysis.json` as a page, with every
-figure carrying the caveat it rests on.
+figure carrying the caveat it rests on. `badminton-poc refresh-labels` re-seeds a ground-truth
+file against a new run while keeping judgements already made.
