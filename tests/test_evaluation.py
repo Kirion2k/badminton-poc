@@ -234,3 +234,73 @@ def test_edited_ranges_are_not_flagged():
     result = evaluate(analysis, ground_truth, [])
     assert result["rally_boundaries"]["ranges_look_unedited"] is False
     assert "warning" not in result["rally_boundaries"]
+
+
+def test_refresh_keeps_judgements_already_made():
+    """Changing a threshold changes which hits are emitted. Re-seeding the template from
+    scratch would throw away hours of labelling; refusing to re-seed leaves the labels
+    describing a run that no longer exists. Neither is acceptable, so judgements are carried
+    across by frame and only genuinely new hits come back unjudged."""
+    from badminton_poc.evaluation import refresh_template
+
+    existing = {
+        "labelled": True, "fps": 60.0,
+        "active_play_ranges": [[100, 500]],
+        "missed_hits": [{"frame": 250}],
+        "hits": [
+            {"frame": 110, "detected_hitter": "near", "true_hitter": "far",
+             "is_real_hit": True, "notes": "clear"},
+            {"frame": 400, "detected_hitter": "far", "true_hitter": None,
+             "is_real_hit": False, "notes": ""},
+        ],
+        "rallies": [{"rally": 1, "boundary_ok": True}],
+    }
+    analysis = {
+        "rallies": [{"rally": 1, "start_frame": 100, "end_frame": 500}],
+        "events": [
+            {"event_type": "hit", "frame": 110, "time_s": 1.83, "hitter": "near"},
+            {"event_type": "hit", "frame": 250, "time_s": 4.17, "hitter": "far"},
+            {"event_type": "hit", "frame": 400, "time_s": 6.67, "hitter": "far"},
+        ],
+    }
+    out = refresh_template(existing, analysis, 60.0)
+
+    kept = {h["frame"]: h for h in out["hits"]}
+    assert kept[110]["true_hitter"] == "far" and kept[110]["notes"] == "clear"
+    assert kept[400]["is_real_hit"] is False
+    assert kept[250]["is_real_hit"] is None                    # new, unjudged
+    assert out["active_play_ranges"] == [[100, 500]]           # hand-corrected, preserved
+    assert out["refresh"]["carried_over"] == 2
+    assert out["refresh"]["new_to_judge"] == 1
+
+
+def test_refresh_drops_labels_for_hits_no_longer_detected():
+    from badminton_poc.evaluation import refresh_template
+
+    existing = {"labelled": True, "fps": 60.0, "active_play_ranges": [], "missed_hits": [],
+                "hits": [{"frame": 999, "is_real_hit": True, "true_hitter": "near"}],
+                "rallies": []}
+    analysis = {"rallies": [], "events": [{"event_type": "hit", "frame": 110, "time_s": 1.8}]}
+    out = refresh_template(existing, analysis, 60.0)
+    assert [h["frame"] for h in out["hits"]] == [110]
+    assert out["refresh"]["dropped_no_longer_detected"] == 1
+
+
+def test_unjudged_hits_make_the_evaluation_unscorable():
+    """A row carried across is a judgement; a row added by a refresh is not. Scoring the two
+    together reports a precision that half of the data never agreed to."""
+    analysis = dict(
+        ANALYSIS, rallies=[],
+        events=[{"event_type": "hit", "frame": f, "time_s": f / 60.0} for f in (10, 20)],
+    )
+    ground_truth = {
+        "labelled": True, "fps": 60.0, "active_play_ranges": [[0, 50]],
+        "hits": [
+            {"frame": 10, "detected_hitter": "near", "true_hitter": "near", "is_real_hit": True},
+            {"frame": 20, "detected_hitter": "far", "true_hitter": None, "is_real_hit": None},
+        ],
+        "rallies": [],
+    }
+    result = evaluate(analysis, ground_truth, [])
+    assert result["hit_detection"]["scorable"] is False
+    assert result["hit_detection"]["unjudged_hits"] == 1

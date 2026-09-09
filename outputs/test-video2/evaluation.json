@@ -13,33 +13,28 @@
     "note": "Coherence through rallies is a visual judgement; record it in notes."
   },
   "hit_detection": {
-    "scorable": true,
-    "detected_hits": 88,
+    "scorable": false,
+    "detected_hits": 189,
     "labelled_hits": 88,
     "unlabelled_hits": 0,
+    "unjudged_hits": 101,
     "labelled_but_not_detected": 0,
-    "true_positives": 55,
-    "false_positives": 33,
-    "missed": 7,
-    "precision": 0.625,
-    "recall": 0.8871
+    "note": "Precision and recall are withheld: the labels do not describe this run. 0 detected hits have no label, 101 are present but not yet judged, and 0 labelled hits are no longer produced. That happens when a threshold or filter changed after labelling. Run 'badminton-poc refresh-labels' to carry the existing judgements onto the current run, then judge the rows marked NEW."
   },
   "hitter_assignment": {
     "scored_hits": 54,
-    "correct": 54,
-    "accuracy": 1.0
+    "correct": 53,
+    "accuracy": 0.9815
   },
   "rally_boundaries": {
     "real_rallies": 6,
-    "detected_rallies": 8,
-    "approximately_correct": 4,
-    "accuracy": 0.6666666666666666,
-    "split": 1,
+    "detected_rallies": 6,
+    "approximately_correct": 1,
+    "accuracy": 0.16666666666666666,
+    "split": 0,
     "missed": 0,
-    "spurious": 1,
-    "spurious_rallies": [
-      6
-    ],
+    "spurious": 0,
+    "spurious_rallies": [],
     "tolerance_seconds": 1.0,
     "detail": [
       {
@@ -48,7 +43,7 @@
         "detected_rallies": [
           1
         ],
-        "start_error_s": 0.0,
+        "start_error_s": -1.334,
         "end_error_s": 4.284,
         "verdict": "edges outside tolerance"
       },
@@ -66,47 +61,48 @@
         "true_start_frame": 1502,
         "true_end_frame": 2767,
         "detected_rallies": [
-          3,
-          4
+          3
         ],
-        "verdict": "split across several detected rallies"
+        "start_error_s": 0.0,
+        "end_error_s": 7.718,
+        "verdict": "edges outside tolerance"
       },
       {
         "true_start_frame": 3821,
         "true_end_frame": 5217,
         "detected_rallies": [
-          5
+          4
         ],
         "start_error_s": -0.183,
-        "end_error_s": -0.1,
-        "verdict": "ok"
+        "end_error_s": 9.569,
+        "verdict": "edges outside tolerance"
       },
       {
         "true_start_frame": 6185,
         "true_end_frame": 6439,
         "detected_rallies": [
-          7
+          5
         ],
         "start_error_s": -0.233,
-        "end_error_s": 0.517,
-        "verdict": "ok"
+        "end_error_s": 3.101,
+        "verdict": "edges outside tolerance"
       },
       {
         "true_start_frame": 7024,
         "true_end_frame": 7355,
         "detected_rallies": [
-          8
+          6
         ],
-        "start_error_s": -0.183,
-        "end_error_s": -0.683,
-        "verdict": "ok"
+        "start_error_s": -1.734,
+        "end_error_s": 0.133,
+        "verdict": "edges outside tolerance"
       }
     ],
     "ranges_look_unedited": false,
     "note": "Scored against active_play_ranges. A real rally is correct when exactly one detected rally overlaps it and both edges land within the tolerance.",
     "manual_boundary_ok": {
-      "judged": 8,
-      "marked_ok": 1,
+      "judged": 0,
+      "marked_ok": 0,
       "note": "The labeller's own per-detected-rally flags, kept for cross-checking."
     }
   },

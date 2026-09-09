@@ -387,16 +387,38 @@ labelled rows.
 | | clip 1 | clip 2 |
 |---|---|---|
 | source | screen recording of YouTube, VFR 60→28 fps | download, genuine 60 fps |
-| labelled | no | **yes** |
 | two players, active play | — | **95.5%** PASS |
 | hitter assignment | — | **100%** PASS |
-| rally boundaries | — | 66.7% FAIL |
-| hit precision / recall | — | 62.5% / 88.7% |
+| rally boundaries | — | FAIL |
 | shuttle visible and on our court | 65.3% | 97.3% |
 
 Two of the three POC criteria pass on a real, labelled clip. The third fails, the cause is
-understood, and the remaining lever is a hit-quality signal that does not come from the
+understood — rally ends run long because false-positive hits during dead time are pulled into
+the rally — and the remaining lever is a hit-quality signal that does not come from the
 upstream event detector.
+
+**Clip 2 is mid-relabelling and deliberately unscorable.** `min_hit_confidence` was set back to
+0, which restores the 7 real hits the threshold was discarding and the rally it was splitting,
+and brings 101 previously hidden candidates into view. The 88 existing judgements were carried
+across by frame -- every one matched exactly -- and the new rows are marked `NEW` with
+`is_real_hit: null`. `evaluate` withholds precision and recall until they are judged rather
+than scoring a run half its labels never saw.
+
+```bash
+badminton-poc refresh-labels --video data/input/<clip>.mp4
+```
+
+re-seeds `ground_truth.json` against the current run, keeping judgements already made,
+preserving `active_play_ranges` and `missed_hits`, and backing the old file up alongside.
+
+Judging those 101 rows answers two questions at once: whether the confidence threshold should
+exist at all, and whether the swing signal holds on the `acceleration_peak` population it was
+never measured against. Both are currently open.
+
+**Every conclusion here rests on one clip.** Clip 1 is a poor recording — occlusion alone costs
+it ten points of far-player coverage, so it cannot pass the tracking criterion however good the
+code is — and it is kept as a regression clip rather than an acceptance one. Nothing has yet
+been cross-validated on a second usable recording.
 
 `badminton-poc report --video <clip>` renders any clip's `analysis.json` as a page, with every
 figure carrying the caveat it rests on.

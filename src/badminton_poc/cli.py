@@ -80,6 +80,12 @@ def build_parser() -> argparse.ArgumentParser:
     p_eval.add_argument("--video", required=True, help="source video, used to locate outputs/<stem>/")
     common(p_eval)
 
+    p_refresh = sub.add_parser(
+        "refresh-labels",
+        help="re-seed ground_truth.json against the current run, keeping judgements already made")
+    p_refresh.add_argument("--video", required=True, help="source video, used to locate outputs/<stem>/")
+    common(p_refresh)
+
     p_report = sub.add_parser(
         "report", help="render analysis.json as a readable summary page")
     p_report.add_argument("--video", required=True, help="source video, used to locate outputs/<stem>/")
@@ -171,6 +177,24 @@ def main(argv: list[str] | None = None) -> int:
         out = paths.root / "evaluation.json"
         out.write_text(json.dumps(result, indent=2), encoding="utf-8")
         print(json.dumps(result, indent=2))
+        return 0
+
+    if args.command == "refresh-labels":
+        from .evaluation import refresh_template
+
+        paths = Paths(Path(args.output_root), Path(args.video).stem)
+        analysis = json.loads(paths.analysis.read_text(encoding="utf-8"))
+        existing = json.loads(paths.ground_truth.read_text(encoding="utf-8"))
+        fps = float(analysis.get("config", {}).get("fps") or existing.get("fps") or 0.0)
+        merged = refresh_template(existing, analysis, fps)
+        backup = paths.ground_truth.with_suffix(".json.bak")
+        backup.write_text(json.dumps(existing, indent=2), encoding="utf-8")
+        paths.ground_truth.write_text(json.dumps(merged, indent=2), encoding="utf-8")
+        info = merged["refresh"]
+        print(f"{paths.ground_truth}  (previous copy at {backup})")
+        print(f"  carried over {info['carried_over']} judgements, "
+              f"{info['new_to_judge']} new hits to judge, "
+              f"{info['dropped_no_longer_detected']} dropped")
         return 0
 
     if args.command == "report":

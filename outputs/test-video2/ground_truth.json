@@ -90,6 +90,30 @@
   "_missed_hits_help": "Frames of real hits the pipeline did not detect at all: [{\"frame\": 123}]",
   "hits": [
     {
+      "frame": 3,
+      "time_s": 0.05,
+      "detected_hitter": null,
+      "true_hitter": null,
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 26,
+      "time_s": 0.433,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 45,
+      "time_s": 0.75,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 83,
       "time_s": 1.384,
       "detected_hitter": "near",
@@ -98,12 +122,44 @@
       "notes": ""
     },
     {
+      "frame": 102,
+      "time_s": 1.7,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 139,
       "time_s": 2.317,
       "detected_hitter": "far",
       "true_hitter": "far",
       "is_real_hit": true,
       "notes": ""
+    },
+    {
+      "frame": 165,
+      "time_s": 2.751,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 186,
+      "time_s": 3.101,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 207,
+      "time_s": 3.451,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
     },
     {
       "frame": 232,
@@ -138,6 +194,30 @@
       "notes": ""
     },
     {
+      "frame": 415,
+      "time_s": 6.918,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 435,
+      "time_s": 7.252,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 459,
+      "time_s": 7.652,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 482,
       "time_s": 8.035,
       "detected_hitter": "far",
@@ -154,12 +234,28 @@
       "notes": ""
     },
     {
+      "frame": 795,
+      "time_s": 13.253,
+      "detected_hitter": null,
+      "true_hitter": null,
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 822,
       "time_s": 13.703,
       "detected_hitter": "near",
       "true_hitter": "near",
       "is_real_hit": true,
       "notes": ""
+    },
+    {
+      "frame": 844,
+      "time_s": 14.07,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
     },
     {
       "frame": 870,
@@ -170,12 +266,36 @@
       "notes": ""
     },
     {
+      "frame": 890,
+      "time_s": 14.837,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 916,
       "time_s": 15.27,
       "detected_hitter": "near",
       "true_hitter": "near",
       "is_real_hit": true,
       "notes": ""
+    },
+    {
+      "frame": 938,
+      "time_s": 15.637,
+      "detected_hitter": null,
+      "true_hitter": null,
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 962,
+      "time_s": 16.037,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
     },
     {
       "frame": 994,
@@ -218,12 +338,36 @@
       "notes": ""
     },
     {
+      "frame": 1521,
+      "time_s": 25.356,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 1549,
       "time_s": 25.823,
       "detected_hitter": "near",
       "true_hitter": "near",
       "is_real_hit": true,
       "notes": ""
+    },
+    {
+      "frame": 1571,
+      "time_s": 26.189,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 1594,
+      "time_s": 26.573,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
     },
     {
       "frame": 1622,
@@ -242,6 +386,14 @@
       "notes": ""
     },
     {
+      "frame": 1690,
+      "time_s": 28.173,
+      "detected_hitter": null,
+      "true_hitter": null,
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 1717,
       "time_s": 28.623,
       "detected_hitter": "far",
@@ -258,12 +410,52 @@
       "notes": ""
     },
     {
+      "frame": 1801,
+      "time_s": 30.024,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 1877,
+      "time_s": 31.291,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 1901,
+      "time_s": 31.691,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 1931,
       "time_s": 32.191,
       "detected_hitter": "near",
       "true_hitter": "near",
       "is_real_hit": true,
       "notes": ""
+    },
+    {
+      "frame": 1952,
+      "time_s": 32.541,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 1973,
+      "time_s": 32.891,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
     },
     {
       "frame": 2006,
@@ -274,12 +466,68 @@
       "notes": ""
     },
     {
+      "frame": 2029,
+      "time_s": 33.824,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 2053,
+      "time_s": 34.225,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 2077,
+      "time_s": 34.625,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 2097,
+      "time_s": 34.958,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 2120,
       "time_s": 35.341,
       "detected_hitter": "far",
       "true_hitter": "far",
       "is_real_hit": true,
       "notes": ""
+    },
+    {
+      "frame": 2146,
+      "time_s": 35.775,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 2165,
+      "time_s": 36.092,
+      "detected_hitter": null,
+      "true_hitter": null,
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 2194,
+      "time_s": 36.575,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
     },
     {
       "frame": 2217,
@@ -290,12 +538,52 @@
       "notes": ""
     },
     {
+      "frame": 2240,
+      "time_s": 37.342,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 2263,
+      "time_s": 37.725,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 2292,
       "time_s": 38.209,
       "detected_hitter": "near",
       "true_hitter": "near",
       "is_real_hit": true,
       "notes": ""
+    },
+    {
+      "frame": 2319,
+      "time_s": 38.659,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 2340,
+      "time_s": 39.009,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 2361,
+      "time_s": 39.359,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
     },
     {
       "frame": 2388,
@@ -306,12 +594,44 @@
       "notes": ""
     },
     {
+      "frame": 2408,
+      "time_s": 40.143,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 2427,
+      "time_s": 40.459,
+      "detected_hitter": null,
+      "true_hitter": null,
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 2452,
       "time_s": 40.876,
       "detected_hitter": "near",
       "true_hitter": "near",
       "is_real_hit": true,
       "notes": ""
+    },
+    {
+      "frame": 2472,
+      "time_s": 41.209,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 2494,
+      "time_s": 41.576,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
     },
     {
       "frame": 2518,
@@ -330,6 +650,14 @@
       "notes": ""
     },
     {
+      "frame": 2560,
+      "time_s": 42.677,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 2597,
       "time_s": 43.293,
       "detected_hitter": "near",
@@ -338,9 +666,17 @@
       "notes": ""
     },
     {
+      "frame": 2617,
+      "time_s": 43.627,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 2643,
       "time_s": 44.06,
-      "detected_hitter": "far",
+      "detected_hitter": "near",
       "true_hitter": "far",
       "is_real_hit": false,
       "notes": "shuttle tracking somehow tracks to the shoe of the far player and detects a false hit"
@@ -352,6 +688,14 @@
       "true_hitter": "near",
       "is_real_hit": true,
       "notes": ""
+    },
+    {
+      "frame": 2713,
+      "time_s": 45.227,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
     },
     {
       "frame": 2744,
@@ -386,6 +730,14 @@
       "notes": "shuttle gets tossed"
     },
     {
+      "frame": 3027,
+      "time_s": 50.462,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 3058,
       "time_s": 50.978,
       "detected_hitter": "near",
@@ -394,12 +746,28 @@
       "notes": "no shot was hit?"
     },
     {
+      "frame": 3081,
+      "time_s": 51.362,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 3172,
       "time_s": 52.879,
       "detected_hitter": "near",
       "true_hitter": "near",
       "is_real_hit": false,
       "notes": "umpire passes a shuttle to near player"
+    },
+    {
+      "frame": 3191,
+      "time_s": 53.196,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
     },
     {
       "frame": 3220,
@@ -418,12 +786,44 @@
       "notes": ""
     },
     {
+      "frame": 3830,
+      "time_s": 63.848,
+      "detected_hitter": null,
+      "true_hitter": null,
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 3849,
+      "time_s": 64.165,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 3868,
       "time_s": 64.482,
       "detected_hitter": "far",
       "true_hitter": "far",
       "is_real_hit": true,
       "notes": ""
+    },
+    {
+      "frame": 3887,
+      "time_s": 64.798,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 3908,
+      "time_s": 65.148,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
     },
     {
       "frame": 3935,
@@ -434,12 +834,52 @@
       "notes": ""
     },
     {
+      "frame": 3959,
+      "time_s": 65.999,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 3980,
+      "time_s": 66.349,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 4016,
       "time_s": 66.949,
       "detected_hitter": "near",
       "true_hitter": "near",
       "is_real_hit": false,
       "notes": "no hit?"
+    },
+    {
+      "frame": 4037,
+      "time_s": 67.299,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 4056,
+      "time_s": 67.616,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 4075,
+      "time_s": 67.932,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
     },
     {
       "frame": 4095,
@@ -450,12 +890,36 @@
       "notes": ""
     },
     {
+      "frame": 4114,
+      "time_s": 68.582,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 4151,
       "time_s": 69.199,
       "detected_hitter": "near",
       "true_hitter": "near",
       "is_real_hit": true,
       "notes": ""
+    },
+    {
+      "frame": 4175,
+      "time_s": 69.599,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 4196,
+      "time_s": 69.949,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
     },
     {
       "frame": 4238,
@@ -466,12 +930,28 @@
       "notes": ""
     },
     {
+      "frame": 4316,
+      "time_s": 71.95,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 4348,
       "time_s": 72.483,
       "detected_hitter": "far",
       "true_hitter": "far",
       "is_real_hit": true,
       "notes": ""
+    },
+    {
+      "frame": 4369,
+      "time_s": 72.833,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
     },
     {
       "frame": 4407,
@@ -482,12 +962,52 @@
       "notes": ""
     },
     {
+      "frame": 4427,
+      "time_s": 73.8,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 4446,
+      "time_s": 74.117,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 4466,
+      "time_s": 74.45,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 4491,
+      "time_s": 74.867,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 4510,
       "time_s": 75.184,
       "detected_hitter": "near",
       "true_hitter": "near",
       "is_real_hit": true,
       "notes": ""
+    },
+    {
+      "frame": 4535,
+      "time_s": 75.601,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
     },
     {
       "frame": 4556,
@@ -498,12 +1018,28 @@
       "notes": ""
     },
     {
+      "frame": 4582,
+      "time_s": 76.384,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 4614,
       "time_s": 76.918,
       "detected_hitter": "far",
       "true_hitter": "far",
       "is_real_hit": true,
       "notes": ""
+    },
+    {
+      "frame": 4633,
+      "time_s": 77.234,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
     },
     {
       "frame": 4704,
@@ -514,12 +1050,36 @@
       "notes": ""
     },
     {
+      "frame": 4727,
+      "time_s": 78.801,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 4750,
       "time_s": 79.185,
       "detected_hitter": "far",
       "true_hitter": "far",
       "is_real_hit": true,
       "notes": ""
+    },
+    {
+      "frame": 4773,
+      "time_s": 79.568,
+      "detected_hitter": null,
+      "true_hitter": null,
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 4792,
+      "time_s": 79.885,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
     },
     {
       "frame": 4814,
@@ -530,12 +1090,36 @@
       "notes": ""
     },
     {
+      "frame": 4833,
+      "time_s": 80.569,
+      "detected_hitter": null,
+      "true_hitter": null,
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 4853,
+      "time_s": 80.902,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 4888,
       "time_s": 81.485,
       "detected_hitter": "far",
       "true_hitter": "far",
       "is_real_hit": true,
       "notes": ""
+    },
+    {
+      "frame": 4910,
+      "time_s": 81.852,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
     },
     {
       "frame": 4936,
@@ -554,12 +1138,28 @@
       "notes": "shoe gets detected as shuttle and a hit"
     },
     {
+      "frame": 4976,
+      "time_s": 82.952,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 5007,
       "time_s": 83.469,
       "detected_hitter": "far",
       "true_hitter": "far",
       "is_real_hit": true,
       "notes": ""
+    },
+    {
+      "frame": 5030,
+      "time_s": 83.853,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
     },
     {
       "frame": 5060,
@@ -570,6 +1170,22 @@
       "notes": ""
     },
     {
+      "frame": 5080,
+      "time_s": 84.686,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 5102,
+      "time_s": 85.053,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 5123,
       "time_s": 85.403,
       "detected_hitter": "far",
@@ -578,12 +1194,44 @@
       "notes": ""
     },
     {
+      "frame": 5142,
+      "time_s": 85.72,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 5173,
       "time_s": 86.237,
       "detected_hitter": null,
       "true_hitter": null,
       "is_real_hit": false,
       "notes": "shuttle hit the ground"
+    },
+    {
+      "frame": 5193,
+      "time_s": 86.57,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 5219,
+      "time_s": 87.003,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 5249,
+      "time_s": 87.503,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
     },
     {
       "frame": 5352,
@@ -626,6 +1274,22 @@
       "notes": "not a proper hit"
     },
     {
+      "frame": 5496,
+      "time_s": 91.621,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 5520,
+      "time_s": 92.021,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 5545,
       "time_s": 92.438,
       "detected_hitter": "far",
@@ -658,12 +1322,28 @@
       "notes": "shuttle tracking spikes up and down when the shuttle isnt even moving its just on the ground and somehow detects a hit"
     },
     {
+      "frame": 5703,
+      "time_s": 95.072,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 5725,
       "time_s": 95.439,
       "detected_hitter": "near",
       "true_hitter": "near",
       "is_real_hit": false,
       "notes": "no hit?"
+    },
+    {
+      "frame": 5745,
+      "time_s": 95.772,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
     },
     {
       "frame": 5779,
@@ -682,6 +1362,14 @@
       "notes": ""
     },
     {
+      "frame": 6191,
+      "time_s": 103.207,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 6223,
       "time_s": 103.741,
       "detected_hitter": "far",
@@ -692,10 +1380,18 @@
     {
       "frame": 6260,
       "time_s": 104.357,
-      "detected_hitter": "near",
+      "detected_hitter": null,
       "true_hitter": "near",
       "is_real_hit": false,
       "notes": "shuttle tracking mixes the shuttle with the light that probably looks like it"
+    },
+    {
+      "frame": 6285,
+      "time_s": 104.774,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
     },
     {
       "frame": 6326,
@@ -714,6 +1410,30 @@
       "notes": ""
     },
     {
+      "frame": 6377,
+      "time_s": 106.308,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 6396,
+      "time_s": 106.625,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 6416,
+      "time_s": 106.958,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 6435,
       "time_s": 107.275,
       "detected_hitter": "near",
@@ -730,12 +1450,60 @@
       "notes": "shuttle lands out"
     },
     {
+      "frame": 6488,
+      "time_s": 108.158,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 6591,
+      "time_s": 109.875,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 6611,
+      "time_s": 110.209,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 6920,
+      "time_s": 115.36,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 6939,
+      "time_s": 115.677,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 7013,
       "time_s": 116.91,
       "detected_hitter": "far",
       "true_hitter": "far",
       "is_real_hit": true,
       "notes": ""
+    },
+    {
+      "frame": 7032,
+      "time_s": 117.227,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
     },
     {
       "frame": 7057,
@@ -746,12 +1514,36 @@
       "notes": ""
     },
     {
+      "frame": 7082,
+      "time_s": 118.061,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
       "frame": 7114,
       "time_s": 118.594,
-      "detected_hitter": "far",
+      "detected_hitter": null,
       "true_hitter": "far",
       "is_real_hit": true,
       "notes": ""
+    },
+    {
+      "frame": 7135,
+      "time_s": 118.944,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 7155,
+      "time_s": 119.277,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
     },
     {
       "frame": 7196,
@@ -792,17 +1584,33 @@
       "true_hitter": "near",
       "is_real_hit": true,
       "notes": ""
+    },
+    {
+      "frame": 7335,
+      "time_s": 122.278,
+      "detected_hitter": "far",
+      "true_hitter": "far",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
+    },
+    {
+      "frame": 7363,
+      "time_s": 122.745,
+      "detected_hitter": "near",
+      "true_hitter": "near",
+      "is_real_hit": null,
+      "notes": "NEW - not yet judged"
     }
   ],
   "_hits_help": "One row per detected hit. Set is_real_hit=false for a false positive. Correct true_hitter to 'near' or 'far' where the assignment is wrong.",
   "rallies": [
     {
       "rally": 1,
-      "detected_start_frame": 83,
-      "detected_end_frame": 236,
-      "true_start_frame": 83,
-      "true_end_frame": 236,
-      "boundary_ok": true,
+      "detected_start_frame": 3,
+      "detected_end_frame": 493,
+      "true_start_frame": 3,
+      "true_end_frame": 493,
+      "boundary_ok": null,
       "notes": ""
     },
     {
@@ -810,64 +1618,52 @@
       "detected_start_frame": 773,
       "detected_end_frame": 1154,
       "true_start_frame": 773,
-      "true_end_frame": 1098,
-      "boundary_ok": false,
+      "true_end_frame": 1154,
+      "boundary_ok": null,
       "notes": ""
     },
     {
       "rally": 3,
       "detected_start_frame": 1502,
-      "detected_end_frame": 1743,
+      "detected_end_frame": 3230,
       "true_start_frame": 1502,
-      "true_end_frame": 2767,
-      "boundary_ok": false,
+      "true_end_frame": 3230,
+      "boundary_ok": null,
       "notes": ""
     },
     {
       "rally": 4,
-      "detected_start_frame": 1931,
-      "detected_end_frame": 3230,
-      "true_start_frame": 3821,
-      "true_end_frame": 5217,
-      "boundary_ok": false,
+      "detected_start_frame": 3810,
+      "detected_end_frame": 5791,
+      "true_start_frame": 3810,
+      "true_end_frame": 5791,
+      "boundary_ok": null,
       "notes": ""
     },
     {
       "rally": 5,
-      "detected_start_frame": 3810,
-      "detected_end_frame": 5211,
-      "true_start_frame": 6185,
-      "true_end_frame": 6439,
-      "boundary_ok": false,
+      "detected_start_frame": 6171,
+      "detected_end_frame": 6625,
+      "true_start_frame": 6171,
+      "true_end_frame": 6625,
+      "boundary_ok": null,
       "notes": ""
     },
     {
       "rally": 6,
-      "detected_start_frame": 5352,
-      "detected_end_frame": 5791,
-      "true_start_frame": 7024,
-      "true_end_frame": 5791,
-      "boundary_ok": false,
-      "notes": ""
-    },
-    {
-      "rally": 7,
-      "detected_start_frame": 6171,
-      "detected_end_frame": 6470,
-      "true_start_frame": 6171,
-      "true_end_frame": 6470,
-      "boundary_ok": false,
-      "notes": ""
-    },
-    {
-      "rally": 8,
-      "detected_start_frame": 7013,
-      "detected_end_frame": 7314,
-      "true_start_frame": 7013,
-      "true_end_frame": 7314,
-      "boundary_ok": false,
+      "detected_start_frame": 6920,
+      "detected_end_frame": 7363,
+      "true_start_frame": 6920,
+      "true_end_frame": 7363,
+      "boundary_ok": null,
       "notes": ""
     }
   ],
-  "_rallies_help": "Set boundary_ok=true/false for each detected rally."
+  "_rallies_help": "Set boundary_ok=true/false for each detected rally.",
+  "refresh": {
+    "carried_over": 88,
+    "new_to_judge": 101,
+    "dropped_no_longer_detected": 0,
+    "note": "Rows marked NEW have not been judged. active_play_ranges and missed_hits were preserved; rally rows were re-seeded, so boundary_ok needs setting again."
+  }
 }

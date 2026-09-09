@@ -72,6 +72,52 @@ def build_template(analysis: dict[str, Any], fps: float, active_play_hint: list[
     }
 
 
+def refresh_template(
+    existing: dict[str, Any], analysis: dict[str, Any], fps: float
+) -> dict[str, Any]:
+    """Re-seed a ground-truth file against a new run, keeping judgements already made.
+
+    Changing a threshold changes which hits the pipeline emits. Re-seeding from scratch throws
+    away the labelling; refusing to re-seed leaves the labels describing a run that no longer
+    exists, which is what made ``evaluate`` report a precision figure for a configuration
+    nobody had judged. Judgements are carried across by frame, hits that are no longer detected
+    are dropped, and genuinely new hits come back with ``is_real_hit: null`` so they are
+    visibly unjudged rather than silently counted as real.
+
+    Hand-corrected work that does not depend on which hits were detected -- active_play_ranges
+    and missed_hits -- is preserved untouched.
+    """
+    fresh = build_template(analysis, fps, existing.get("active_play_ranges") or [])
+    previous = {h["frame"]: h for h in existing.get("hits", []) if h.get("frame") is not None}
+
+    carried = 0
+    rows: list[dict[str, Any]] = []
+    for row in fresh["hits"]:
+        prior = previous.get(row["frame"])
+        if prior is None:
+            row = {**row, "is_real_hit": None, "notes": "NEW - not yet judged"}
+        else:
+            carried += 1
+            row = {**row, **{k: prior[k] for k in ("is_real_hit", "true_hitter", "notes")
+                             if k in prior}}
+        rows.append(row)
+
+    detected = {r["frame"] for r in fresh["hits"]}
+    fresh["hits"] = rows
+    fresh["labelled"] = existing.get("labelled", False)
+    fresh["missed_hits"] = existing.get("missed_hits", [])
+    fresh["refresh"] = {
+        "carried_over": carried,
+        "new_to_judge": len(rows) - carried,
+        "dropped_no_longer_detected": len(set(previous) - detected),
+        "note": (
+            "Rows marked NEW have not been judged. active_play_ranges and missed_hits were "
+            "preserved; rally rows were re-seeded, so boundary_ok needs setting again."
+        ),
+    }
+    return fresh
+
+
 def write_template(path: str | Path, analysis: dict[str, Any], fps: float) -> Path:
     out = Path(path)
     if out.exists():
@@ -203,8 +249,10 @@ def evaluate(analysis: dict[str, Any], ground_truth: dict[str, Any], players: li
     if not hits:
         raise NotLabelledError("ground_truth.json has labelled=true but no hit rows to score.")
 
-    true_positives = [h for h in hits if h.get("is_real_hit")]
-    false_positives = [h for h in hits if not h.get("is_real_hit")]
+    unjudged = [h for h in hits if h.get("is_real_hit") is None]
+    judged = [h for h in hits if h.get("is_real_hit") is not None]
+    true_positives = [h for h in judged if h.get("is_real_hit")]
+    false_positives = [h for h in judged if not h.get("is_real_hit")]
     missed = ground_truth.get("missed_hits", [])
 
     # Labels describe the run that produced them. Change a threshold and the pipeline emits a
@@ -216,7 +264,7 @@ def evaluate(analysis: dict[str, Any], ground_truth: dict[str, Any], players: li
     labelled_frames = {h["frame"] for h in hits if h.get("frame") is not None}
     unlabelled = detected_frames - labelled_frames
     stale = labelled_frames - detected_frames
-    labels_match_run = not unlabelled and not stale
+    labels_match_run = not unlabelled and not stale and not unjudged
 
     precision = _ratio(len(true_positives), len(true_positives) + len(false_positives))
     recall = _ratio(len(true_positives), len(true_positives) + len(missed))
@@ -250,7 +298,7 @@ def evaluate(analysis: dict[str, Any], ground_truth: dict[str, Any], players: li
         },
         "hit_detection": _hit_detection(
             true_positives, false_positives, missed, precision, recall,
-            labels_match_run, unlabelled, stale, len(detected_frames),
+            labels_match_run, unlabelled, stale, len(detected_frames), len(unjudged),
         ),
         "hitter_assignment": {
             "scored_hits": len(scorable),
@@ -285,21 +333,24 @@ def _hit_detection(
     unlabelled: set[int],
     stale: set[int],
     detected: int,
+    unjudged_count: int = 0,
 ) -> dict[str, Any]:
     out: dict[str, Any] = {
         "scorable": labels_match_run,
         "detected_hits": detected,
         "labelled_hits": len(true_positives) + len(false_positives),
         "unlabelled_hits": len(unlabelled),
+        "unjudged_hits": unjudged_count,
         "labelled_but_not_detected": len(stale),
     }
     if not labels_match_run:
         out["note"] = (
             "Precision and recall are withheld: the labels do not describe this run. "
-            f"{len(unlabelled)} detected hits have no label and {len(stale)} labelled hits are "
-            "no longer produced, which happens when a threshold or filter changed after "
-            "labelling. Re-label against the current output, or restore the configuration the "
-            "labels were made against."
+            f"{len(unlabelled)} detected hits have no label, {unjudged_count} are present but "
+            f"not yet judged, and {len(stale)} labelled hits are no longer produced. That "
+            "happens when a threshold or filter changed after labelling. Run "
+            "'badminton-poc refresh-labels' to carry the existing judgements onto the current "
+            "run, then judge the rows marked NEW."
         )
         return out
     out.update({
