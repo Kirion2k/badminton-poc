@@ -308,75 +308,89 @@ kept, so no two survivors can be closer than the interval and no chain can form.
 properties now hold on real data — the closest pair of hits on either clip is 0.32s, and the
 widest hit merge is 0.583s against a healthy limit of 0.6s.
 
-### The confidence threshold is a rule filter, not a certainty filter
+### Measured accuracy on a labelled clip
 
-Clip 2 still reported 1.5 hits a second after consolidation was fixed. The cause was upstream
-candidate quality: **613 of its 777 hit candidates came from one rule, `acceleration_peak`, at a
-flat confidence of 0.75.**
+Clip 2 is hand-labelled: 88 detected hits judged real or false, 7 missed hits added, and the
+six true rally spans marked. `badminton-poc evaluate` scores it.
 
-Inspecting the rule-to-confidence mapping shows what upstream's confidence actually is — a fixed
-value per rule, raised when rules agree:
+| Metric | Result | Target | |
+|---|---|---|---|
+| Two-player tracking, active play | 95.5% | ≥ 90% | **PASS** |
+| Hitter assignment | 100% (54/54) | ≥ 90% | **PASS** |
+| Rally boundaries | 66.7% (4/6) | ≥ 85% | **FAIL** |
+| Hit precision | 62.5% | — | |
+| Hit recall | 88.7% | — | |
 
-| | |
-|---|---|
-| `speed_local_max` alone | 0.50 |
-| `acceleration_peak` alone | 0.75 |
-| `vx_reversal` alone | 0.80 |
-| `vy_reversal` alone | 0.85 |
-| two rules agreeing | 0.90 |
-| three rules | 0.95 |
+Hitter assignment is exact on every real, detected hit. Tracking clears its bar. Everything
+that fails traces back to one thing: **hit precision.**
 
-So a threshold selects **which rules to trust**, not how certain a detection is. `>= 0.85`
-means "vy_reversal fired, or at least two rules agreed". Sweeping it:
+### Rally boundaries are downstream of hit precision
 
-| threshold | clip 2 hits | /s | rallies | longest | clip 1 hits | /s | rallies |
-|---|---|---|---|---|---|---|---|
-| none | 189 | 1.54 | 6 | 72 | 78 | 0.72 | 9 |
-| 0.80 | 96 | 0.78 | 7 | 29 | 58 | 0.54 | 5 |
-| **0.85** | **88** | **0.72** | **8** | **22** | 55 | 0.51 | 5 |
-| 0.90 | 33 | 0.27 | 6 | 6 | 35 | 0.32 | 5 |
+With no confidence threshold the rally *structure* is exactly right — six detected for six
+real, none split, none invented, none missed — and every single end runs long, by a median
+3.69s and never short. Starts are already good at a median −0.21s. The ends run long because
+false-positive hits during dead time are pulled into the rally before its terminating event is
+looked for. 22 of 33 false positives fall outside real play entirely.
 
-0.85 is applied to clip 2 and **not** to clip 1, because the two clips need different things.
-Clip 1's candidates are spread across rules (`vy_reversal` 144, `acceleration_peak` 111) and
-0.85 keeps 52% of them; clip 2's are 79% `acceleration_peak` and it keeps 16%. Filtering clip 1
-cuts its rallies from 9 to 5 — it removes signal, not noise.
+So rally-boundary accuracy and hit precision are one problem. Five discriminators were measured
+against the labels, and four of them do not work:
 
-The likely reason clip 2 leans so hard on `acceleration_peak` is its frame rate. Acceleration
-from finite differences scales as 1/dt², so at 60 fps its noise is roughly five times that at
-clip 1's 28 fps, and the rule trips constantly. **The better source makes this rule worse.**
+| Signal | Real vs false | Verdict |
+|---|---|---|
+| Upstream confidence | 57% precision at ≥0.85, 75% at ≥0.90 | **No.** It is a rule id, not a score |
+| Shuttle speed (play gate) | ≥4 px/f covers 78% of play frames and 22% of dead ones | **No.** Not a gate |
+| Landing events | 47 of 68 gaps are 47–49 frames | **No.** A metronome, not events |
+| Trajectory smoothness | residual median 12.4 real vs 18.7 false | **No.** Overlapping |
+| **Player wrist speed** | median 0.072 vs 0.033 body-heights/frame | **Best lead.** 85% precision at 61% recall |
 
-**This threshold is not validated.** It was chosen by looking at unlabelled output and judging
-the result plausible, which is not a measurement. It is per-clip config, defaults to off, and
-every discarded candidate is written to `analysis.json` under `low_confidence_hits_dropped`, so
-the choice can be argued with. The report states it as a caveat rather than presenting the
-filtered count as fact.
+The landing result is worth dwelling on. `min_landing_interval_seconds` is 0.75s and the
+suppression floor is 45 frames; 47 of 68 landing gaps are 47–49 frames. The detector fires
+continuously through dead time and suppression simply samples it at the floor. "A landing sits
+within 0.75s of the true rally end" is therefore true *everywhere* and carries no information —
+a spurious correlation that a rally-trimming fix was nearly built on.
+
+Wrist speed is the first signal that clearly beats the 63% baseline, and the only one
+independent of the shuttle track. It is not applied: it buys precision with recall, and every
+filter tried against these labels has cost more than it gained. The better use is probably as
+evidence attached to each hit rather than as a gate, so a marginal hit is marked rather than
+discarded.
+
+### The confidence threshold, and why it is a rule filter
+
+Upstream's confidence is a fixed value per rule, raised when rules agree: 0.50
+`speed_local_max`, 0.75 `acceleration_peak`, 0.80 `vx_reversal`, 0.85 `vy_reversal`, 0.90 for
+two rules agreeing, 0.95 for three. A threshold selects which rules to trust, not how certain a
+detection is.
+
+Labelling settled its value. `min_hit_confidence = 0.85` on clip 2:
+
+- caused **all 7 missed hits** — every recall failure is self-inflicted;
+- caused the one **split rally**: the real hits at 1803 and 1886 were discarded, turning a
+  0.97s gap into 3.13s, past the 2.5s rally break;
+- removed **none** of the false positives that matter — all 33 are at 0.85 or 0.90, and 32 come
+  from `vy_reversal`, the same rule producing 55 of the true positives.
+
+Raising it to 0.88 is meaningless: confidence is discrete, so 0.88 behaves as 0.90 and costs 31
+real shots to remove 24 false ones. It is left at 0.85 only because that is the configuration
+the labels describe; `evaluate` now withholds precision and recall when the labels do not match
+the run, which is what caught a 62.5% figure being reported for a 189-hit run scored against 88
+labelled rows.
 
 ### Where it stands
 
 | | clip 1 | clip 2 |
 |---|---|---|
 | source | screen recording of YouTube, VFR 60→28 fps | download, genuine 60 fps |
-| two players, during rallies | 85.4% | **96.8%** |
-| — near | 95.0% | **100.0%** |
-| — far | 89.8% | **96.8%** |
-| shuttle visible and on our court | 65.3% | **97.3%** |
-| shuttle rejected as another court's | 30.3% | **0.3%** |
-| confidence threshold | none | 0.85 |
-| hits | 78, 0.72/s | 88, 0.72/s |
-| — near / far / unassigned | 42 / 23 / 13 | 46 / 40 / **2** |
-| rallies | 9, longest 28 | 8, longest 22 |
-| seconds per shot | — | 0.98 |
-| widest hit merge (limit 0.6s) | 0.500s | 0.433s |
+| labelled | no | **yes** |
+| two players, active play | — | **95.5%** PASS |
+| hitter assignment | — | **100%** PASS |
+| rally boundaries | — | 66.7% FAIL |
+| hit precision / recall | — | 62.5% / 88.7% |
+| shuttle visible and on our court | 65.3% | 97.3% |
 
-Clip 2's output is now internally plausible: eight rallies of 7, 8, 6, 19, 22, 11, 7 and 8
-shots, a shot a second, near and far hits nearly balanced, and two unassigned hits out of 88.
-None of that is evidence it is *correct* — a plausible wrong answer is exactly what a
-hand-tuned threshold produces. It means the clip is finally worth labelling.
-
-**Nothing above is accuracy.** Precision, recall, hitter accuracy and rally-boundary accuracy
-require `ground_truth.json`. Clip 2 is the one to label: it clears the tracking criterion at
-96.8%, its shuttle track is 97% usable, and 88 hits is a manageable labelling load. Labelling it
-would also settle whether 0.85 is right or whether it is discarding real shots.
+Two of the three POC criteria pass on a real, labelled clip. The third fails, the cause is
+understood, and the remaining lever is a hit-quality signal that does not come from the
+upstream event detector.
 
 `badminton-poc report --video <clip>` renders any clip's `analysis.json` as a page, with every
 figure carrying the caveat it rests on.
