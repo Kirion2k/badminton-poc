@@ -469,3 +469,42 @@ def test_no_play_spans_means_no_gate():
     events = [ShuttleEvent(50, "hit", 1.0, 2.0, 0.9, "r", ("r",))]
     kept, dropped = reject_hits_outside_play(events, [], fps=60.0)
     assert len(kept) == 1 and dropped == []
+
+
+def test_hits_without_a_swing_behind_them_can_be_dropped():
+    """The last lever on rally boundaries. Ends run long because false hits during dead time
+    keep a rally alive, so the question is whether removing weakly-evidenced hits pulls the
+    ends back without breaking the rallies apart."""
+    from badminton_poc.rallies import drop_weak_swings
+
+    events = [
+        ShuttleEvent(10, "hit", 1.0, 2.0, 0.9, "r", ("r",)),
+        ShuttleEvent(60, "hit", 1.0, 2.0, 0.9, "r", ("r",)),
+        ShuttleEvent(90, "landing", 1.0, 2.0, 0.9, "r", ("r",)),
+    ]
+    swing = {10: {"near": {"peak_wrist_speed": 8.0}}, 60: {"near": {"peak_wrist_speed": 0.4}}}
+    hitters = {10: "near", 60: "near"}
+    kept, dropped = drop_weak_swings(events, swing, hitters, 3.0, fps=60.0)
+    assert [e.frame for e in kept] == [10, 90]        # the landing is never gated
+    assert dropped[0]["frame"] == 60
+    assert dropped[0]["peak_wrist_speed"] == 0.4
+
+
+def test_a_hit_with_no_measurable_swing_is_kept():
+    """No pose, no evidence -- and absence of evidence is not evidence of absence. Dropping
+    these would silently penalise frames where the player was occluded."""
+    from badminton_poc.rallies import drop_weak_swings
+
+    events = [ShuttleEvent(10, "hit", 1.0, 2.0, 0.9, "r", ("r",))]
+    kept, dropped = drop_weak_swings(events, {10: {"near": {"peak_wrist_speed": None}}},
+                                     {10: "near"}, 3.0, fps=60.0)
+    assert len(kept) == 1 and dropped == []
+
+
+def test_a_zero_threshold_gates_nothing():
+    from badminton_poc.rallies import drop_weak_swings
+
+    events = [ShuttleEvent(10, "hit", 1.0, 2.0, 0.9, "r", ("r",))]
+    kept, dropped = drop_weak_swings(events, {10: {"near": {"peak_wrist_speed": 0.1}}},
+                                     {10: "near"}, 0.0, fps=60.0)
+    assert len(kept) == 1 and dropped == []

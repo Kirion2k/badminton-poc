@@ -288,6 +288,12 @@ class AnalysisConfig:
     rally_gap_seconds: float = 2.5
     """Silence between events longer than this starts a new rally."""
     min_hits_per_rally: int = 2
+    min_swing_speed: float = 0.0
+    """Drop hit candidates whose assigned player shows less racket-arm motion than this, in
+    body-heights per second, measured from the pose model.
+
+    Zero disables it. The only measured discriminator that does not come from the event
+    detector itself; whether it should be on is a question for labelled clips."""
     play_gate_min_speed_px: float = 0.0
     """Median shuttle speed, in px/frame over a short window, above which play is in progress.
 

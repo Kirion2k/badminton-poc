@@ -124,6 +124,49 @@ def reject_hits_outside_play(
     return kept, dropped
 
 
+def drop_weak_swings(
+    events: list[ShuttleEvent],
+    swing_by_frame: dict[int, dict[str, Any]],
+    hitters: dict[int, str | None],
+    min_speed: float,
+    *,
+    fps: float,
+) -> tuple[list[ShuttleEvent], list[dict[str, Any]]]:
+    """Drop hit candidates with no racket swing behind them, recording each one.
+
+    The last lever available on rally boundaries. Ends run long because false hits during dead
+    time keep a rally alive past its real end, and the swing signal is the only measured
+    discriminator that does not come from the event detector itself.
+
+    Only hits are gated: a landing is what ends a rally and has no swing associated with it.
+    A candidate whose pose could not be measured is kept -- absence of evidence is not evidence
+    of absence, and dropping those would silently penalise occluded frames.
+    """
+    if min_speed <= 0:
+        return list(events), []
+    kept: list[ShuttleEvent] = []
+    dropped: list[dict[str, Any]] = []
+    for event in events:
+        if event.event_type != "hit":
+            kept.append(event)
+            continue
+        hitter = hitters.get(event.frame)
+        features = (swing_by_frame.get(event.frame) or {}).get(hitter) or {}
+        peak = features.get("peak_wrist_speed")
+        if peak is None or peak >= min_speed:
+            kept.append(event)
+        else:
+            dropped.append({
+                "frame": event.frame,
+                "time_s": round(event.frame / fps, 3),
+                "hitter": hitter,
+                "peak_wrist_speed": peak,
+                "threshold": min_speed,
+                "reason": "no racket swing behind the candidate",
+            })
+    return kept, dropped
+
+
 def drop_low_confidence(
     events: list[ShuttleEvent],
     min_confidence: float,

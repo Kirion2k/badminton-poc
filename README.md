@@ -428,6 +428,39 @@ It is still not applied. Buying 23 points of precision with 36 points of recall 
 obviously right, and that trade should be made against a second clip rather than the one the
 threshold was chosen on.
 
+### Three attempts at rally boundaries, all measured, all failed
+
+Rally-boundary accuracy is the failing criterion: 4 of 6 on the development clip against a
+target of 85%. Ends run long by a median 3.7s and never short. Three routes were tried against
+the labelled clip; none improved it.
+
+**A play gate on shuttle motion.** Shuttle speed of 4 px/frame or more covers 78% of play
+frames but also 22% of dead ones. Retried as an end-trimming rule rather than a per-frame gate
+-- searching forward from a known rally start for the first sustained quiet period -- it
+recovers 4 of 6, exactly what the current pipeline manages, and introduces two new failures: a
+rally whose shuttle track drops out mid-point ends 1.55s early, and the last rally never finds
+a quiet period because the clip ends first.
+
+**Scoreboard OCR.** A score change is an independent signal that a rally ended, immune to the
+hit detector. It is legible on one of the three clips. Clip 2 has no scoreboard in frame at
+all, clip 3's is a 30px LED panel that resolves to coloured blobs, and only clip 5's digits are
+readable. A method that works on a third of recordings is not a solution to this.
+
+**A swing gate on hits.** The only measured discriminator that does not come from the event
+detector. It works on precision, 0.62 to 0.84, and it makes rally boundaries **worse**: 0.67 to
+0.33, with splits rising from one to three. Removing hits opens gaps longer than the rally
+break inside real rallies and cuts them in half.
+
+The reason all three fail is the same, and it is now precise. A rally ends at its *terminating
+event*, and the terminating event is a landing. Landings arrive every 0.8 seconds throughout
+dead time -- 47 of 68 gaps on the development clip sit at exactly the suppression floor, which
+is the signature of a detector firing continuously while suppression samples it. Rally 1's end
+stays at frame 493 under every configuration tried, +4.28s past the truth, because no amount of
+hit filtering moves an end that a metronome sets.
+
+**Rally boundaries cannot be fixed downstream of this event detector.** Fixing them means
+fixing landing detection, which means replacing the detector.
+
 ### Where it stands
 
 Two of three POC criteria pass on a real, fully labelled clip. Rally boundaries fail, and the

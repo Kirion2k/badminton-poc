@@ -14,6 +14,7 @@ from .rallies import (
     build_timeline,
     consolidate_events,
     detect_play_spans,
+    drop_weak_swings,
     drop_low_confidence,
     reject_hits_outside_play,
     segment_rallies,
@@ -79,6 +80,15 @@ def analyze(
     assignments = enforce_alternation(raw_assignments, max_gap)
     by_frame = {a.frame: a for a in assignments}
 
+    # Gated after assignment, because which player's arm to look at is only known once the hit
+    # has been attributed to one.
+    events, weak_swings = drop_weak_swings(
+        events, swing_by_frame, {a.frame: a.hitter for a in assignments},
+        cfg.min_swing_speed, fps=fps)
+    if weak_swings:
+        gated = {d["frame"] for d in weak_swings}
+        by_frame = {f: a for f, a in by_frame.items() if f not in gated}
+
     timeline = build_timeline(events, by_frame, ball, fps, cfg.shuttle_absent_seconds,
                               swing_by_frame=swing_by_frame)
     rallies = segment_rallies(
@@ -114,6 +124,7 @@ def analyze(
             for s, e in play_spans
         ],
         "hits_outside_play_dropped": off_play,
+        "weak_swing_hits_dropped": weak_swings,
         "offcourt_events_dropped": offcourt_events,
     }
     out = Path(output_json)
