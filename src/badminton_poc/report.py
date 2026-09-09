@@ -22,6 +22,10 @@ RALLY_BOUNDARY_TARGET = 0.85
 
 _CONSOLIDATION_RATIO = 1.5
 _OFFCOURT_SHARE = 0.10
+# A badminton exchange runs at roughly one shot a second; the fastest are a few tenths apart.
+# A merged burst is meant to be one physical hit, so anything spanning longer than this is
+# swallowing separate shots rather than de-duplicating a flicker.
+_MAX_MERGE_SPAN_S = 0.4
 
 
 def hit_intervals(hits: list[dict[str, Any]]) -> list[float]:
@@ -50,6 +54,30 @@ def _rally_rows(analysis: dict[str, Any]) -> list[dict[str, Any]]:
             "hitters": [h.get("hitter") for h in rally.get("hits", [])],
         })
     return rows
+
+
+def consolidation_stats(analysis: dict[str, Any]) -> dict[str, Any]:
+    """How wide the merged hit bursts were, in seconds.
+
+    Consolidation chains: candidates each within the merge window of the next collapse
+    transitively, so a dense enough stream merges an entire rally into one hit no matter how
+    long it runs. The span is the number that shows it; the count of merges does not.
+    """
+    fps = float(analysis.get("config", {}).get("fps") or 0.0)
+    merges = analysis.get("hit_consolidation") or []
+    spans = []
+    for merge in merges:
+        frames = merge.get("merged_frames") or []
+        if len(frames) > 1 and fps > 0:
+            spans.append((max(frames) - min(frames)) / fps)
+    spans.sort()
+    return {
+        "merges": len(merges),
+        "candidates_merged": sum(len(m.get("merged_frames") or []) for m in merges),
+        "longest_merge_s": round(spans[-1], 3) if spans else None,
+        "median_merge_s": round(spans[len(spans) // 2], 3) if spans else None,
+        "merges_over_a_shot": sum(1 for s in spans if s > _MAX_MERGE_SPAN_S),
+    }
 
 
 def _caveats(analysis: dict[str, Any], rows: list[dict[str, Any]]) -> list[dict[str, str]]:
@@ -109,6 +137,17 @@ def _caveats(analysis: dict[str, Any], rows: list[dict[str, Any]]) -> list[dict[
             "analysis.json under assignment_reason."
         )})
 
+    merge = consolidation_stats(analysis)
+    longest = merge["longest_merge_s"]
+    if longest is not None and longest > _MAX_MERGE_SPAN_S:
+        out.append({"level": "warn", "text": (
+            f"Hit consolidation merged candidates across {longest:.1f} seconds in its widest "
+            f"case, and {merge['merges_over_a_shot']} of {merge['merges']} merges span longer "
+            f"than {_MAX_MERGE_SPAN_S}s. Merging is transitive, so a dense candidate stream "
+            "chains an entire exchange into a single hit. Rallies are being flattened, not "
+            "cleaned up, and the shot count below is an undercount."
+        )})
+
     if rows and all(r["hit_count"] <= 2 for r in rows):
         out.append({"level": "warn", "text": (
             "Every rally has two hits or fewer, which is not what a real rally looks like. "
@@ -154,6 +193,7 @@ def build_report(analysis: dict[str, Any]) -> dict[str, Any]:
             "events_by_type": summary.get("events_by_type", {}),
         },
         "tempo": tempo,
+        "consolidation": consolidation_stats(analysis),
         "rallies": rows,
         "caveats": _caveats(analysis, rows),
     }

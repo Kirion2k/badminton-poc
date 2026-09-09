@@ -138,3 +138,30 @@ def test_html_defines_every_colour_token_before_any_theme_block():
     dark = html.index("prefers-color-scheme")
     for token in ("--ink", "--paper", "--near", "--far", "--muted"):
         assert token in html[root:dark], f"{token} is not defined in the bare :root block"
+
+
+def test_a_merge_that_spans_longer_than_a_shot_is_flagged():
+    """Consolidation chains: candidates each within the merge window of the next collapse
+    transitively, so on clip 2 one merge swallowed 84 candidates across 8.15 seconds and
+    reported them as a single hit. A rally has a shot about every second, so a merge that
+    spans several is destroying rallies, not cleaning them up."""
+    a = _analysis()
+    a["config"]["fps"] = 60.0
+    a["hit_consolidation"] = [
+        {"kept_frame": 100, "merged_frames": [98, 100, 102]},
+        {"kept_frame": 2006, "merged_frames": list(range(1877, 2367, 6))},
+    ]
+    report = build_report(a)
+    flagged = [c for c in report["caveats"] if "merge" in c["text"].lower()]
+    assert flagged and flagged[0]["level"] == "warn"
+    assert "8.1" in flagged[0]["text"]
+    assert report["consolidation"]["longest_merge_s"] == pytest.approx(8.1, abs=0.02)
+
+
+def test_short_merges_are_not_flagged():
+    """Merging a two-frame flicker into one hit is the feature working."""
+    a = _analysis()
+    a["config"]["fps"] = 60.0
+    a["hit_consolidation"] = [{"kept_frame": 100, "merged_frames": [98, 100, 102]}]
+    report = build_report(a)
+    assert not [c for c in report["caveats"] if "merge" in c["text"].lower()]
