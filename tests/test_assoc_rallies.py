@@ -508,3 +508,32 @@ def test_a_zero_threshold_gates_nothing():
     kept, dropped = drop_weak_swings(events, {10: {"near": {"peak_wrist_speed": 0.1}}},
                                      {10: "near"}, 0.0, fps=60.0)
     assert len(kept) == 1 and dropped == []
+
+
+def test_a_rally_can_end_at_its_last_hit_instead_of_a_landing():
+    """Landings arrive every 0.8s through dead time -- 47 of 68 gaps on the development clip
+    sit exactly at the suppression floor, the signature of a detector free-running while
+    suppression samples it. Ending on one puts the rally end wherever the metronome next ticks,
+    which is why no amount of hit filtering moved rally 1's end off frame 493.
+
+    Ending at the last hit trades an error we cannot reason about for one we can: the rally
+    ends when the last stroke was played, which is at worst one shot early."""
+    from badminton_poc.rallies import segment_rallies
+
+    events = timeline((10, "hit", "near"), (40, "hit", "far"), (300, "landing", None))
+    at_landing = segment_rallies(events, FPS, gap_seconds=2.5, min_hits=2)
+    at_last_hit = segment_rallies(events, FPS, gap_seconds=2.5, min_hits=2, end_at_last_hit=True)
+
+    assert at_landing[0]["end_frame"] == 300
+    assert at_last_hit[0]["end_frame"] == 40
+    assert at_last_hit[0]["termination_reason"] == "last_hit"
+    # the terminal event is still recorded, it just no longer sets the boundary
+    assert at_last_hit[0]["terminating_event"] == "landing"
+
+
+def test_ending_at_the_last_hit_still_reports_a_duration():
+    from badminton_poc.rallies import segment_rallies
+
+    events = timeline((10, "hit", "near"), (40, "hit", "far"), (300, "landing", None))
+    r = segment_rallies(events, FPS, gap_seconds=2.5, min_hits=2, end_at_last_hit=True)[0]
+    assert r["duration_s"] == pytest.approx(30 / FPS, abs=1e-3)

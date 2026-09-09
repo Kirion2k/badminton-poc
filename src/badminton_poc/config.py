@@ -288,6 +288,12 @@ class AnalysisConfig:
     rally_gap_seconds: float = 2.5
     """Silence between events longer than this starts a new rally."""
     min_hits_per_rally: int = 2
+    rally_end_at_last_hit: bool = False
+    """End a rally at its last hit rather than at the terminating landing.
+
+    Landings arrive every 0.8s through dead time on these clips, 47 of 68 gaps sitting exactly
+    at the suppression floor, so ending on one puts the boundary wherever the metronome next
+    ticks. Ending at the last hit is at worst one stroke early."""
     min_swing_speed: float = 0.0
     """Drop hit candidates whose assigned player shows less racket-arm motion than this, in
     body-heights per second, measured from the pose model.

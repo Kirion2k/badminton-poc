@@ -369,6 +369,7 @@ def segment_rallies(
     *,
     gap_seconds: float,
     min_hits: int,
+    end_at_last_hit: bool = False,
 ) -> list[dict[str, Any]]:
     """Group hits into rallies, then attach a terminating event to each.
 
@@ -404,7 +405,8 @@ def segment_rallies(
             ),
             None,
         )
-        rallies.append(_finalise(group, terminator, fps, len(rallies) + 1))
+        rallies.append(_finalise(group, terminator, fps, len(rallies) + 1,
+                                 end_at_last_hit=end_at_last_hit))
     return rallies
 
 
@@ -413,10 +415,23 @@ def _finalise(
     terminator: TimelineEvent | None,
     fps: float,
     index: int,
+    *,
+    end_at_last_hit: bool = False,
 ) -> dict[str, Any]:
     hits = [e for e in events if e.event_type == "hit"]
     start = hits[0].frame if hits else events[0].frame
-    end = terminator.frame if terminator is not None else events[-1].frame
+    # Ending on the terminating event puts the boundary wherever the landing detector next
+    # ticks, and on these clips it ticks every 0.8s right through dead time. Ending at the last
+    # hit is at worst one stroke early, which is an error that can be reasoned about.
+    if end_at_last_hit and hits:
+        end = hits[-1].frame
+        reason = "last_hit"
+    elif terminator is not None:
+        end = terminator.frame
+        reason = "terminal_event"
+    else:
+        end = events[-1].frame
+        reason = "time_gap_or_end_of_clip"
     ordered = [
         {
             "index": i,
@@ -446,6 +461,6 @@ def _finalise(
         "unassigned_hits": sum(1 for h in hits if h.hitter is None),
         "terminating_event": None if terminator is None else terminator.event_type,
         "terminating_event_source": None if terminator is None else terminator.source,
-        "termination_reason": "terminal_event" if terminator is not None else "time_gap_or_end_of_clip",
+        "termination_reason": reason,
         "hits": ordered,
     }

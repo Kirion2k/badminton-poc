@@ -77,6 +77,7 @@
     "shuttle_absent_seconds": 1.0,
     "min_hit_confidence": 0.85,
     "play_gate_min_speed_px": 0.0,
-    "min_swing_speed": 0.0
+    "min_swing_speed": 0.0,
+    "rally_end_at_last_hit": false
   }
 }

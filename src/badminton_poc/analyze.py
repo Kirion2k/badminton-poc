@@ -92,7 +92,8 @@ def analyze(
     timeline = build_timeline(events, by_frame, ball, fps, cfg.shuttle_absent_seconds,
                               swing_by_frame=swing_by_frame)
     rallies = segment_rallies(
-        timeline, fps, gap_seconds=cfg.rally_gap_seconds, min_hits=cfg.min_hits_per_rally
+        timeline, fps, gap_seconds=cfg.rally_gap_seconds, min_hits=cfg.min_hits_per_rally,
+        end_at_last_hit=cfg.rally_end_at_last_hit,
     )
 
     summary = _summarise(player_rows, ball, timeline, rallies, assignments, fps)

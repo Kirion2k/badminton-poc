@@ -458,8 +458,26 @@ is the signature of a detector firing continuously while suppression samples it.
 stays at frame 493 under every configuration tried, +4.28s past the truth, because no amount of
 hit filtering moves an end that a metronome sets.
 
-**Rally boundaries cannot be fixed downstream of this event detector.** Fixing them means
-fixing landing detection, which means replacing the detector.
+**Ending a rally at its last hit instead** was the obvious follow-up and does not help either:
+4 of 6, unchanged. Rally 1's end moves only from frame 493 to 482, because its last *hit* is
+itself a false positive during dead time. The landing metronome was not the whole story -- the
+rally genuinely contains spurious hits reaching past the true end, and both the last hit and
+the next landing sit beyond it.
+
+Nor does the combination. Every pairing of end-at-last-hit with a swing gate scores 4 of 6 or
+worse, and the aggressive pairings reach 1 of 6:
+
+| rally end | swing gate | precision | recall | recovered | median end error |
+|---|---|---|---|---|---|
+| landing | off | 0.62 | 0.90 | **4/6** | +0.52s |
+| landing | 3.6 | 0.84 | 0.67 | 2/6 | +0.52s |
+| last hit | off | 0.62 | 0.90 | **4/6** | +0.42s |
+| last hit | 3.6 | 0.84 | 0.67 | 1/6 | −0.68s |
+
+**Rally boundaries cannot be fixed downstream of this event detector.** Four routes were
+measured and none beats 4 of 6. The ceiling is set by false-positive hits *inside* rallies, and
+every available signal that removes enough of them also splits the rallies apart. Fixing this
+means fixing hit detection at source, which means replacing the detector.
 
 ### Where it stands
 
