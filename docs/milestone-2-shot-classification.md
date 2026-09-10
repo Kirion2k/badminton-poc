@@ -468,3 +468,61 @@ further hits on this clip could not be attributed to a player, against one on cl
 carries a run of five consecutive contacts credited to the same player. Milestone 1 passed on
 clip 2 and visibly does not transfer to clip 5 at the same quality. That is the cross-validation
 Milestone 1 never had, arriving as a side effect of Milestone 2.
+
+---
+
+## 11. Is BST the wrong tool, or just the wrong head?
+
+Pretrained BST reaches about 38% on our footage and no amount of preprocessing moved it. That
+number cannot say whether the representation is unable to carry shot type on amateur footage, or
+whether it carries it fine and only the output layer is aimed at the wrong distribution. The two
+lead to opposite decisions, so we asked directly.
+
+Freeze the backbone, take the 300-dimensional vector it hands to its own classifier, fit a
+multinomial logistic regression on labels, and vary only *what is allowed into training*.
+
+| what the probe was trained on | clip 2 | clip 5 |
+|---|---|---|
+| other rallies **and the same rally** as the test shot | 0.759 | 0.773 |
+| other rallies of the same clip only | **0.476** | **0.491** |
+| the other clip entirely | 0.317 | 0.340 |
+| zero-shot pretrained BST, for reference | 0.397 | 0.377 |
+| always answer the commonest class | 0.302 | 0.264 |
+
+**The first row is an illusion and it is worth dwelling on.** Random five-fold splitting puts
+shot N in training and shot N+1 in test, and consecutive shots share a rally, an exchange and a
+pair of body positions. It reports 76%, comfortably past the 75% target, and it is measuring
+memorisation of context. Splitting by rally instead drops it to 48%. Had we not checked, this
+project would have declared the milestone met.
+
+Reading the honest rows:
+
+**The representation does carry adaptable signal, but only locally.** Within a clip and across
+rallies a probe reaches 0.48 against zero-shot's 0.40, so roughly eight points are available from
+fitting to a venue.
+
+**None of it survives a change of clip.** Trained on one clip and tested on the other, the probe
+reaches 0.33, which is *worse than zero-shot* and barely past always-guessing-lift. Fitting a
+head on 116 shots from two recordings produces something that does not generalise to a third.
+
+**So fine-tuning is not the next step**, which reverses what section 9's unexplained remainder
+seemed to suggest. Training a head on the data we have makes cross-clip performance worse, not
+better. A control probe on BST's raw input arrays, with no transformer in between, scores 0.23
+and 0.33, so the transformer is not the weak link either.
+
+### What this actually says the bottleneck is
+
+The gating quantity is **the number of distinct recordings, not the number of labelled shots**.
+Two clips means "leave one clip out" is training on exactly one venue, one pair of players and one
+camera position, which is the hardest possible version of the test. The generalisation ladder --
+0.76 within a rally, 0.48 within a clip, 0.33 across clips -- is the signature of a model
+learning setting rather than stroke.
+
+The experiment that would settle it is to label eight to ten clips and plot leave-one-clip-out
+accuracy against the number of training clips. If it climbs, this is a data-collection problem
+with a known price. If it stays flat near 0.35, skeleton-plus-shuttle features do not determine
+shot type on amateur footage at this camera distance, and the answer is a different input, not
+more of the same.
+
+That is a much more specific and much cheaper question than "should we fine-tune", and it is the
+one to answer next.
