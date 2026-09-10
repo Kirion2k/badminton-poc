@@ -92,7 +92,9 @@ def load_bst(cfg: BSTConfig, base: Path = Path(".")):
     if str(package) not in sys.path:
         sys.path.insert(0, str(package))
     from model.bst import BST_0
-    from preparing_data.shuttleset_dataset import get_bone_pairs, get_merged_stroke_types
+    from preparing_data.shuttleset_dataset import (
+        get_bone_pairs, get_merged_stroke_types, get_stroke_types,
+    )
 
     device = cfg.device
     if device == "auto":
@@ -106,7 +108,22 @@ def load_bst(cfg: BSTConfig, base: Path = Path(".")):
     state = torch.load(str(weight), map_location=device, weights_only=True)
     net.load_state_dict(state)
     net.eval().to(device)
-    return net, list(get_merged_stroke_types()), device
+    # The two heads order their classes differently: merged puts the unknown class first,
+    # unmerged puts it last. Picking the list by width rather than by habit keeps a
+    # sequence-30 checkpoint from being read against the sequence-100 label order.
+    if cfg.n_classes == 25:
+        classes = list(get_merged_stroke_types())
+    elif cfg.n_classes == 35:
+        classes = list(get_stroke_types())
+    else:
+        raise BSTUnavailable(
+            f"no published class list for a {cfg.n_classes}-class head; expected 25 or 35"
+        )
+    if len(classes) != cfg.n_classes:
+        raise BSTUnavailable(
+            f"upstream returned {len(classes)} class names for a {cfg.n_classes}-class head"
+        )
+    return net, classes, device
 
 
 def bone_pairs(cfg: BSTConfig, base: Path = Path(".")) -> list[tuple[int, int]]:

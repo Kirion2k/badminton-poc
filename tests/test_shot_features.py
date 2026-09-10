@@ -258,3 +258,56 @@ def test_positions_are_image_normalized_feet():
     feats = build_features(_sample(), _rows(frames), _ball(frames))
     assert feats.position_mask.all()
     assert 0.0 <= feats.position.min() and feats.position.max() <= 1.0
+
+
+# --------------------------------------------------------------------------------------------
+# shuttle framing
+
+
+def test_shuttle_framing_defaults_to_the_airspace_box():
+    from badminton_poc.shots.features import airspace_box
+    assert FeatureConfig().shuttle_frame == "airspace"
+    assert airspace_box(((0.13, 0.0), (0.9, 0.0), (0.9, 1.0), (0.13, 1.0))) == (0.13, 0.9, 0.0, 1.0)
+    assert airspace_box(None) is None
+    assert airspace_box(((0.5, 0.5), (0.5, 0.5))) is None
+
+
+def test_the_airspace_box_stretches_that_region_onto_the_unit_square():
+    """Upstream divides by the frame, which assumes the court fills it. Ours does not."""
+    box = (0.2, 0.8, 0.0, 1.0)
+    assert normalize_shuttle(0.2 * 1920, 0.0, 1920, 884, box) == pytest.approx((0.0, 0.0))
+    assert normalize_shuttle(0.8 * 1920, 884, 1920, 884, box) == pytest.approx((1.0, 1.0))
+    assert normalize_shuttle(0.5 * 1920, 442, 1920, 884, box) == pytest.approx((0.5, 0.5))
+
+
+def test_a_shuttle_outside_the_airspace_box_is_clamped_not_extrapolated():
+    box = (0.2, 0.8, 0.0, 1.0)
+    x, _ = normalize_shuttle(0.05 * 1920, 442, 1920, 884, box)
+    assert x == 0.0
+
+
+def test_a_degenerate_framing_box_is_refused():
+    with pytest.raises(ValueError):
+        normalize_shuttle(100.0, 100.0, 1920, 884, (0.5, 0.5, 0.0, 1.0))
+
+
+def test_the_video_framing_reproduces_upstream_exactly():
+    frames = list(range(90, 220))
+    feats = build_features(_sample(), _rows(frames), _ball(frames, x=960.0, y=442.0),
+                           cfg=FeatureConfig(shuttle_frame="video"))
+    assert feats.shuttle[0] == pytest.approx([0.5, 0.5])
+    assert "divided by video" in feats.provenance["shuttle_normalization"]
+
+
+def test_an_unknown_framing_choice_is_refused():
+    frames = list(range(90, 220))
+    with pytest.raises(ValueError):
+        build_features(_sample(), _rows(frames), _ball(frames),
+                       cfg=FeatureConfig(shuttle_frame="whatever"))
+
+
+def test_framing_falls_back_to_the_video_when_no_polygon_is_configured():
+    frames = list(range(90, 220))
+    feats = build_features(_sample(), _rows(frames), _ball(frames, x=960.0, y=442.0),
+                           shuttle_polygon=None)
+    assert feats.shuttle[0] == pytest.approx([0.5, 0.5])

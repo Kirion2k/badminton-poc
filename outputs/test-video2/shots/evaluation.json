@@ -21,14 +21,14 @@
     }
   },
   "labelled_by": null,
-  "taxonomy_version": "broad-v1",
+  "taxonomy_version": "broad-v2",
   "models": {
     "rules": {
       "shots": 63,
-      "accuracy": 0.2857,
-      "macro_f1": 0.1984,
-      "top2_accuracy": 0.2857,
-      "top3_accuracy": 0.3016,
+      "accuracy": 0.3016,
+      "macro_f1": 0.2186,
+      "top2_accuracy": 0.3016,
+      "top3_accuracy": 0.3333,
       "abstention_rate": 0.1429,
       "class_counts_truth": {
         "serve": 5,
@@ -42,10 +42,10 @@
       },
       "class_counts_predicted": {
         "serve": 6,
-        "smash": 3,
+        "smash": 4,
         "drop": 4,
         "clear": 9,
-        "lift": 32,
+        "lift": 31,
         "other": 9
       },
       "largest_class_share": 0.3016,
@@ -62,9 +62,9 @@
         },
         "smash": {
           "support": 1,
-          "predicted": 3,
+          "predicted": 4,
           "true_positives": 0,
-          "false_positives": 3,
+          "false_positives": 4,
           "false_negatives": 1,
           "precision": 0.0,
           "recall": 0.0,
@@ -92,13 +92,13 @@
         },
         "lift": {
           "support": 19,
-          "predicted": 32,
+          "predicted": 31,
           "true_positives": 10,
-          "false_positives": 22,
+          "false_positives": 21,
           "false_negatives": 9,
-          "precision": 0.3125,
+          "precision": 0.3226,
           "recall": 0.5263,
-          "f1": 0.3922
+          "f1": 0.4
         },
         "drive": {
           "support": 4,
@@ -123,12 +123,12 @@
         "other": {
           "support": 4,
           "predicted": 9,
-          "true_positives": 0,
-          "false_positives": 9,
-          "false_negatives": 4,
-          "precision": 0.0,
-          "recall": 0.0,
-          "f1": 0.0
+          "true_positives": 1,
+          "false_positives": 8,
+          "false_negatives": 3,
+          "precision": 0.1111,
+          "recall": 0.25,
+          "f1": 0.1538
         }
       },
       "confusion": {
@@ -154,13 +154,13 @@
         },
         "drop": {
           "serve": 0,
-          "smash": 0,
+          "smash": 1,
           "drop": 0,
           "clear": 0,
           "lift": 3,
           "drive": 0,
           "net": 0,
-          "other": 2
+          "other": 1
         },
         "clear": {
           "serve": 0,
@@ -207,10 +207,10 @@
           "smash": 0,
           "drop": 1,
           "clear": 0,
-          "lift": 2,
+          "lift": 1,
           "drive": 0,
           "net": 0,
-          "other": 0
+          "other": 1
         }
       },
       "by_hitter": {
@@ -228,13 +228,13 @@
             "drive": 2,
             "net": 7
           },
-          "abstention_rate": 0.1111
+          "abstention_rate": 0.0741
         },
         "far": {
           "shots": 36,
-          "accuracy": 0.3333,
-          "macro_f1": 0.1959,
-          "top2_accuracy": 0.3333,
+          "accuracy": 0.3611,
+          "macro_f1": 0.224,
+          "top2_accuracy": 0.3611,
           "class_counts": {
             "serve": 3,
             "drop": 1,
@@ -244,24 +244,24 @@
             "net": 6,
             "other": 4
           },
-          "abstention_rate": 0.1667
+          "abstention_rate": 0.1944
         }
       },
       "note": "Read the class counts before the accuracy. This taxonomy is imbalanced by nature: a rally contains one serve and a dozen other strokes.",
       "acceptance": {
         "overall_accuracy": {
           "target": 0.75,
-          "value": 0.2857,
+          "value": 0.3016,
           "pass": false
         },
         "macro_f1": {
           "target": 0.65,
-          "value": 0.1984,
+          "value": 0.2186,
           "pass": false
         },
         "top2_accuracy": {
           "target": 0.9,
-          "value": 0.2857,
+          "value": 0.3016,
           "pass": false
         },
         "smash_f1": {
@@ -273,7 +273,7 @@
           "target": "each shows useful discriminative ability rather than collapsing",
           "value": {
             "clear": 0.2857,
-            "lift": 0.3922,
+            "lift": 0.4,
             "drop": 0.0
           },
           "pass": false,
@@ -283,7 +283,7 @@
           "target": "far-player accuracy within 20 points of near",
           "value": {
             "near": 0.2222,
-            "far": 0.3333
+            "far": 0.3611
           },
           "pass": true
         }
@@ -315,11 +315,6 @@
           "count": 3
         },
         {
-          "truth": "drop",
-          "predicted": "other",
-          "count": 2
-        },
-        {
           "truth": "clear",
           "predicted": "smash",
           "count": 2
@@ -328,16 +323,21 @@
           "truth": "drive",
           "predicted": "lift",
           "count": 2
+        },
+        {
+          "truth": "drive",
+          "predicted": "other",
+          "count": 2
         }
       ]
     },
     "bst": {
       "shots": 63,
-      "accuracy": 0.3492,
-      "macro_f1": 0.3788,
-      "top2_accuracy": 0.6032,
-      "top3_accuracy": 0.6825,
-      "abstention_rate": 0.2063,
+      "accuracy": 0.3968,
+      "macro_f1": 0.4141,
+      "top2_accuracy": 0.5873,
+      "top3_accuracy": 0.6667,
+      "abstention_rate": 0.1746,
       "class_counts_truth": {
         "serve": 5,
         "smash": 1,
@@ -350,13 +350,13 @@
       },
       "class_counts_predicted": {
         "serve": 4,
-        "smash": 12,
-        "drop": 4,
+        "smash": 11,
+        "drop": 5,
         "clear": 9,
-        "lift": 9,
+        "lift": 7,
         "drive": 2,
-        "net": 10,
-        "other": 13
+        "net": 14,
+        "other": 11
       },
       "largest_class_share": 0.3016,
       "per_class": {
@@ -372,9 +372,9 @@
         },
         "smash": {
           "support": 1,
-          "predicted": 12,
+          "predicted": 11,
           "true_positives": 0,
-          "false_positives": 12,
+          "false_positives": 11,
           "false_negatives": 1,
           "precision": 0.0,
           "recall": 0.0,
@@ -382,13 +382,13 @@
         },
         "drop": {
           "support": 5,
-          "predicted": 4,
-          "true_positives": 2,
+          "predicted": 5,
+          "true_positives": 3,
           "false_positives": 2,
-          "false_negatives": 3,
-          "precision": 0.5,
-          "recall": 0.4,
-          "f1": 0.4444
+          "false_negatives": 2,
+          "precision": 0.6,
+          "recall": 0.6,
+          "f1": 0.6
         },
         "clear": {
           "support": 12,
@@ -402,13 +402,13 @@
         },
         "lift": {
           "support": 19,
-          "predicted": 9,
-          "true_positives": 6,
-          "false_positives": 3,
-          "false_negatives": 13,
-          "precision": 0.6667,
-          "recall": 0.3158,
-          "f1": 0.4286
+          "predicted": 7,
+          "true_positives": 5,
+          "false_positives": 2,
+          "false_negatives": 14,
+          "precision": 0.7143,
+          "recall": 0.2632,
+          "f1": 0.3846
         },
         "drive": {
           "support": 4,
@@ -422,19 +422,19 @@
         },
         "net": {
           "support": 13,
-          "predicted": 10,
-          "true_positives": 4,
-          "false_positives": 6,
-          "false_negatives": 9,
-          "precision": 0.4,
-          "recall": 0.3077,
-          "f1": 0.3478
+          "predicted": 14,
+          "true_positives": 7,
+          "false_positives": 7,
+          "false_negatives": 6,
+          "precision": 0.5,
+          "recall": 0.5385,
+          "f1": 0.5185
         },
         "other": {
           "support": 4,
-          "predicted": 13,
+          "predicted": 11,
           "true_positives": 0,
-          "false_positives": 13,
+          "false_positives": 11,
           "false_negatives": 4,
           "precision": 0.0,
           "recall": 0.0,
@@ -464,8 +464,8 @@
         },
         "drop": {
           "serve": 0,
-          "smash": 2,
-          "drop": 2,
+          "smash": 1,
+          "drop": 3,
           "clear": 0,
           "lift": 0,
           "drive": 0,
@@ -487,9 +487,9 @@
           "smash": 5,
           "drop": 0,
           "clear": 4,
-          "lift": 6,
+          "lift": 5,
           "drive": 0,
-          "net": 2,
+          "net": 3,
           "other": 1
         },
         "drive": {
@@ -507,10 +507,10 @@
           "smash": 0,
           "drop": 0,
           "clear": 0,
-          "lift": 3,
+          "lift": 2,
           "drive": 0,
-          "net": 4,
-          "other": 6
+          "net": 7,
+          "other": 4
         },
         "other": {
           "serve": 0,
@@ -526,9 +526,9 @@
       "by_hitter": {
         "near": {
           "shots": 27,
-          "accuracy": 0.4074,
-          "macro_f1": 0.4558,
-          "top2_accuracy": 0.6296,
+          "accuracy": 0.4815,
+          "macro_f1": 0.4691,
+          "top2_accuracy": 0.6667,
           "class_counts": {
             "serve": 2,
             "smash": 1,
@@ -538,13 +538,13 @@
             "drive": 2,
             "net": 7
           },
-          "abstention_rate": 0.2593
+          "abstention_rate": 0.2222
         },
         "far": {
           "shots": 36,
-          "accuracy": 0.3056,
-          "macro_f1": 0.3422,
-          "top2_accuracy": 0.5833,
+          "accuracy": 0.3333,
+          "macro_f1": 0.3617,
+          "top2_accuracy": 0.5278,
           "class_counts": {
             "serve": 3,
             "drop": 1,
@@ -554,24 +554,24 @@
             "net": 6,
             "other": 4
           },
-          "abstention_rate": 0.1667
+          "abstention_rate": 0.1389
         }
       },
       "note": "Read the class counts before the accuracy. This taxonomy is imbalanced by nature: a rally contains one serve and a dozen other strokes.",
       "acceptance": {
         "overall_accuracy": {
           "target": 0.75,
-          "value": 0.3492,
+          "value": 0.3968,
           "pass": false
         },
         "macro_f1": {
           "target": 0.65,
-          "value": 0.3788,
+          "value": 0.4141,
           "pass": false
         },
         "top2_accuracy": {
           "target": 0.9,
-          "value": 0.6032,
+          "value": 0.5873,
           "pass": false
         },
         "smash_f1": {
@@ -583,8 +583,8 @@
           "target": "each shows useful discriminative ability rather than collapsing",
           "value": {
             "clear": 0.4762,
-            "lift": 0.4286,
-            "drop": 0.4444
+            "lift": 0.3846,
+            "drop": 0.6
           },
           "pass": true,
           "note": "read as each of the three reaching an F1 of 0.30 rather than one absorbing the others"
@@ -592,18 +592,13 @@
         "far_player_not_catastrophic": {
           "target": "far-player accuracy within 20 points of near",
           "value": {
-            "near": 0.4074,
-            "far": 0.3056
+            "near": 0.4815,
+            "far": 0.3333
           },
           "pass": true
         }
       },
       "most_confused": [
-        {
-          "truth": "net",
-          "predicted": "other",
-          "count": 6
-        },
         {
           "truth": "lift",
           "predicted": "smash",
@@ -616,7 +611,12 @@
         },
         {
           "truth": "net",
-          "predicted": "lift",
+          "predicted": "other",
+          "count": 4
+        },
+        {
+          "truth": "lift",
+          "predicted": "net",
           "count": 3
         },
         {
@@ -630,13 +630,13 @@
           "count": 2
         },
         {
-          "truth": "drop",
+          "truth": "clear",
           "predicted": "smash",
           "count": 2
         },
         {
           "truth": "clear",
-          "predicted": "smash",
+          "predicted": "net",
           "count": 2
         }
       ]

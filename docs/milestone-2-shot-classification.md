@@ -4,10 +4,12 @@ Findings from the first pass, 10 September 2026. Development clip is `test-video
 fully labelled recording. Milestone 1 is treated as an upstream dependency and was not retuned.
 
 **Short answer: no, not yet, and not close.** The published BST checkpoint runs on our footage
-and beats a rule baseline, but reaches 35% accuracy against a 75% target. The gap is not the
+and beats a rule baseline, but reaches 40% accuracy against a 75% target. The gap is not the
 frame rate, not the clipping and not the joint format, all of which were handled and measured.
-It is a distribution mismatch between professional and amateur play, on top of a labelling set
-too small and too uncertain to carry the weight.
+
+Section 9 records a second pass that changed two of the conclusions below. Official inference
+*was* reproduced, to within 0.001 of the published figure. And a framing mismatch nobody had
+looked for was found and fixed, worth five points. Read section 9 before quoting section 5.
 
 ---
 
@@ -97,10 +99,12 @@ a theoretical one.
 
 ---
 
-## 3. Reference inference: partially blocked, and this is a caveat on everything below
+## 3. Reference inference: blocked on the first pass, resolved on the second
+
+*Superseded by section 9: the reproduction succeeded. This section records the first attempt.*
 
 The instruction was to reproduce one official inference example on the authors' own data before
-integrating. **That was not fully done, and it is the weakest point in this work.**
+integrating. On the first pass that was not done.
 
 What was verified: the checkpoint
 `bst_0_JnB_bone_between_2_hits_with_max_limits_seq_100_merged_2.pt` loads into `BST_0` with
@@ -284,3 +288,110 @@ now visibly costing accuracy, and it is one line to change and re-score.
    `taxonomy.py`, already versioned and tested, and it directly addresses the largest confusion.
 4. Only then consider fine-tuning, and only with a clear picture of how much of the gap is
    distribution and how much is labelling.
+
+---
+
+## 9. Second pass
+
+Four things were done after the first write-up. Two changed its conclusions.
+
+### Official inference reproduced, exactly
+
+The authors' preprocessed archive downloaded on a later retry: 894MB of RAR5 holding per-shot
+`.npy` arrays foldered by true class. The system's `7z` is p7zip 16.02, which predates RAR5's
+newer compression and extracted 10,497 silently empty files; libarchive 3.6, already installed,
+reads it correctly. Worth knowing, because the failure was silent.
+
+Running BST-0 over their 3,499-shot test split, across all seven merged sequence-100 checkpoints:
+
+| | reproduced | published |
+|---|---|---|
+| accuracy | **0.8294** mean, 0.8345 best | 0.8284 |
+| macro F1 | **0.8050** mean | 0.8041 |
+
+Within a thousandth. So the model, the weights and our torch 2.14 runtime are all confirmed
+sound, and the 40% on our footage is not a broken model path. Runtime is 1.1s for 3,499 shots.
+
+### Our preprocessing checked against theirs, which found a real bug
+
+Having their arrays makes a direct comparison possible for the first time:
+
+| | ShuttleSet | our clip 2 |
+|---|---|---|
+| window samples, median | 58 | 54 |
+| joints non-zero range | −0.62 to +0.72, std 0.189 | −0.53 to +0.59, std 0.182 |
+| joints missing | 7.7% | 14.0% |
+| shuttle missing | 10.1% | 5.8% |
+| shuttle x range | 0.011 to 0.974 | 0.187 to 0.755 |
+| shuttle y range | 0.003 to 0.917 | 0.005 to 0.693 |
+
+Window length and joint normalization match, which validates the resampling and the bounding-box
+maths. Our pose is worse and our shuttle track is better, both expected.
+
+The last two rows are the finding. **Upstream normalizes the shuttle by the video resolution,
+which silently assumes the court fills the frame.** ShuttleSet is broadcast footage, so it does.
+A fixed camera set back from an amateur court leaves the court in the middle of the picture, so
+the same shot lands at a compressed input value the weights never saw. Rescaling the configured
+shuttle-airspace polygon onto the unit square restores the expected framing, uses only the court
+calibration and no labels, and is worth:
+
+| shuttle framing | accuracy | macro F1 |
+|---|---|---|
+| by video resolution, as upstream | 0.349 | 0.379 |
+| **by the configured airspace, as now** | **0.397** | **0.414** |
+
+This is now the default. It is a preprocessing bug we introduced by following upstream too
+literally, and it would have gone unnoticed without their arrays to compare against.
+
+### What is left, decomposed
+
+With framing fixed, each further step relaxes a condition that is not available at inference
+time, so these are bounds rather than achievable scores.
+
+| condition | accuracy | gain |
+|---|---|---|
+| as measured | 0.397 | — |
+| + oracle class prior | 0.460 | +0.064 |
+| + only labels I was confident about | 0.571 | +0.111 |
+| + only shots whose hitter looks right | 0.595 | +0.023 |
+| target | 0.750 | **+0.155 unexplained** |
+
+**This overturns the first pass's ranking.** Label quality, not distribution mismatch, is the
+largest identified factor. The ShuttleSet prior really is skewed against us -- smash is 11.6% of
+their strokes and 1.6% of ours, lift 15.4% against 30.2% -- and correcting it is worth six
+points, but only with an oracle. Dividing by the source prior alone, the only version deployable
+on an unlabelled clip, is worth nothing at all.
+
+Even with a perfect prior, perfect labels and perfect hitters, BST reaches 0.595. **That 0.155
+remainder is the honest case for fine-tuning**, and it is the first evidence in this project that
+actually supports it.
+
+### Things that did not help, recorded so nobody retries them
+
+| tried | result |
+|---|---|
+| the shorter `middle_in_a_sec` window with the sequence-30 head | 0.191, far worse |
+| the unmerged 35-class head at sequence 100 | 0.365 accuracy but 0.492 top-2 |
+| ensembling all seven checkpoints | 0.365, no better than their mean of 0.361 |
+| dividing by the source prior alone | no change |
+| mapping push to drive | +0.016 accuracy, −0.025 macro F1 |
+| mapping net kill to smash | +0.032 accuracy, +0.023 macro F1 |
+
+Single-checkpoint spread is 0.318 to 0.397, so any difference under about four points is noise.
+The taxonomy decisions move the result by about three points, which demotes the taxonomy from
+third place in section 6 to a rounding error. The two contested mappings are left as committed:
+adopting the better-scoring variant after seeing the score would be fitting to the test set.
+
+### Revised answers
+
+Only the ones that changed.
+
+1. **Can official BST inference be reproduced?** **Yes**, to within 0.001 of published.
+5. **Main limitation?** Label quality first, then distribution mismatch, then an unexplained
+   0.155 that is genuine model failure on amateur footage. Not pose, not shuttle tracking, not
+   clipping, and not the taxonomy.
+7. **Do we need fine-tuning?** The 0.155 remainder says yes eventually, but the 0.111 attributable
+   to labelling says do the labelling first. Fine-tuning on labels this noisy would bake the noise
+   in.
+8. **Highest-value next experiment?** Unchanged and now better supported: an independent labelling
+   of a clip that contains smashes.

@@ -21,7 +21,7 @@
     "net": "played in the forecourt and staying in the forecourt, including a block off a smash",
     "other": "a real contact that is none of the above, or that you cannot call from the video: pushes, net kills, mishits, and anything ambiguous"
   },
-  "_taxonomy_version": "broad-v1",
+  "_taxonomy_version": "broad-v2",
   "_seeded_from": "the Milestone 1 hit timeline only. shot_type is deliberately empty: seeding it from a classifier would measure agreement with that classifier rather than accuracy.",
   "clip": "test-video2",
   "fps": 59.986172678840134,

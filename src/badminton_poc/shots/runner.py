@@ -112,8 +112,11 @@ def load_clip(
     ball = load_ball_csv(paths.ball_csv())
     players = {int(r["frame"]): r for r in load_jsonl(paths.players)}
     fixed = analysis.get("shuttle_fixed_points") or []
+    polygon = config.court.shuttle_polygon if config is not None else None
     features = [
-        build_features(s, players, ball, cfg=feature_cfg, fixed_points=fixed) for s in samples
+        build_features(s, players, ball, cfg=feature_cfg, fixed_points=fixed,
+                       shuttle_polygon=polygon)
+        for s in samples
     ]
     depth = CourtDepth.from_roi(config.court) if config is not None else None
     return ClipShots(paths, samples, features, skipped, depth,

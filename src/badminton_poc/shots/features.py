@@ -58,6 +58,20 @@ class FeatureConfig:
     """A shuttle sample this close to a known tracker lock-on is not a shuttle."""
     center_align: bool = True
     """Upstream's ``normalize_joints`` default: shift so the bounding-box centre is the origin."""
+    shuttle_frame: str = "airspace"
+    """What the shuttle coordinate is normalized against.
+
+    Upstream divides by the video resolution, which carries a hidden assumption: ShuttleSet is
+    broadcast footage where the court fills the frame. Measured against their published arrays,
+    their shuttle spans x 0.011 to 0.974 and y 0.003 to 0.917. Ours spans x 0.187 to 0.755 and
+    y 0.005 to 0.693, because a fixed camera set back from an amateur court leaves the court
+    occupying the middle of the picture. The same shot therefore lands at a different input
+    value, and the model was never trained on that compressed range.
+
+    ``airspace`` rescales the configured shuttle polygon's bounding box onto the unit square,
+    restoring the framing the weights expect. It uses only the court calibration, no labels.
+    On the development clip it is worth accuracy 0.349 -> 0.397 and macro F1 0.379 -> 0.414.
+    ``video`` reproduces upstream exactly and is kept so the difference stays measurable."""
 
 
 @dataclass(frozen=True)
@@ -150,11 +164,38 @@ def normalize_joints(
     return np.stack((nx, ny), axis=-1)
 
 
-def normalize_shuttle(x: float, y: float, width: int, height: int) -> tuple[float, float]:
-    """Upstream's ``normalize_shuttlecock``: straight division by the video resolution."""
+def normalize_shuttle(
+    x: float, y: float, width: int, height: int,
+    box: tuple[float, float, float, float] | None = None,
+) -> tuple[float, float]:
+    """Upstream's ``normalize_shuttlecock``, optionally against a sub-region of the frame.
+
+    ``box`` is ``(x0, x1, y0, y1)`` in normalized frame coordinates. With it, that region is
+    stretched onto the unit square; without it this is upstream's plain division.
+    """
     if width <= 0 or height <= 0:
         raise ValueError("width and height must be positive")
-    return x / width, y / height
+    nx, ny = x / width, y / height
+    if box is None:
+        return nx, ny
+    x0, x1, y0, y1 = box
+    if x1 <= x0 or y1 <= y0:
+        raise ValueError("shuttle framing box must have positive extent")
+    return (
+        min(1.0, max(0.0, (nx - x0) / (x1 - x0))),
+        min(1.0, max(0.0, (ny - y0) / (y1 - y0))),
+    )
+
+
+def airspace_box(polygon: Sequence[Sequence[float]] | None) -> tuple[float, float, float, float] | None:
+    """Bounding box of the configured shuttle airspace, in normalized frame coordinates."""
+    if not polygon:
+        return None
+    xs = [float(p[0]) for p in polygon]
+    ys = [float(p[1]) for p in polygon]
+    if max(xs) <= min(xs) or max(ys) <= min(ys):
+        return None
+    return (min(xs), max(xs), min(ys), max(ys))
 
 
 def _player_arrays(
@@ -188,9 +229,18 @@ def build_features(
     *,
     cfg: FeatureConfig | None = None,
     fixed_points: Sequence[dict[str, Any]] = (),
+    shuttle_polygon: Sequence[Sequence[float]] | None = None,
 ) -> ShotFeatures:
     """Assemble one shot's arrays. Pure: it reads dictionaries and a track, nothing else."""
     cfg = cfg or FeatureConfig()
+    if cfg.shuttle_frame == "airspace":
+        box = airspace_box(shuttle_polygon)
+    elif cfg.shuttle_frame == "video":
+        box = None
+    else:
+        raise ValueError(
+            f"unknown shuttle_frame {cfg.shuttle_frame!r}; expected 'airspace' or 'video'"
+        )
     frames, times = resample_times(
         sample.start_frame, sample.end_frame, sample.hit_frame, sample.fps, cfg
     )
@@ -227,7 +277,8 @@ def build_features(
                 for p in fixed_points
             )
             if not parked:
-                shuttle[i] = normalize_shuttle(ball_sample.x, ball_sample.y, width, height)
+                shuttle[i] = normalize_shuttle(
+                    ball_sample.x, ball_sample.y, width, height, box)
                 shuttle_mask[i] = True
 
     hitter_index = PLAYER_ORDER.index(sample.hitter) if sample.hitter in PLAYER_ORDER else 1
@@ -241,7 +292,13 @@ def build_features(
         "player_axis": list(PLAYER_ORDER),
         "joint_format": "coco17",
         "joints_normalization": "bbox top-left origin, divided by bbox diagonal, centre-aligned",
-        "shuttle_normalization": "divided by video width and height",
+        "shuttle_normalization": (
+            "divided by video width and height"
+            if box is None else
+            f"airspace box {tuple(round(v, 3) for v in box)} of the frame stretched to the unit "
+            "square, restoring the court-fills-frame framing upstream's weights were trained on"
+        ),
+        "shuttle_frame": cfg.shuttle_frame,
         "position_normalization": "foot point divided by video width and height (image, NOT court)",
         "missing_convention": "zero, with a separate boolean mask",
         "min_joint_confidence": cfg.min_joint_confidence,

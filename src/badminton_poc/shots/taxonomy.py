@@ -30,7 +30,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-MAPPING_VERSION = "broad-v1"
+MAPPING_VERSION = "broad-v2"
 
 BROAD_CLASSES = ("serve", "smash", "drop", "clear", "lift", "drive", "net", "other")
 
@@ -80,9 +80,23 @@ STROKE_TABLE: tuple[StrokeMapping, ...] = (
         "would inflate the class carrying its own acceptance threshold",
         contested_alternative="smash",
     ),
+    # The five below exist only in the unmerged 35-class head. Each is a finer split of a class
+    # already in the table above, so each inherits that class without a new judgement.
+    StrokeMapping("點扣", "smash", "punch smash", "a flatter, shorter-swing smash"),
+    StrokeMapping("防守回挑", "lift", "defensive lift", "a lift played under pressure"),
+    StrokeMapping("後場抽平球", "drive", "rear-court drive", "a flat drive struck from the back"),
+    StrokeMapping("過渡切球", "drop", "transitional slice drop", "a slice drop played to regain position"),
+    StrokeMapping("防守回抽", "drive", "defensive drive", "a flat drive played under pressure"),
 )
 
 _BY_UPSTREAM = {m.upstream: m for m in STROKE_TABLE}
+
+
+MERGED_CLASSES = 25
+UNMERGED_CLASSES = 35
+"""BST publishes two heads. They differ in more than width: the merged head puts the unknown
+class **first**, at index 0, while the unmerged head puts it **last**, at index 34. Reading a
+prediction against the wrong list silently shifts every label by one."""
 
 
 def split_side(class_name: str) -> tuple[str | None, str]:

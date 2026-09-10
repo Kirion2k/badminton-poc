@@ -1,5 +1,5 @@
 {
-  "version": "broad-v1",
+  "version": "broad-v2",
   "broad_classes": [
     "serve",
     "smash",
@@ -101,6 +101,41 @@
       "broad": "other",
       "note": "steep downward putaway taken at the net: between smash and net. Folding it into smash would inflate the class carrying its own acceptance threshold",
       "contested_alternative": "smash"
+    },
+    {
+      "upstream": "點扣",
+      "english": "punch smash",
+      "broad": "smash",
+      "note": "a flatter, shorter-swing smash",
+      "contested_alternative": ""
+    },
+    {
+      "upstream": "防守回挑",
+      "english": "defensive lift",
+      "broad": "lift",
+      "note": "a lift played under pressure",
+      "contested_alternative": ""
+    },
+    {
+      "upstream": "後場抽平球",
+      "english": "rear-court drive",
+      "broad": "drive",
+      "note": "a flat drive struck from the back",
+      "contested_alternative": ""
+    },
+    {
+      "upstream": "過渡切球",
+      "english": "transitional slice drop",
+      "broad": "drop",
+      "note": "a slice drop played to regain position",
+      "contested_alternative": ""
+    },
+    {
+      "upstream": "防守回抽",
+      "english": "defensive drive",
+      "broad": "drive",
+      "note": "a flat drive played under pressure",
+      "contested_alternative": ""
     }
   ]
 }

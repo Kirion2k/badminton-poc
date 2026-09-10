@@ -22,8 +22,20 @@ from badminton_poc.shots.taxonomy import (
 
 
 def test_the_mapping_is_versioned():
-    assert MAPPING_VERSION == "broad-v1"
+    assert MAPPING_VERSION == "broad-v2"
     assert mapping_document()["version"] == MAPPING_VERSION
+
+
+@pytest.mark.parametrize("upstream,broad", [
+    ("Top_點扣", "smash"),          # punch smash
+    ("Bottom_防守回挑", "lift"),     # defensive lift
+    ("Top_後場抽平球", "drive"),     # rear-court drive
+    ("Bottom_過渡切球", "drop"),     # transitional slice drop
+    ("Top_防守回抽", "drive"),       # defensive drive
+])
+def test_the_unmerged_head_extra_classes_inherit_their_parent(upstream, broad):
+    """Each is a finer split of a class already mapped, so none needs a fresh judgement."""
+    assert to_broad(upstream) == broad
 
 
 def test_every_upstream_class_maps_into_our_taxonomy():
@@ -135,6 +147,7 @@ def test_the_mapping_document_carries_the_reasoning_not_just_the_answer():
     doc = mapping_document()
     contested = [s for s in doc["strokes"] if s["contested_alternative"]]
     assert len(contested) == 3
+    assert len(doc["strokes"]) == 17          # both heads' stroke types are covered
     for stroke in doc["strokes"]:
         assert stroke["english"]
     assert "destination" not in doc["defined_by"] or True

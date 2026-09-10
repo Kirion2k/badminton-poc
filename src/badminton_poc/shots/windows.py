@@ -30,6 +30,13 @@ BST_LIMIT_SECONDS = 1.5
 
 @dataclass(frozen=True)
 class ShotWindowConfig:
+    strategy: str = "between_2_hits_with_max_limits"
+    """Which of upstream's clipping rules to reproduce.
+
+    ``between_2_hits_with_max_limits`` is the rule behind the sequence-100 checkpoints and is
+    described above. ``middle_in_a_sec`` is the rule behind the sequence-30 checkpoints and is
+    far simpler: exactly ``half_seconds`` either side of the contact, ignoring the neighbours
+    entirely. Both come from ``ShuttleSet/gen_my_dataset.py``; neither was chosen by us."""
     half_seconds: float = BST_HALF_SECONDS
     eps_seconds: float = BST_EPS_SECONDS
     limit_seconds: float = BST_LIMIT_SECONDS
@@ -97,6 +104,18 @@ def window_for(
     half = int(round(cfg.half_seconds * fps))
     eps = int(round(cfg.eps_seconds * fps))
     limit = int(round(cfg.limit_seconds * fps))
+
+    if cfg.strategy == "middle_in_a_sec":
+        start, end = hit_frame - half, hit_frame + half
+        start = max(start, first_frame)
+        if last_frame is not None:
+            end = min(end, last_frame)
+        return start, max(start, end)
+    if cfg.strategy != "between_2_hits_with_max_limits":
+        raise ValueError(
+            f"unknown clipping strategy {cfg.strategy!r}; expected "
+            "'between_2_hits_with_max_limits' or 'middle_in_a_sec'"
+        )
 
     start = prev_hit_frame if prev_hit_frame is not None else hit_frame - half
     end = (next_hit_frame + eps) if next_hit_frame is not None else hit_frame + half
