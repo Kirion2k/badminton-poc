@@ -577,3 +577,85 @@ def test_trimming_never_empties_a_rally():
                       {"frame": 60, "swing_peak_wrist_speed": 0.3}]}
     out, dropped = trim_trailing_weak_hits(rally, 3.0, fps=60.0)
     assert len(out["hits"]) >= 1
+
+
+# ------------------------------------------------------------------------------------------
+# rallies built from flight-segment chains
+
+
+class _Chain:
+    def __init__(self, start, end, hits, kind="serve", rest=None, segments=(0,)):
+        self.start_frame = start
+        self.end_frame = end
+        self.hit_frames = tuple(hits)
+        self.segment_indices = tuple(segments)
+        self.start_kind = kind
+        self.rest_seen_at = rest
+
+
+class _Model:
+    def __init__(self, chains):
+        self.rallies = chains
+
+
+def _flight_hit(frame, hitter):
+    return TimelineEvent(frame=frame, event_type="hit", source="flight", hitter=hitter)
+
+
+def _flight_landing(frame):
+    return TimelineEvent(frame=frame, event_type="landing", source="flight")
+
+
+def test_flight_rally_span_comes_from_the_chain_not_the_hits():
+    from badminton_poc.rallies import rallies_from_flight
+
+    timeline = [_flight_hit(120, "near"), _flight_hit(180, "far"), _flight_landing(400)]
+    model = _Model([_Chain(100, 400, [120, 180])])
+    rallies, dropped = rallies_from_flight(model, timeline, 60.0)
+    assert dropped == []
+    assert (rallies[0]["start_frame"], rallies[0]["end_frame"]) == (100, 400)
+    assert rallies[0]["hit_count"] == 2
+    assert rallies[0]["termination_reason"] == "last_flight_ended"
+    assert rallies[0]["start_kind"] == "serve"
+
+
+def test_require_hitter_drops_unattributed_hits_but_keeps_the_span():
+    from badminton_poc.rallies import rallies_from_flight
+
+    timeline = [_flight_hit(120, "near"), _flight_hit(150, None), _flight_hit(180, "far"), _flight_landing(400)]
+    model = _Model([_Chain(100, 400, [120, 150, 180])])
+    rallies, dropped = rallies_from_flight(model, timeline, 60.0, require_hitter=True)
+    assert rallies[0]["hit_count"] == 2
+    assert (rallies[0]["start_frame"], rallies[0]["end_frame"]) == (100, 400)
+    assert [d["frame"] for d in dropped] == [150]
+
+
+def test_a_chain_only_one_player_ever_touched_is_not_a_rally():
+    from badminton_poc.rallies import rallies_from_flight
+
+    timeline = [_flight_hit(120, "near"), _flight_hit(150, "near"), _flight_hit(180, "near"), _flight_landing(400)]
+    model = _Model([_Chain(100, 400, [120, 150, 180])])
+    rallies, dropped = rallies_from_flight(model, timeline, 60.0, require_both_players=True)
+    assert rallies == []
+    assert {d["reason"] for d in dropped} == {
+        "only one player made contact, so this is not an exchange"
+    }
+
+
+def test_both_players_gate_keeps_a_rally_with_a_run_of_one_name():
+    from badminton_poc.rallies import rallies_from_flight
+
+    timeline = [_flight_hit(120, "near"), _flight_hit(150, "near"), _flight_hit(180, "far"), _flight_landing(400)]
+    model = _Model([_Chain(100, 400, [120, 150, 180])])
+    rallies, _ = rallies_from_flight(model, timeline, 60.0, require_both_players=True)
+    assert len(rallies) == 1
+
+
+def test_a_chain_below_the_hit_minimum_is_dropped_with_a_reason():
+    from badminton_poc.rallies import rallies_from_flight
+
+    timeline = [_flight_hit(120, "near"), _flight_landing(400)]
+    model = _Model([_Chain(100, 400, [120])])
+    rallies, dropped = rallies_from_flight(model, timeline, 60.0, min_hits=2)
+    assert rallies == []
+    assert dropped and "fewer than 2" in dropped[0]["reason"]

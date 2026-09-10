@@ -117,7 +117,7 @@ def run(
         started = time.time()
         result = analyze(
             paths.players, ball_csv, events_json, paths.analysis,
-            fps=fps, court=config.court, cfg=config.analysis,
+            fps=fps, court=config.court, cfg=config.analysis, flight_cfg=config.flight,
             width=width, height=height,
             metadata={
                 "source_video": str(source),

@@ -16,12 +16,18 @@ source video
   │  preprocess   ffmpeg: bake rotation, uniform fps, one frame per source frame
   ├─ players      Ultralytics pose + ByteTrack, court-polygon ROI, near/far identity slots
   ├─ shuttle      upstream BadmintonTrackNet (TrackNetV3 + InpaintNet) via subprocess
-  │  analyze      hit -> player association, rally segmentation, coverage metrics
+  │  flight       shuttle track -> flight segments -> hits, landings, rallies
+  │  analyze      hit -> player association, rally assembly, coverage metrics
   └─ render       annotated diagnostic video
 ```
 
 Shuttle inference and player inference never touch each other. They meet only in `analyze`,
 which reads files from disk.
+
+`flight` takes only the shuttle CSV and the frame rate, so it needs no GPU and a change to it can
+be scored against every clip in seconds. Setting `analysis.event_source` to `tracknet` restores
+the older path, which reads upstream's events file instead; both stay runnable so any claim about
+one is a measurement against the other.
 
 ## One command
 
@@ -496,18 +502,142 @@ measured and none beats 4 of 6. The ceiling is set by false-positive hits *insid
 every available signal that removes enough of them also splits the rallies apart. Fixing this
 means fixing hit detection at source, which means replacing the detector.
 
+### The labels were wrong about where rallies end
+
+Every attempt at rally boundaries had been scored against labelled spans that nobody had gone
+back and checked. Rally 2 ran 773-1098, and the shuttle track showed the tracker frozen on one
+pixel from frame 1005 to 1080. Pulling the frames out of `work.mp4` and looking at them settled
+it: at 933 the far player is lunging low at the net with the point live, and by 941 both players
+are upright and walking. The labelled end was 2.7 seconds into dead time.
+
+So all six ends were re-measured the same way, at 8-frame granularity, each bracketed by one
+frame with the point visibly live and one with both players disengaged. Five of six had been
+labelled 20 to 40 frames late and rally 2 by 160, which is a convention drifting rather than a
+mistake: a rally ends when the shuttle lands, not when the players finish walking.
+
+| rally | was | now | what the frames show |
+|---|---|---|---|
+| 1 | 83-236 | **0**-198 | the clip opens mid-rally, far player already mid-stroke at frame 0 |
+| 2 | 773-1098 | 773-**938** | live at 933, both players upright by 941 |
+| 3 | 1502-2767 | 1502-**2740** | shuttle visible falling 2721-2737, lands about 2740 |
+| 4 | 3821-5217 | **3810**-**5175** | near player airborne at the net at 5163, turned away by 5179 |
+| 5 | 6185-6439 | **6171**-**6378** | near player lunging at 6364, both upright by 6376 |
+| 6 | 7024-7355 | **7013**-**7375** | still live at 7355; the clip ends at 7375 and cuts the rally off |
+
+The correction was applied to all six before any of them was scored, and it is not a correction
+that flatters anything. It moves two ends earlier than the new detector reports and four later,
+it made a rest-based end rule fail that the uncorrected labels had passed, and starts were
+aligned to the labelled serve contact, moving three of them 11 to 14 frames earlier against a
+detector whose starts already ran late. Scored on the corrected labels, the **old** pipeline
+drops from 4 of 6 to 1 of 6.
+
+Two rallies turn out to be truncated by the recording itself. That is worth having in the schema
+rather than as a footnote: a clip that starts mid-point has a rally whose start cannot be
+observed, and scoring a detector against a start that is not in the video is meaningless.
+
+### Replacing the event detector
+
+The conclusion of the previous session was that rally boundaries cannot be fixed downstream of
+upstream's event detector. That turned out to be right, and the way past it was to stop scoring
+frames and start segmenting the track.
+
+The measurement that opens the door, on the development clip:
+
+| where | median residual of a quadratic fit over 7 frames |
+|---|---|
+| in a rally, away from any hit | 0.88 px |
+| at a real hit | 5.14 px |
+| dead time, tracker frozen | 0.00 px |
+
+A shuttle in flight is almost perfectly smooth, and a racket contact is where that smoothness
+breaks. `flight.py` cuts the track into **flight segments** -- maximal runs a smooth motion model
+fits at real speed -- and reads everything off the segmentation. A hit is a join between two
+segments. A landing is how the last segment of a chain ends. A rally is a chain of segments
+joined by hits. Dead time is whatever no segment covers, which needs no detector of its own.
+
+Four things had to be got right, and each was measured rather than guessed:
+
+**Not every join is a contact.** A join with a large turn is a hit; a join with almost no turn is
+one flight the tracker briefly lost. Treating the second kind as a rally break split two rallies
+in half. Real contacts turn a median 150 degrees, frames inside a flight a median 9.
+
+**Gaps have to be generous, and something else has to close them.** Three intra-rally dropouts run
+0.8s, 1.53s and 1.55s, so a tight gap limit splits rallies. What separates a long intra-rally
+dropout from the gap between two rallies is not its length but whether the shuttle track came to
+a standstill inside it. On this clip that separates them exactly: the one gap holding a sustained
+standstill is between rallies, and all seventy-odd intra-rally gaps hold none, losing the shuttle
+to invisibility instead.
+
+**A frozen position is usually furniture.** TrackNetV3 emits one shuttle per frame whether or not
+one is in play, and between points it settles on a ceiling light -- pixel-identical across
+fourteen separate stretches totalling 2340 frames, while the one genuine shuttle-at-rest appears
+once for 85. Recurrence tells them apart and needs no court geometry.
+
+**Where the contact is placed decides who gets blamed for it.** The shuttle leaves the racket
+fast, so a hit reported a few frames late already sits nearer the opponent. Every wrong
+assignment under a late rule was a near-player shot credited to the far player. Putting the
+contact on the last frame of the incoming flight -- the last moment the shuttle is still
+unambiguously on its way *to* the racket -- fixes it, at the cost of reporting contacts a median
+three frames early:
+
+| contact placed at | precision | recall | F1 | hitter |
+|---|---|---|---|---|
+| the worst-fitting frame | 0.736 | 0.898 | 0.809 | 0.885 |
+| the middle of the gap | 0.750 | 0.915 | 0.824 | 0.926 |
+| **the last incoming frame** | **0.778** | **0.949** | **0.855** | **0.927** |
+
+A separate fix in `assoc.py` helped both detectors. A hit landing in a one- or two-frame dropout
+of one player left the only remaining candidate to win by default, and which frame a detector
+lands on is close to chance. Nobody crosses a court in 60ms, so the nearest frame that has both
+players is now borrowed. That took the old pipeline's hitter accuracy from 92.3% to 94.1%.
+
+The last piece is what a rally *is*. Two detected chains on this clip are not rallies -- one is
+the handback before a serve, the other somebody knocking a shuttle about during a break -- and
+both read as contacts by one player alone, `NNN` and `FF`, while all six real rallies carry
+contacts from both sides. Requiring both players removes both without touching anything real. It
+asks only that both appear, not that they alternate, because at 93% assignment accuracy a real
+rally routinely shows runs of one name.
+
+### Milestone 1, measured
+
+Clip 2, corrected labels, `event_source: flight`:
+
+| criterion | target | result |
+|---|---|---|
+| both players tracked in active play | >= 90% | **92.9%** |
+| hitter assignment on detected hits | >= 90% | **92.7%** |
+| rally boundaries approximately correct | >= 85% | **6 of 6** |
+| hit detection scorable | precision/recall | **0.78 / 0.95**, F1 0.855 |
+
+Against the same labels and the same clip, upstream's detector scores 0.62 / 0.90 on hits, 94.1%
+on hitters and 1 of 6 on rallies. The old path is still runnable with `event_source: tracknet`,
+so this is a comparison rather than a claim.
+
+Rally ends still run a median 0.51s late, because the last flight segment includes the shuttle's
+descent after the final shot. That is a bias with a known cause, well inside the one-second
+tolerance, and it is the obvious next thing to shave.
+
+**This is one clip.** Nothing here is cross-validated. Clips 3 and 5 have seeded truth drafts
+sitting at `labelled: false` and until somebody works through them the flight detector's
+parameters rest entirely on the recording they were measured against. What it does on the
+unlabelled clips, for whoever picks that up: clip 1 six rallies, clip 3 five against a six-rally
+draft, clip 5 four against an eight-rally draft with one detected rally running 23.5 seconds,
+which is either a long point or two rallies merged and only the video can say which.
+
 ### Where it stands
 
-Two of three POC criteria pass on a real, fully labelled clip. Rally boundaries fail, and the
-cause is understood: rally ends run long because false-positive hits during dead time are pulled
-into the rally before its terminating event is looked for. Boundary accuracy and hit precision
-are one problem.
+All four milestone-1 criteria pass on clip 2 with the flight-segment detector, against labels
+that were re-measured from the video rather than taken on trust. That is the milestone met on one
+recording and not yet on any other.
 
 **Every number here comes from one recording.** Clip 1 is a poor clip -- occlusion alone costs
 it ten points of far-player coverage, so it cannot pass the tracking criterion however good the
 code is -- and is kept as a regression clip, not an acceptance one. Nothing has been
-cross-validated on a second usable recording, and the swing threshold in particular was
-measured on the same clip that set the confidence threshold.
+cross-validated on a second usable recording, and the flight detector's parameters were measured
+on the same clip whose labels were corrected in the same session.
+
+The next thing worth doing is labelling clip 3. It is the smallest unlabelled clip, its draft
+holds 32 candidate contacts, and it is the only way to find out whether any of this transfers.
 
 `badminton-poc report --video <clip>` renders any clip's `analysis.json` as a page, with every
 figure carrying the caveat it rests on. `badminton-poc refresh-labels` re-seeds a ground-truth

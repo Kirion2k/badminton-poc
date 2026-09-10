@@ -1,5 +1,5 @@
 {
-  "notes": "Court ROI derived from a permissive calibration pass rather than by eye: the near player's foot cloud spans x 0.20-0.86 y 0.67-1.00, the far player's x 0.20-0.40 y 0.55-0.68, and the courtside crowd sits at x 0.74-0.90 y 0.63-0.72 with the left-hand spectators pinned at x 0.11. Six vertices, not four, because the crowd on the right needs a near-horizontal cut above it while the far court needs a sloping baseline. The near baseline runs off the bottom of the frame, so the polygon closes on y=1.0. Source is pillarboxed: x<0.09 and x>0.905 are solid black. min_hit_confidence is 0: labelling showed 0.85 discarded 7 real hits (every one of the recall losses) and caused a real rally to be split, while removing none of the false positives that matter. play_gate_min_speed_px is 0: shuttle motion was measured and does not separate play from dead time well enough to gate on (>=4 px/frame covers 78% of play frames but also 22% of dead ones).",
+  "notes": "Court ROI derived from a permissive calibration pass rather than by eye: the near player's foot cloud spans x 0.20-0.86 y 0.67-1.00, the far player's x 0.20-0.40 y 0.55-0.68, and the courtside crowd sits at x 0.74-0.90 y 0.63-0.72 with the left-hand spectators pinned at x 0.11. Six vertices, not four, because the crowd on the right needs a near-horizontal cut above it while the far court needs a sloping baseline. The near baseline runs off the bottom of the frame, so the polygon closes on y=1.0. Source is pillarboxed: x<0.09 and x>0.905 are solid black. event_source is 'flight': hits and rallies come from this project's flight-segment detector rather than upstream's events file, which took rally boundaries from 1 of 6 to 6 of 6 and hit F1 from 0.73 to 0.86 on this clip. Everything below min_hit_confidence exists only for the upstream path and is ignored while event_source is 'flight'.",
   "court": {
     "polygon": [
       [
@@ -80,6 +80,8 @@
     "min_swing_speed": 0.0,
     "rally_end_at_last_hit": false,
     "min_hits_per_rally": 2,
-    "trailing_swing_trim": 0.0
+    "trailing_swing_trim": 0.0,
+    "event_source": "flight",
+    "require_both_players": true
   }
 }

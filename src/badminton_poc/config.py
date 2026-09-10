@@ -278,6 +278,28 @@ class ShuttleConfig:
 
 @dataclass(frozen=True)
 class AnalysisConfig:
+    event_source: str = "tracknet"
+    """Where hits and landings come from: ``tracknet`` for upstream's events file, ``flight``
+    for this project's flight-segment detector.
+
+    Both stay runnable so any claim about the newer detector is a measured comparison rather
+    than an assertion. Under ``flight`` the whole upstream filtering chain is skipped -- the
+    confidence threshold, burst consolidation, the play gate and the swing gate all exist to
+    thin 777 candidates down to something usable, and a segmentation does not produce them."""
+    require_hitter: bool = False
+    """Discard hits that could not be attributed to either court player.
+
+    A rally shot happens within reach of somebody. A break in the shuttle track with no player
+    near it is the tracker wandering, which is what a spurious dead-time rally is made of."""
+    require_both_players: bool = False
+    """Discard a rally in which only one player ever made contact.
+
+    A rally is an exchange. A run of contacts by one player is somebody knocking the shuttle up,
+    handing it back, or bouncing it on a racket between points. On the development clip the two
+    chains that are not rallies read ``NNN`` and ``FF`` while all six real ones carry contacts
+    from both sides, so this is a gate on what a rally *is* rather than a tuned threshold. It
+    asks only that both players appear, not that they alternate: assignment is 92% accurate, so
+    a real rally routinely shows runs of one name."""
     hit_search_radius_frames: int = 4
     """How far either side of an event frame we look for a visible shuttle sample."""
     assignment_margin_px: float = 40.0
@@ -342,6 +364,75 @@ class AnalysisConfig:
 
 
 @dataclass(frozen=True)
+class FlightConfig:
+    """Parameters of the flight-segment event detector, in seconds and pixels.
+
+    Every duration is in seconds and every distance in pixels at ``reference_width``, because
+    these clips do not agree on either axis: the frame rates run 28 to 60 fps, so a window fixed
+    in frames measures a different amount of time on each, and a speed in px/frame means half as
+    much at 60 fps as at 30. Distances are scaled by the actual frame width at run time.
+    """
+
+    reference_width: int = 1920
+    """Frame width the pixel figures below were measured at. Distances scale with the actual
+    working width, so a clip normalized to a different size keeps the same physical meaning."""
+    fit_window_seconds: float = 0.12
+    """Width of the centred window a quadratic is fitted to. Long enough that noise averages
+    out, short enough that a real flight is still locally quadratic under drag."""
+    max_fit_residual_px: float = 2.5
+    """Fit residual above which the shuttle is not flying smoothly. Measured on the development
+    clip: 0.88 px median in a rally away from any hit, 1.49 px at the 90th percentile, against
+    5.14 px at a real contact."""
+    min_flight_speed_px_s: float = 150.0
+    """A smooth track that is barely moving is not flight."""
+    min_flight_seconds: float = 0.10
+    """Shorter smooth runs are noise that happened to fit."""
+    max_link_gap_seconds: float = 1.8
+    """How long the shuttle may go unmodelled between two segments and still belong to the same
+    rally. Generous because TrackNet loses fast strokes for over a second: three intra-rally
+    dropouts on the development clip run 0.8s, 1.53s and 1.55s, and a tighter limit split two
+    rallies in half. Dead time between real rallies on that clip is never shorter than 2.3s."""
+    min_turn_degrees: float = 60.0
+    """Turn between the velocity leaving one segment and entering the next, above which the join
+    is a racket contact rather than one flight the tracker briefly lost. Real contacts sit at a
+    median 150 degrees; frames inside a flight sit at a median 9."""
+    rest_window_seconds: float = 0.20
+    rest_tolerance_px: float = 8.0
+    min_rest_seconds: float = 0.25
+    """A shuttle counts as lying still when it drifts less than ``rest_tolerance_px`` over
+    ``rest_window_seconds`` for at least ``min_rest_seconds``."""
+    fixed_point_min_runs: int = 3
+    fixed_point_tolerance_px: float = 12.0
+    """A frozen position reached in this many separate stretches is a fixed object in the room,
+    not a shuttle at rest. TrackNetV3 emits one shuttle per frame whether or not one is in play;
+    on the development clip it settles on a single ceiling light in fourteen separate stretches
+    totalling 2340 frames, while the one real shuttle-at-rest appears once for 85."""
+    min_serve_quiet_seconds: float = 1.0
+    """Quiet needed before a chain's first segment for its start to count as a serve. Without it
+    the rally is reported as ``truncated``: the clip began mid-flight and its real start cannot
+    be seen. The development clip opens with the far player already mid-stroke."""
+    min_hits_per_rally: int = 2
+    contact_frame_rule: str = "exit"
+    """Where in the gap between two flight segments to place the contact.
+
+    The contact happened somewhere between the last frame of the incoming flight and the first
+    of the outgoing one, and which frame is reported matters downstream: the shuttle leaves the
+    racket fast, so a hit placed late already sits nearer the opponent and gets attributed to
+    them. All six wrong assignments under a late rule were near-player shots credited to the far
+    player.
+
+    ``exit`` is the last frame the shuttle was still unambiguously on its way *to* the racket,
+    which is the sample closest to the hitter. It reports a contact a median three frames (50ms)
+    early and is the better choice anyway, measured on the development clip:
+
+        rule            precision  recall     F1   hitter
+        residual_peak       0.736   0.898  0.809    0.885
+        midpoint            0.750   0.915  0.824    0.926
+        exit                0.778   0.949  0.855    0.927
+    """
+
+
+@dataclass(frozen=True)
 class PipelineConfig:
     court: CourtROI = field(default_factory=CourtROI.full_frame)
     target_width: int = 1920
@@ -350,6 +441,7 @@ class PipelineConfig:
     players: PlayerConfig = field(default_factory=PlayerConfig)
     shuttle: ShuttleConfig = field(default_factory=ShuttleConfig)
     analysis: AnalysisConfig = field(default_factory=AnalysisConfig)
+    flight: FlightConfig = field(default_factory=FlightConfig)
 
     @classmethod
     def load(cls, path: str | Path | None) -> "PipelineConfig":
@@ -358,7 +450,8 @@ class PipelineConfig:
         data = json.loads(Path(path).read_text(encoding="utf-8"))
         if not isinstance(data, dict):
             raise ConfigError("config file must contain a JSON object")
-        known = {"court", "target_width", "target_fps", "players", "shuttle", "analysis"}
+        known = {"court", "target_width", "target_fps", "players", "shuttle", "analysis",
+                 "flight"}
         unknown = set(data) - known - {"_comment", "notes"}
         if unknown:
             raise ConfigError(f"unknown config keys: {sorted(unknown)}")
@@ -369,6 +462,7 @@ class PipelineConfig:
             players=_build(PlayerConfig, data.get("players")),
             shuttle=_build(ShuttleConfig, data.get("shuttle")),
             analysis=_build(AnalysisConfig, data.get("analysis")),
+            flight=_build(FlightConfig, data.get("flight")),
         )
 
     def to_dict(self) -> dict[str, Any]:

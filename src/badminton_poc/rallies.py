@@ -505,3 +505,69 @@ def _finalise(
         "termination_reason": reason,
         "hits": ordered,
     }
+
+
+def rallies_from_flight(
+    model,
+    timeline: list[TimelineEvent],
+    fps: float,
+    *,
+    require_hitter: bool = False,
+    require_both_players: bool = False,
+    min_hits: int = 2,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Turn flight-segment chains into rally records.
+
+    Chains already know where they start and end, so unlike :func:`segment_rallies` this does no
+    grouping: it attaches the hits and the terminating landing to a span the segmentation
+    decided. The span survives ``require_hitter`` untouched. Whether a player could be put
+    behind a contact says something about that contact, not about whether the shuttle flew.
+    """
+    hits_by_frame = {e.frame: e for e in timeline if e.event_type == "hit"}
+    landings = {e.frame: e for e in timeline if e.event_type == "landing"}
+    rallies: list[dict[str, Any]] = []
+    dropped: list[dict[str, Any]] = []
+    for chain in model.rallies:
+        hits = [hits_by_frame[f] for f in chain.hit_frames if f in hits_by_frame]
+        if require_hitter:
+            keep = []
+            for hit in hits:
+                if hit.hitter in ("near", "far"):
+                    keep.append(hit)
+                else:
+                    dropped.append({
+                        "frame": hit.frame,
+                        "time_s": round(hit.frame / fps, 3),
+                        "reason": "no player close enough to have played it",
+                        "assignment_reason": hit.detail.get("assignment_reason"),
+                    })
+            hits = keep
+        if len(hits) < min_hits:
+            dropped.extend({
+                "frame": hit.frame,
+                "time_s": round(hit.frame / fps, 3),
+                "reason": f"chain kept fewer than {min_hits} hits",
+            } for hit in hits)
+            continue
+        if require_both_players and len({h.hitter for h in hits} & {"near", "far"}) < 2:
+            dropped.extend({
+                "frame": hit.frame,
+                "time_s": round(hit.frame / fps, 3),
+                "reason": "only one player made contact, so this is not an exchange",
+                "hitter": hit.hitter,
+            } for hit in hits)
+            continue
+        rally = _finalise(hits, landings.get(chain.end_frame), fps, len(rallies) + 1)
+        # The chain, not the hits, decides the span: a rally is in progress from the first
+        # flight we can see to the last, and the serve that opened it may be off the clip.
+        rally["start_frame"] = chain.start_frame
+        rally["end_frame"] = chain.end_frame
+        rally["start_s"] = round(chain.start_frame / fps, 3)
+        rally["end_s"] = round(chain.end_frame / fps, 3)
+        rally["duration_s"] = round(max(0.0, (chain.end_frame - chain.start_frame) / fps), 3)
+        rally["termination_reason"] = "last_flight_ended"
+        rally["start_kind"] = chain.start_kind
+        rally["flight_segments"] = list(chain.segment_indices)
+        rally["shuttle_seen_at_rest"] = chain.rest_seen_at
+        rallies.append(rally)
+    return rallies, dropped

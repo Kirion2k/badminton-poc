@@ -109,6 +109,23 @@ def assign_hit(
     if player_row is None:
         return HitAssignment(frame, UNASSIGNED, None, "no_player_row_for_frame", evidence)
 
+    # A hit frame that happens to fall in a one- or two-frame dropout of one player leaves the
+    # only remaining candidate to win by default, and which frame a detector lands on is close
+    # to chance: three of six wrong assignments on the development clip were hits where the far
+    # player was simply missing, with the same player present a few frames either side. Nobody
+    # crosses a court in 60ms, so borrowing the nearest frame that has both is a better estimate
+    # of where they stood than deciding from one of them.
+    if not (player_row.get("near") and player_row.get("far")):
+        for offset in range(1, max(0, cfg.hit_search_radius_frames) + 1):
+            for candidate_frame in (frame - offset, frame + offset):
+                candidate = players_by_frame.get(candidate_frame)
+                if candidate and candidate.get("near") and candidate.get("far"):
+                    player_row = candidate
+                    evidence["player_row_frame_offset"] = candidate_frame - frame
+                    break
+            if "player_row_frame_offset" in evidence:
+                break
+
     near_anchors = player_anchors(player_row.get("near"), shuttle)
     far_anchors = player_anchors(player_row.get("far"), shuttle)
     near_best, far_best = _best(near_anchors), _best(far_anchors)

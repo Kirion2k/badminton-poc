@@ -323,39 +323,41 @@
   "rallies": [
     {
       "rally": 1,
-      "start_frame": 83,
-      "end_frame": 236,
-      "notes": ""
+      "start_frame": 0,
+      "end_frame": 198,
+      "notes": "Corrected from 83-236 after frame-by-frame review. The clip opens mid-rally: at frame 0 the far player is already mid-stroke, so this rally's real start is before the recording and 0 is the earliest frame we can claim. Play stops between 193 and 201, where the near player straightens up and walks right.",
+      "start_truncated": true
     },
     {
       "rally": 2,
       "start_frame": 773,
-      "end_frame": 1098,
-      "notes": ""
+      "end_frame": 938,
+      "notes": "End corrected from 1098. At 933 the far player is lunging low at the net with the point live; by 941 both players are upright and walking. 1098 is two and a half seconds into dead time, with the near player alone on court. The shuttle track goes to a ceiling light at 1005 and stays there, which is what made the original end look plausible."
     },
     {
       "rally": 3,
       "start_frame": 1502,
-      "end_frame": 2767,
-      "notes": ""
+      "end_frame": 2740,
+      "notes": "End corrected from 2767. The shuttle is visible falling across 2721-2737 and lands about 2740; both players have stopped by 2705."
     },
     {
       "rally": 4,
-      "start_frame": 3821,
-      "end_frame": 5217,
-      "notes": ""
+      "start_frame": 3810,
+      "end_frame": 5175,
+      "notes": "End corrected from 5217. Both players are at the net with the near player airborne at 5163; by 5179 the near player has turned away with the racket down. Start moved from 3821 to the labelled serve contact at 3810; a rally starts when it is served."
     },
     {
       "rally": 5,
-      "start_frame": 6185,
-      "end_frame": 6439,
-      "notes": ""
+      "start_frame": 6171,
+      "end_frame": 6378,
+      "notes": "End corrected from 6439. The near player lunges at the net at 6364; by 6376 both are upright. Start moved from 6185 to the labelled serve contact at 6171; a rally starts when it is served."
     },
     {
       "rally": 6,
-      "start_frame": 7024,
-      "end_frame": 7355,
-      "notes": ""
+      "start_frame": 7013,
+      "end_frame": 7375,
+      "notes": "End corrected from 7355. The far player is lunging at the net at 7355 with the point still live, and the clip ends at 7375. This rally is truncated by the end of the recording. Start moved from 7024 to the labelled serve contact at 7013; a rally starts when it is served.",
+      "end_truncated": true
     }
   ],
   "_rallies_help": "[{\"rally\": 1, \"start_frame\": 83, \"end_frame\": 236, \"notes\": \"\"}] -- inclusive spans where a rally was in progress.",
@@ -366,5 +368,14 @@
     "contacts_kept": 62,
     "discarded_candidate_verdicts": 128,
     "note": "Discarded rows recorded that a particular candidate was not a hit, which is true of a configuration rather than of the video. The matcher re-derives false positives for whatever configuration is scored."
-  }
+  },
+  "label_revisions": [
+    {
+      "date": "2026-09-10",
+      "what": "Every rally end and rally 1's start re-measured from the working video at 8-frame granularity.",
+      "why": "Rally 2's labelled end of 1098 was 2.7 seconds into dead time. Checking it exposed a systematic bias: five of six ends were labelled 20 to 40 frames after play stopped, and rally 2 by 160. The convention is now that a rally ends when the shuttle lands or the point is otherwise decided, not when the players finish walking.",
+      "method": "Frames pulled from outputs/test-video2/work.mp4 with ffmpeg and read directly. Each end was bracketed by one frame with the point visibly live and one with both players upright and disengaged, then set between them.",
+      "effect": "The correction was applied to all six ends before any of them was scored, and it moves two ends earlier than the detector reports and four later. Rally 4's correction made a rest-based end rule fail that the uncorrected label had passed. Rally starts were also aligned to the labelled serve contact, moving three of them 11 to 14 frames earlier. That works against the detector, whose starts already ran late."
+    }
+  ]
 }

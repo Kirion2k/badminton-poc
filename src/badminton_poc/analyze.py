@@ -7,11 +7,13 @@ from statistics import mean
 from typing import Any
 
 from .assoc import assign_hit, enforce_alternation
-from .config import AnalysisConfig, CourtROI
+from .config import AnalysisConfig, CourtROI, FlightConfig
 from .parsing import BallTrack, load_ball_csv, load_events_json, load_jsonl
 from .players import swing_features
+from .flight import segment_flight
 from .rallies import (
     build_timeline,
+    rallies_from_flight,
     consolidate_events,
     detect_play_spans,
     drop_weak_swings,
@@ -31,40 +33,61 @@ def analyze(
     fps: float,
     court: CourtROI,
     cfg: AnalysisConfig,
-    width: int,
+    flight_cfg: FlightConfig | None = None,
+    width: int = 1920,
     height: int,
     metadata: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     if fps <= 0:
         raise ValueError("fps must be positive")
+    if cfg.event_source == "flight" and flight_cfg is None:
+        flight_cfg = FlightConfig()
 
     player_rows = load_jsonl(players_jsonl)
     players_by_frame = {int(row["frame"]): row for row in player_rows}
     ball_raw = load_ball_csv(ball_csv)
     ball, offcourt_frames = mask_offcourt_shuttle(ball_raw, court, width, height)
-    raw_events = load_events_json(events_json)
-    raw_events, offcourt_events = drop_offcourt_events(raw_events, court, width, height)
+    upstream_events = load_events_json(events_json)
+    upstream_events, offcourt_events = drop_offcourt_events(upstream_events, court, width, height)
     raw_counts: dict[str, int] = {}
-    for event in raw_events:
+    for event in upstream_events:
         raw_counts[event.event_type] = raw_counts.get(event.event_type, 0) + 1
+
+    flight_model = None
+    if cfg.event_source == "flight":
+        # The whole upstream filtering chain below exists to thin 777 candidates into something
+        # usable. A segmentation does not produce them, so none of it runs; upstream's file is
+        # still parsed above and its counts still reported, as a comparison rather than an input.
+        flight_model = segment_flight(ball, fps, flight_cfg, width=width)
+        raw_events = list(flight_model.events)
+    elif cfg.event_source == "tracknet":
+        raw_events = upstream_events
+    else:
+        raise ValueError(
+            f"unknown event_source {cfg.event_source!r}; expected 'tracknet' or 'flight'"
+        )
+
     play_spans = detect_play_spans(
         ball, fps,
         min_speed_px=cfg.play_gate_min_speed_px,
         smooth_seconds=cfg.play_gate_smooth_seconds,
         bridge_seconds=cfg.play_gate_bridge_seconds,
         min_span_seconds=cfg.play_gate_min_span_seconds,
-    ) if cfg.play_gate_min_speed_px > 0 else []
-    raw_events, off_play = reject_hits_outside_play(raw_events, play_spans, fps=fps)
-    raw_events, low_confidence = drop_low_confidence(
-        raw_events, cfg.min_hit_confidence, "hit"
-    )
-    events, merge_audit = consolidate_events(
-        raw_events, fps, cfg.min_hit_interval_seconds, "hit"
-    )
-    events, landing_audit = consolidate_events(
-        events, fps, cfg.min_landing_interval_seconds, "landing"
-    )
-    merge_audit = merge_audit + landing_audit
+    ) if cfg.play_gate_min_speed_px > 0 and flight_model is None else []
+    if flight_model is None:
+        raw_events, off_play = reject_hits_outside_play(raw_events, play_spans, fps=fps)
+        raw_events, low_confidence = drop_low_confidence(
+            raw_events, cfg.min_hit_confidence, "hit"
+        )
+        events, merge_audit = consolidate_events(
+            raw_events, fps, cfg.min_hit_interval_seconds, "hit"
+        )
+        events, landing_audit = consolidate_events(
+            events, fps, cfg.min_landing_interval_seconds, "landing"
+        )
+        merge_audit = merge_audit + landing_audit
+    else:
+        events, off_play, low_confidence, merge_audit = raw_events, [], [], []
 
     hits = [e for e in events if e.event_type == "hit"]
     swing_by_frame = {}
@@ -92,10 +115,19 @@ def analyze(
 
     timeline = build_timeline(events, by_frame, ball, fps, cfg.shuttle_absent_seconds,
                               swing_by_frame=swing_by_frame)
-    rallies = segment_rallies(
-        timeline, fps, gap_seconds=cfg.rally_gap_seconds, min_hits=cfg.min_hits_per_rally,
-        end_at_last_hit=cfg.rally_end_at_last_hit,
-    )
+    unattributed: list[dict[str, Any]] = []
+    if flight_model is not None:
+        rallies, unattributed = rallies_from_flight(
+            flight_model, timeline, fps,
+            require_hitter=cfg.require_hitter,
+            require_both_players=cfg.require_both_players,
+            min_hits=cfg.min_hits_per_rally,
+        )
+    else:
+        rallies = segment_rallies(
+            timeline, fps, gap_seconds=cfg.rally_gap_seconds, min_hits=cfg.min_hits_per_rally,
+            end_at_last_hit=cfg.rally_end_at_last_hit,
+        )
 
     trailing_trimmed: list[dict[str, Any]] = []
     if cfg.trailing_swing_trim > 0:
@@ -135,9 +167,20 @@ def analyze(
             for s, e in play_spans
         ],
         "hits_outside_play_dropped": off_play,
+        "unattributed_hits_dropped": unattributed,
         "weak_swing_hits_dropped": weak_swings,
         "trailing_hits_trimmed": trailing_trimmed,
         "offcourt_events_dropped": offcourt_events,
+        "flight": None if flight_model is None else flight_model.to_dict(fps),
+        "upstream_events_not_used": (
+            None if flight_model is None else {
+                "counts": raw_counts,
+                "note": (
+                    "Parsed from upstream's events file and reported for comparison. Under "
+                    "event_source 'flight' nothing here reached the timeline."
+                ),
+            }
+        ),
     }
     out = Path(output_json)
     out.parent.mkdir(parents=True, exist_ok=True)
