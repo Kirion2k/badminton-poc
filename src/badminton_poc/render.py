@@ -8,6 +8,7 @@ which rally we believe we are in.
 from __future__ import annotations
 
 import json
+import math
 from collections import deque
 from pathlib import Path
 from typing import Any
@@ -25,6 +26,8 @@ HIT_COLOR = (80, 120, 255)
 LANDING_COLOR = (100, 100, 255)
 COURT_COLOR = (110, 110, 60)
 OFFCOURT_SHUTTLE_COLOR = (130, 130, 130)
+PARKED_SHUTTLE_COLOR = (110, 110, 110)
+PARKED_TOLERANCE_PX = 14.0
 PANEL_BG = (24, 24, 24)
 
 SKELETON = (
@@ -88,6 +91,38 @@ def _draw_court(frame, court: CourtROI) -> None:
     cv2.line(frame, left, right, COURT_COLOR, 1, cv2.LINE_AA)
 
 
+def shuttle_state(
+    sample,
+    court: CourtROI | None,
+    fixed_points: list[dict[str, Any]],
+    width: int,
+    height: int,
+    tolerance_px: float = PARKED_TOLERANCE_PX,
+) -> str:
+    """What the shuttle marker at this frame actually means.
+
+    ``none`` no sample, ``live`` a shuttle we believe in, ``off_court`` a neighbouring court's
+    shuttle, ``parked`` the tracker resting on a fixed object in the room.
+
+    TrackNetV3 emits exactly one shuttle per frame whether or not one is in play, so between
+    points it holds a single pixel on a ceiling light for seconds at a time. Drawn as a live
+    shuttle that reads as a shuttle hovering mid-court, which is the most misleading thing in the
+    annotated video. It is still drawn, greyed and labelled, because hiding it would hide a real
+    failure mode of the tracker.
+    """
+    if sample is None or not sample.visible:
+        return "none"
+    if court is not None and not court.shuttle_contains_normalized(
+        sample.x / width, sample.y / height
+    ):
+        # Named before "parked" because it is the more specific diagnosis.
+        return "off_court"
+    for point in fixed_points or []:
+        if math.hypot(sample.x - float(point["x"]), sample.y - float(point["y"])) <= tolerance_px:
+            return "parked"
+    return "live"
+
+
 def _rally_for_frame(rallies: list[dict[str, Any]], frame_index: int) -> dict[str, Any] | None:
     for rally in rallies:
         if rally["start_frame"] <= frame_index <= rally["end_frame"]:
@@ -112,6 +147,8 @@ def render(
     analysis = json.loads(Path(analysis_json).read_text(encoding="utf-8"))
     rallies = analysis.get("rallies", [])
     fps = float(analysis.get("config", {}).get("fps") or 30.0)
+
+    fixed_points = list((analysis.get("shuttle_fixed_points") or []))
 
     events_by_frame: dict[int, list[dict[str, Any]]] = {}
     for event in analysis.get("events", []):
@@ -152,19 +189,23 @@ def render(
                 _draw_player(frame, row.get("near"), "NEAR", NEAR_COLOR)
 
             sample = ball.get(frame_index)
-            on_court = True
-            if sample and sample.visible and court is not None:
-                on_court = court.shuttle_contains_normalized(
-                    sample.x / width, sample.y / height
-                )
-            if sample and sample.visible and not on_court:
-                # Drawn, but greyed and kept out of the trail: this is TrackNet locking onto a
-                # neighbouring court's shuttle, and hiding it would hide a real failure mode.
+            state = shuttle_state(sample, court, fixed_points, width, height)
+            if state in ("off_court", "parked"):
+                # Drawn, but greyed and kept out of the trail. Both are real failure modes of a
+                # tracker that must emit a shuttle every frame, and hiding either would hide
+                # them; drawing them like a live shuttle is what made the video misleading.
                 point = (int(sample.x), int(sample.y))
-                cv2.circle(frame, point, 6, OFFCOURT_SHUTTLE_COLOR, 2)
-                _text(frame, "off-court", (point[0] + 10, point[1] - 8),
-                      OFFCOURT_SHUTTLE_COLOR, 0.45, 1)
-            elif sample and sample.visible:
+                colour = OFFCOURT_SHUTTLE_COLOR if state == "off_court" else PARKED_SHUTTLE_COLOR
+                label = "off-court" if state == "off_court" else "tracker parked"
+                cv2.drawMarker(frame, point, colour, cv2.MARKER_TILTED_CROSS, 12, 1)
+                cv2.circle(frame, point, 6, colour, 1)
+                _text(frame, label, (point[0] + 12, point[1] - 9), colour, 0.5, 1)
+                if state == "parked":
+                    # A parked tracker means no shuttle is in play, so there is no trajectory
+                    # left to show. An off-court sample is a brief lock onto the next court and
+                    # the trail either side of it is still ours, so that one is left alone.
+                    trail.clear()
+            elif state == "live":
                 point = (int(sample.x), int(sample.y))
                 trail.append((frame_index, point))
                 cv2.circle(frame, point, 9, (0, 0, 0), -1)

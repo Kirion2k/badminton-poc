@@ -607,7 +607,7 @@ Clip 2, corrected labels, `event_source: flight`:
 | both players tracked in active play | >= 90% | **92.9%** |
 | hitter assignment on detected hits | >= 90% | **92.7%** |
 | rally boundaries approximately correct | >= 85% | **6 of 6** |
-| hit detection scorable | precision/recall | **0.78 / 0.95**, F1 0.855 |
+| hit detection scorable | precision/recall | **0.82 / 0.95**, F1 0.882 |
 
 Against the same labels and the same clip, upstream's detector scores 0.62 / 0.90 on hits, 94.1%
 on hitters and 1 of 6 on rallies. The old path is still runnable with `event_source: tracknet`,
@@ -622,7 +622,38 @@ sitting at `labelled: false` and until somebody works through them the flight de
 parameters rest entirely on the recording they were measured against. What it does on the
 unlabelled clips, for whoever picks that up: clip 1 six rallies, clip 3 five against a six-rally
 draft, clip 5 four against an eight-rally draft with one detected rally running 23.5 seconds,
-which is either a long point or two rallies merged and only the video can say which.
+which is either a long point or two rallies merged and only the video can say which. All four
+clips now run the flight detector, which on three of them is a preference argued from clip 2
+rather than evidence about those clips.
+
+### What the annotated video was showing that was not there
+
+Watching the output, the shuttle marker sat frozen mid-frame between rallies with LANDING
+pulsing over it. Three separate causes, and none of them was the shuttle.
+
+**The marker.** TrackNetV3 must emit a shuttle on every frame whether or not one is in play, so
+between points it settles on a ceiling light and holds one pixel. The renderer drew that like any
+other detection: a bright filled dot, mid-court, apparently hovering. The detector already knew
+better, because the same recurring-freeze test that keeps a light out of the flight segmentation
+identifies the position, and it is the same fixture in all four clips at (918, 222), accounting
+for 860 to 2991 frames each. `analysis.json` now carries `shuttle_fixed_points` whichever detector
+produced its events, and a sample sitting on one is drawn as a grey cross labelled `tracker
+parked` and kept out of the trail. Still drawn, because hiding it would hide a real failure of
+the tracker; no longer drawn as a shuttle.
+
+**The pulsing.** Clips 1, 3 and 5 were still on `event_source: tracknet`, where landings arrive
+every 0.8s straight through dead time: 34, 65 and 50 of them outside any rally, each flashed for
+12 frames. Those clips now use the flight detector, which puts one landing at the end of each
+rally and none anywhere else. Landing counts fell from 51, 82 and 75 to 6, 5 and 4, and no clip
+now has a single landing outside a detected rally.
+
+**The orphans.** A chain the rally gates rejected still left its events behind, because the
+timeline was assembled before the gates ran. Clip 2 flashed two landings for chains it had
+decided were not rallies. Events whose rally did not survive are now pruned, which also removed
+five false hits and took hit precision from 0.778 to **0.824**, F1 to **0.882**.
+
+Clip 2 after the fix: hits 0.82 precision, 0.95 recall, F1 0.882; hitter 92.7%; rally boundaries
+6 of 6; coverage 92.9%.
 
 ### Where it stands
 

@@ -659,3 +659,44 @@ def test_a_chain_below_the_hit_minimum_is_dropped_with_a_reason():
     rallies, dropped = rallies_from_flight(model, timeline, 60.0, min_hits=2)
     assert rallies == []
     assert dropped and "fewer than 2" in dropped[0]["reason"]
+
+
+# ------------------------------------------------------------------------------------------
+# events must not outlive the rally they belonged to
+
+
+def test_flight_events_for_a_rejected_chain_do_not_reach_the_timeline(tmp_path):
+    """A chain the rally gates throw out must take its landing with it.
+
+    Otherwise the annotated video flashes LANDING in the middle of dead time for a rally that
+    the pipeline decided was not a rally.
+    """
+    from badminton_poc.analyze import prune_to_rallies
+    from badminton_poc.rallies import TimelineEvent
+
+    timeline = [
+        TimelineEvent(frame=100, event_type="hit", source="flight", hitter="near"),
+        TimelineEvent(frame=150, event_type="hit", source="flight", hitter="far"),
+        TimelineEvent(frame=200, event_type="landing", source="flight"),
+        TimelineEvent(frame=400, event_type="hit", source="flight", hitter="near"),
+        TimelineEvent(frame=480, event_type="landing", source="flight"),
+        TimelineEvent(frame=600, event_type="shuttle_absent", source="shuttle_absence"),
+    ]
+    rallies = [{"start_frame": 90, "end_frame": 200,
+                "hits": [{"frame": 100}, {"frame": 150}]}]
+    kept, dropped = prune_to_rallies(timeline, rallies)
+    assert [(e.frame, e.event_type) for e in kept] == [
+        (100, "hit"), (150, "hit"), (200, "landing"), (600, "shuttle_absent"),
+    ]
+    assert sorted((d["frame"], d["event_type"]) for d in dropped) == [
+        (400, "hit"), (480, "landing"),
+    ]
+
+
+def test_pruning_keeps_shuttle_absence_which_belongs_to_no_rally():
+    from badminton_poc.analyze import prune_to_rallies
+    from badminton_poc.rallies import TimelineEvent
+
+    timeline = [TimelineEvent(frame=600, event_type="shuttle_absent", source="shuttle_absence")]
+    kept, dropped = prune_to_rallies(timeline, [])
+    assert len(kept) == 1 and dropped == []

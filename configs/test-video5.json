@@ -1,5 +1,5 @@
 {
-  "notes": "Court fitted by measurement. Near player x 0.203-0.740 y 0.713-0.944; far player x 0.51-0.67 y 0.574-0.620 at about 100px tall. WARNING: this camera is low and the far half is compressed into roughly 0.046 of frame height, with seated line judges at y 0.579-0.596 -- the same image depth as the far player. No polygon can separate them; only the mobility filter can, and the far player's tracks are short-lived. Both-player coverage on the calibration pass was 46%. DETECTOR SETTINGS COPIED FROM CLIP 2 UNCHANGED.",
+  "notes": "Court fitted by measurement. Near player x 0.203-0.740 y 0.713-0.944; far player x 0.51-0.67 y 0.574-0.620 at about 100px tall. WARNING: this camera is low and the far half is compressed into roughly 0.046 of frame height, with seated line judges at y 0.579-0.596 -- the same image depth as the far player. No polygon can separate them; only the mobility filter can, and the far player's tracks are short-lived. Both-player coverage on the calibration pass was 46%. DETECTOR SETTINGS COPIED FROM CLIP 2 UNCHANGED. event_source is 'flight': hits and rallies come from this project's flight-segment detector. Measured only on clip 2, where it took rally boundaries from 1 of 6 to 6 of 6 and hit F1 from 0.73 to 0.86; this clip is not labelled, so that is a reason to prefer it here, not evidence about this clip.",
   "court": {
     "polygon": [
       [
@@ -68,6 +68,8 @@
     "rally_gap_seconds": 2.5,
     "shuttle_absent_seconds": 1.0,
     "min_hit_confidence": 0.85,
-    "play_gate_min_speed_px": 0.0
+    "play_gate_min_speed_px": 0.0,
+    "event_source": "flight",
+    "require_both_players": true
   }
 }

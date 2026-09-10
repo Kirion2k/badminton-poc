@@ -10,7 +10,7 @@ from .assoc import assign_hit, enforce_alternation
 from .config import AnalysisConfig, CourtROI, FlightConfig
 from .parsing import BallTrack, load_ball_csv, load_events_json, load_jsonl
 from .players import swing_features
-from .flight import segment_flight
+from .flight import find_fixed_points, segment_flight
 from .rallies import (
     build_timeline,
     rallies_from_flight,
@@ -52,6 +52,16 @@ def analyze(
     raw_counts: dict[str, int] = {}
     for event in upstream_events:
         raw_counts[event.event_type] = raw_counts.get(event.event_type, 0) + 1
+
+    # Computed whichever detector is in use. It costs one pass over the shuttle track, it is
+    # what tells the annotated video that a motionless mid-court shuttle is a tracker parked on
+    # a light rather than a shuttle, and it is worth knowing on a clip whatever produced its
+    # events.
+    _flight_cfg = flight_cfg or FlightConfig()
+    fixed_points = find_fixed_points(
+        ball, fps, _flight_cfg,
+        width / _flight_cfg.reference_width if _flight_cfg.reference_width > 0 else 1.0,
+    )
 
     flight_model = None
     if cfg.event_source == "flight":
@@ -116,6 +126,7 @@ def analyze(
     timeline = build_timeline(events, by_frame, ball, fps, cfg.shuttle_absent_seconds,
                               swing_by_frame=swing_by_frame)
     unattributed: list[dict[str, Any]] = []
+    orphaned: list[dict[str, Any]] = []
     if flight_model is not None:
         rallies, unattributed = rallies_from_flight(
             flight_model, timeline, fps,
@@ -123,6 +134,7 @@ def analyze(
             require_both_players=cfg.require_both_players,
             min_hits=cfg.min_hits_per_rally,
         )
+        timeline, orphaned = prune_to_rallies(timeline, rallies)
     else:
         rallies = segment_rallies(
             timeline, fps, gap_seconds=cfg.rally_gap_seconds, min_hits=cfg.min_hits_per_rally,
@@ -168,9 +180,11 @@ def analyze(
         ],
         "hits_outside_play_dropped": off_play,
         "unattributed_hits_dropped": unattributed,
+        "events_orphaned_by_rally_gates": orphaned,
         "weak_swing_hits_dropped": weak_swings,
         "trailing_hits_trimmed": trailing_trimmed,
         "offcourt_events_dropped": offcourt_events,
+        "shuttle_fixed_points": fixed_points,
         "flight": None if flight_model is None else flight_model.to_dict(fps),
         "upstream_events_not_used": (
             None if flight_model is None else {
@@ -186,6 +200,37 @@ def analyze(
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(output, indent=2), encoding="utf-8")
     return output
+
+
+def prune_to_rallies(
+    timeline: list[Any], rallies: list[dict[str, Any]]
+) -> tuple[list[Any], list[dict[str, Any]]]:
+    """Drop hits and landings belonging to a chain the rally gates threw out.
+
+    The events are built before the gates run, so without this a chain rejected as "not an
+    exchange" still leaves its landing behind, and the annotated video flashes LANDING in the
+    middle of dead time for a rally the pipeline decided was not one. Events that belong to no
+    rally by design, such as shuttle absence, are left alone.
+    """
+    keep_hits = {int(h["frame"]) for rally in rallies for h in rally.get("hits", [])}
+    spans = [(int(r["start_frame"]), int(r["end_frame"])) for r in rallies]
+    kept, dropped = [], []
+    for event in timeline:
+        if event.event_type == "hit":
+            survives = event.frame in keep_hits
+        elif event.event_type == "landing":
+            survives = any(start <= event.frame <= end for start, end in spans)
+        else:
+            survives = True
+        if survives:
+            kept.append(event)
+        else:
+            dropped.append({
+                "frame": event.frame,
+                "event_type": event.event_type,
+                "reason": "the chain it belonged to was not kept as a rally",
+            })
+    return kept, dropped
 
 
 def _rally_coverage(player_rows, rallies) -> dict[str, Any]:
