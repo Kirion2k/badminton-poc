@@ -700,3 +700,16 @@ def test_pruning_keeps_shuttle_absence_which_belongs_to_no_rally():
     timeline = [TimelineEvent(frame=600, event_type="shuttle_absent", source="shuttle_absence")]
     kept, dropped = prune_to_rallies(timeline, [])
     assert len(kept) == 1 and dropped == []
+
+
+def test_timeline_keeps_each_event_own_source():
+    """A flight event stamped "tracknet" would misreport where the timeline came from."""
+    from badminton_poc.rallies import build_timeline
+
+    events = [
+        ShuttleEvent(10, "hit", 1.0, 2.0, None, "flight_break", ("flight_break",), source="flight"),
+        ShuttleEvent(40, "landing", 3.0, 4.0, 0.9, "speed_step", ("speed_step",)),
+    ]
+    ball = BallTrack([BallSample(frame=f, x=1.0, y=2.0, visible=True) for f in range(60)])
+    timeline = build_timeline(events, {}, ball, 60.0, 1.0)
+    assert [(e.frame, e.source) for e in timeline] == [(10, "flight"), (40, "tracknet")]

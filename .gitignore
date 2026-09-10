@@ -22,6 +22,14 @@ outputs/*/*
 !outputs/*/truth.json
 !outputs/*/baseline.json
 !outputs/*/evaluation.json
+# Milestone 2 keeps its labelling one level deeper. Same reasoning: the shot labels cost hours
+# of frame-by-frame review and cannot be regenerated, and the evaluation is the only record of
+# what was measured against them.
+!outputs/*/shots/
+outputs/*/shots/*
+!outputs/*/shots/ground_truth.json
+!outputs/*/shots/evaluation.json
+!outputs/*/shots/taxonomy.json
 
 # media, wherever it lands
 *.mp4

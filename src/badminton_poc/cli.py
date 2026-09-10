@@ -104,6 +104,21 @@ def build_parser() -> argparse.ArgumentParser:
     p_refresh.add_argument("--video", required=True, help="source video, used to locate outputs/<stem>/")
     common(p_refresh)
 
+    p_shots = sub.add_parser(
+        "shots", help="Milestone 2: build shot samples, classify them, label and score")
+    p_shots.add_argument("--video", required=True,
+                         help="source video, used to locate outputs/<stem>/")
+    p_shots.add_argument(
+        "--stages", default="build,predict,seed,score,report",
+        help="comma-separated: build, predict, seed, score, report, previews")
+    p_shots.add_argument("--model", default="bst",
+                         help="which model's errors to report on (bst or rules)")
+    p_shots.add_argument("--target-hz", type=float, default=None,
+                         help="resample each window to this rate before the model sees it")
+    p_shots.add_argument("--no-bst", action="store_true",
+                         help="skip the pretrained model and run only the rule baseline")
+    common(p_shots)
+
     p_report = sub.add_parser(
         "report", help="render analysis.json as a readable summary page")
     p_report.add_argument("--video", required=True, help="source video, used to locate outputs/<stem>/")
@@ -224,6 +239,45 @@ def main(argv: list[str] | None = None) -> int:
             note = "empty; label contacts and rallies by watching annotated.mp4"
         paths.truth.write_text(json.dumps(truth, indent=2), encoding="utf-8")
         print(f"{paths.truth}\n  {note}")
+        return 0
+
+    if args.command == "shots":
+        from .shots.features import FeatureConfig
+        from .shots.runner import (
+            confusion_image, error_report, load_clip, make_previews, run_predictions,
+            score_clip, seed_truth, write_predictions, write_samples,
+        )
+        from .shots.truth import NotLabelledError
+
+        stages = tuple(s.strip() for s in args.stages.split(",") if s.strip())
+        clip = Path(args.video).stem
+        feature_cfg = FeatureConfig(target_hz=args.target_hz) if args.target_hz else None
+        clip_shots = load_clip(clip, output_root=Path(args.output_root), config=config,
+                               feature_cfg=feature_cfg)
+        print(f"{len(clip_shots.samples)} shot samples, {len(clip_shots.skipped)} hits skipped")
+        if "build" in stages:
+            print("samples:", write_samples(clip_shots))
+        if "predict" in stages:
+            records = run_predictions(clip_shots, include_bst=not args.no_bst)
+            print("predictions:", write_predictions(clip_shots, records))
+        if "seed" in stages:
+            print("ground truth:", seed_truth(clip_shots))
+        if "previews" in stages:
+            made = make_previews(clip_shots)
+            print(f"previews: {len(made)} clips in {clip_shots.paths.previews}")
+        if "score" in stages:
+            try:
+                result = score_clip(clip_shots)
+            except NotLabelledError as exc:
+                print(f"cannot score yet: {exc}", file=sys.stderr)
+                return 2
+            for name, scores in result["models"].items():
+                print(f"  {name}: accuracy {scores['accuracy']} macro F1 {scores['macro_f1']} "
+                      f"top2 {scores['top2_accuracy']}")
+            print("evaluation:", clip_shots.paths.evaluation)
+        if "report" in stages and clip_shots.paths.evaluation.exists():
+            print("errors:", error_report(clip_shots, args.model))
+            print("confusion:", confusion_image(clip_shots, args.model))
         return 0
 
     if args.command == "baseline":

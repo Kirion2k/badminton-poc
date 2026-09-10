@@ -394,7 +394,10 @@ def build_timeline(
             TimelineEvent(
                 frame=event.frame,
                 event_type=event.event_type,
-                source="tracknet",
+                # The event's own provenance, not a constant. Under event_source "flight" these
+                # come from this project's segmentation, and stamping them "tracknet" made
+                # analysis.json claim an origin the events did not have.
+                source=event.source,
                 hitter=hitter,
                 detail=detail,
             )

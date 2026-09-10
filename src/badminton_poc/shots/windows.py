@@ -1,0 +1,183 @@
+"""Turn Milestone 1 hits into shot samples: a window of frames around each contact.
+
+The window is not chosen by us. It is the ``between_2_hits_with_max_limits`` rule from the BST
+repository's ``ShuttleSet/gen_my_dataset.py``, which is what its published checkpoints were
+trained on, restated in seconds:
+
+    half   = 0.5s     fallback reach when a neighbouring hit is missing
+    eps    = 0.25s    extension past the next hit, so the shuttle's arrival is inside the window
+    limit  = 1.5s     hard cap either side of the contact
+
+    start = previous hit, or contact - half, but never earlier than contact - limit
+    end   = next hit + eps, or contact + half, but never later than contact + limit + eps
+
+Upstream writes those as ``fps // 2``, ``t // 2`` and ``fps * 3 // 2``, so the rule is already
+expressed in time and transfers to our frame rate unchanged. What does *not* transfer is the
+number of samples inside it, which is what :mod:`badminton_poc.shots.features` deals with.
+
+A sample stores frame references, never pixels. Everything needed to rebuild the window is on
+disk already in ``players.jsonl`` and the shuttle CSV.
+"""
+from __future__ import annotations
+
+from dataclasses import dataclass, asdict
+from typing import Any
+
+BST_HALF_SECONDS = 0.5
+BST_EPS_SECONDS = 0.25
+BST_LIMIT_SECONDS = 1.5
+
+
+@dataclass(frozen=True)
+class ShotWindowConfig:
+    half_seconds: float = BST_HALF_SECONDS
+    eps_seconds: float = BST_EPS_SECONDS
+    limit_seconds: float = BST_LIMIT_SECONDS
+    require_hitter: bool = True
+    """Skip contacts Milestone 1 could not attribute. A shot classifier keyed on the hitter has
+    nothing to say about a hit with no hitter, and guessing one here would launder an unknown
+    into a label."""
+
+
+@dataclass(frozen=True)
+class ShotSample:
+    clip: str
+    shot_id: int
+    rally: int
+    index_in_rally: int
+    hit_frame: int
+    hit_time_s: float
+    hitter: str | None
+    prev_hit_frame: int | None
+    next_hit_frame: int | None
+    start_frame: int
+    end_frame: int
+    fps: float
+    width: int
+    height: int
+    is_first_in_rally: bool
+    is_last_in_rally: bool
+    rally_start_frame: int
+    rally_end_frame: int
+    rally_start_kind: str | None
+
+    @property
+    def frames(self) -> int:
+        return self.end_frame - self.start_frame + 1
+
+    @property
+    def seconds(self) -> float:
+        return self.frames / self.fps
+
+    def to_dict(self) -> dict[str, Any]:
+        out = asdict(self)
+        out["frames"] = self.frames
+        out["seconds"] = round(self.seconds, 3)
+        return out
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "ShotSample":
+        fields = {f for f in cls.__dataclass_fields__}
+        return cls(**{k: v for k, v in data.items() if k in fields})
+
+
+def window_for(
+    hit_frame: int,
+    prev_hit_frame: int | None,
+    next_hit_frame: int | None,
+    *,
+    fps: float,
+    cfg: ShotWindowConfig,
+    first_frame: int = 0,
+    last_frame: int | None = None,
+) -> tuple[int, int]:
+    """Inclusive frame span around one contact, per the BST rule above."""
+    if fps <= 0:
+        raise ValueError("fps must be positive")
+    half = int(round(cfg.half_seconds * fps))
+    eps = int(round(cfg.eps_seconds * fps))
+    limit = int(round(cfg.limit_seconds * fps))
+
+    start = prev_hit_frame if prev_hit_frame is not None else hit_frame - half
+    end = (next_hit_frame + eps) if next_hit_frame is not None else hit_frame + half
+    start = max(start, hit_frame - limit)
+    end = min(end, hit_frame + limit + eps)
+
+    start = max(start, first_frame)
+    if last_frame is not None:
+        end = min(end, last_frame)
+    if end < start:
+        end = start
+    return start, end
+
+
+def build_samples(
+    analysis: dict[str, Any],
+    *,
+    clip: str,
+    width: int,
+    height: int,
+    cfg: ShotWindowConfig | None = None,
+    last_frame: int | None = None,
+) -> tuple[list[ShotSample], list[dict[str, Any]]]:
+    """One sample per Milestone 1 hit, plus a record of every hit deliberately skipped.
+
+    ``width`` and ``height`` are required rather than read from the analysis document, which
+    does not carry them. Everything downstream normalizes by frame size, so a silent default
+    would turn every "normalized" coordinate into raw pixels without anything failing.
+    """
+    cfg = cfg or ShotWindowConfig()
+    fps = float(analysis.get("config", {}).get("fps") or 0.0)
+    if fps <= 0:
+        raise ValueError("analysis.json carries no usable fps")
+    if width <= 0 or height <= 0:
+        raise ValueError("width and height must be positive; they normalize every coordinate")
+    metadata = analysis.get("metadata") or {}
+    if last_frame is None and metadata.get("frame_count"):
+        last_frame = int(metadata["frame_count"]) - 1
+
+    samples: list[ShotSample] = []
+    skipped: list[dict[str, Any]] = []
+    shot_id = 0
+    for rally in analysis.get("rallies", []):
+        hits = rally.get("hits") or []
+        frames = [int(h["frame"]) for h in hits]
+        for index, hit in enumerate(hits):
+            hitter = hit.get("hitter")
+            if cfg.require_hitter and hitter not in ("near", "far"):
+                skipped.append({
+                    "rally": rally.get("rally"),
+                    "frame": int(hit["frame"]),
+                    "reason": "Milestone 1 could not attribute this contact to a player",
+                })
+                continue
+            frame = int(hit["frame"])
+            start, end = window_for(
+                frame,
+                frames[index - 1] if index > 0 else None,
+                frames[index + 1] if index + 1 < len(frames) else None,
+                fps=fps, cfg=cfg, last_frame=last_frame,
+            )
+            samples.append(ShotSample(
+                clip=clip,
+                shot_id=shot_id,
+                rally=int(rally.get("rally", 0)),
+                index_in_rally=index,
+                hit_frame=frame,
+                hit_time_s=round(frame / fps, 3),
+                hitter=hitter,
+                prev_hit_frame=frames[index - 1] if index > 0 else None,
+                next_hit_frame=frames[index + 1] if index + 1 < len(frames) else None,
+                start_frame=start,
+                end_frame=end,
+                fps=fps,
+                width=width,
+                height=height,
+                is_first_in_rally=index == 0,
+                is_last_in_rally=index == len(hits) - 1,
+                rally_start_frame=int(rally.get("start_frame", frame)),
+                rally_end_frame=int(rally.get("end_frame", frame)),
+                rally_start_kind=rally.get("start_kind"),
+            ))
+            shot_id += 1
+    return samples, skipped
