@@ -395,3 +395,76 @@ Only the ones that changed.
    in.
 8. **Highest-value next experiment?** Unchanged and now better supported: an independent labelling
    of a clip that contains smashes.
+
+---
+
+## 10. Cross-validated on clip 5, labelled independently
+
+The project owner labelled all 53 shots of clip 5 from the marked preview clips. This is the
+first labelling in the project not made by the party that built the pipeline, on a different
+venue, a different standard of play and a different frame rate.
+
+| | clip 2 (my labels, 60 fps) | clip 5 (owner's labels, 33.75 fps) |
+|---|---|---|
+| accuracy | 0.397 | **0.377** |
+| macro F1 | 0.414 | 0.272 |
+| top-2 | 0.587 | 0.585 |
+| near / far | 0.481 / 0.333 | 0.458 / 0.310 |
+
+**Accuracy cross-validates.** Two clips, two labellers, two frame rates, two venues, and the
+figure moves two points. The roughly 38% result is real and not an artefact of my labelling.
+
+Macro F1 falls because clip 5's tail classes are tiny: one drop, two drives, three serves, each
+scoring zero. That is a property of the sample, not a change in the model.
+
+### Smash is finally testable, and I was wrong about it
+
+I had told the owner that no clip we hold contains enough smashes to test the criterion, based on
+counting fast descending contacts with the rule baseline. **That was wrong.** Clip 5 contains ten
+smashes by the owner's count; my heuristic found two, because the heuristic is poor, not because
+the smashes were absent. The lesson is that a weak baseline is not a survey instrument.
+
+| class | support | precision | recall | F1 |
+|---|---|---|---|---|
+| clear | 9 | 0.75 | 0.67 | **0.71** |
+| smash | 10 | 0.67 | 0.40 | **0.50** |
+| lift | 14 | 0.63 | 0.36 | 0.45 |
+| net | 11 | 0.50 | 0.36 | 0.42 |
+| other | 3 | 0.06 | 0.33 | 0.10 |
+| serve | 3 | 0.00 | 0.00 | 0.00 |
+
+Smash F1 of 0.50 misses the 0.80 target but the model does find smashes, at two-thirds precision.
+Clear at 0.71 is the strongest class in the project so far.
+
+**The `other` class is now the clearest single defect.** Eighteen predictions against three real
+examples, absorbing six lifts and six net shots. It is where the abstention goes and where the
+accuracy dies.
+
+### The contested taxonomy mappings, settled on a held-out clip
+
+The decision to send push and net kill to `other` was made before clip 5 existed, so testing the
+alternative here is not fitting to the test set.
+
+| | clip 2 | clip 5 |
+|---|---|---|
+| as committed | 0.397 | 0.377 |
+| push→drive, net kill→smash | 0.429 | 0.377 |
+
+It helps the clip it was tuned against and does nothing on the held-out one. **Left as committed.**
+
+### Two things the labelling exposed that are not about shot type
+
+**The taxonomy has no way to say "backhand".** The owner used it five times. Twice they added the
+shot type in brackets, so those were taken at their word as clears. Three remain unresolved and
+are parked as `other` with `uncertain=true` and an open question recorded in the file. Backhand
+describes which side of the body played the stroke, not where the shuttle went, and this taxonomy
+is defined by destination and flight shape. A backhand can be a clear, a drive, a net shot or a
+lift. This is a real gap and the decision is the owner's, not mine.
+
+**Clip 5's rally boundaries are wrong.** The pipeline calls shots 3, 14 and 40 the first of a
+rally. The owner labelled serves at 14, 15 and 40, and called shot 3 a jump smash. So two of the
+four detected rallies start mid-point, and one real serve is missing from the boundaries. Eight
+further hits on this clip could not be attributed to a player, against one on clip 2, and rally 4
+carries a run of five consecutive contacts credited to the same player. Milestone 1 passed on
+clip 2 and visibly does not transfer to clip 5 at the same quality. That is the cross-validation
+Milestone 1 never had, arriving as a side effect of Milestone 2.

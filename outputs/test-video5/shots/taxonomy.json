@@ -1,0 +1,141 @@
+{
+  "version": "broad-v2",
+  "broad_classes": [
+    "serve",
+    "smash",
+    "drop",
+    "clear",
+    "lift",
+    "drive",
+    "net",
+    "other"
+  ],
+  "side_to_slot": {
+    "Top": "far",
+    "Bottom": "near"
+  },
+  "unknown_upstream": "未知球種",
+  "unknown_maps_to": "other",
+  "defined_by": "where the shuttle goes and the shape of its flight, not where the player stood",
+  "strokes": [
+    {
+      "upstream": "發短球",
+      "english": "short serve",
+      "broad": "serve",
+      "note": "starts a rally, low over the net",
+      "contested_alternative": ""
+    },
+    {
+      "upstream": "發長球",
+      "english": "long serve",
+      "broad": "serve",
+      "note": "starts a rally, high to the rear court",
+      "contested_alternative": ""
+    },
+    {
+      "upstream": "殺球",
+      "english": "smash",
+      "broad": "smash",
+      "note": "steep, fast, downward",
+      "contested_alternative": ""
+    },
+    {
+      "upstream": "切球",
+      "english": "slice drop",
+      "broad": "drop",
+      "note": "from the rear court into the forecourt",
+      "contested_alternative": ""
+    },
+    {
+      "upstream": "長球",
+      "english": "clear",
+      "broad": "clear",
+      "note": "high and deep to the rear court",
+      "contested_alternative": ""
+    },
+    {
+      "upstream": "挑球",
+      "english": "lift",
+      "broad": "lift",
+      "note": "upward from the forecourt to the rear court",
+      "contested_alternative": ""
+    },
+    {
+      "upstream": "平球",
+      "english": "drive",
+      "broad": "drive",
+      "note": "flat and fast",
+      "contested_alternative": ""
+    },
+    {
+      "upstream": "放小球",
+      "english": "net shot",
+      "broad": "net",
+      "note": "played in the forecourt, stays there",
+      "contested_alternative": ""
+    },
+    {
+      "upstream": "勾球",
+      "english": "cross-court net shot",
+      "broad": "net",
+      "note": "forecourt to the opposite forecourt",
+      "contested_alternative": ""
+    },
+    {
+      "upstream": "擋小球",
+      "english": "block to the net",
+      "broad": "net",
+      "note": "a soft block off a smash that drops into the forecourt; mapped by where the shuttle lands, which is what this taxonomy is defined by",
+      "contested_alternative": "other"
+    },
+    {
+      "upstream": "推球",
+      "english": "push",
+      "broad": "other",
+      "note": "flat forecourt shot pushed to the opponent's midcourt: between drive and net, and neither without guessing",
+      "contested_alternative": "drive"
+    },
+    {
+      "upstream": "撲球",
+      "english": "net kill",
+      "broad": "other",
+      "note": "steep downward putaway taken at the net: between smash and net. Folding it into smash would inflate the class carrying its own acceptance threshold",
+      "contested_alternative": "smash"
+    },
+    {
+      "upstream": "點扣",
+      "english": "punch smash",
+      "broad": "smash",
+      "note": "a flatter, shorter-swing smash",
+      "contested_alternative": ""
+    },
+    {
+      "upstream": "防守回挑",
+      "english": "defensive lift",
+      "broad": "lift",
+      "note": "a lift played under pressure",
+      "contested_alternative": ""
+    },
+    {
+      "upstream": "後場抽平球",
+      "english": "rear-court drive",
+      "broad": "drive",
+      "note": "a flat drive struck from the back",
+      "contested_alternative": ""
+    },
+    {
+      "upstream": "過渡切球",
+      "english": "transitional slice drop",
+      "broad": "drop",
+      "note": "a slice drop played to regain position",
+      "contested_alternative": ""
+    },
+    {
+      "upstream": "防守回抽",
+      "english": "defensive drive",
+      "broad": "drive",
+      "note": "a flat drive played under pressure",
+      "contested_alternative": ""
+    }
+  ]
+}

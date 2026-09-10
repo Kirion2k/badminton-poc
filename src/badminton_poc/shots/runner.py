@@ -184,12 +184,17 @@ def make_previews(
     pad_seconds: float = 0.4,
     width: int = 640,
     only: Sequence[int] | None = None,
+    mark_seconds: float = 0.25,
 ) -> list[Path]:
     """One short clip per shot, cut from the working video with ffmpeg.
 
-    Deliberately a few tenths of a second wider than the classifier's window: a human needs to
-    see the shuttle arrive and leave to name a stroke, and cutting to exactly the model's window
-    would hide the evidence the label depends on.
+    The window runs from the previous contact to the next one, so a preview shows up to three
+    hits and the one being labelled is the middle one. That is genuinely ambiguous to watch, so
+    the contact is marked: a red border and the word CONTACT are burned on for ``mark_seconds``
+    either side of it, and a header names the shot and the hitter throughout.
+
+    Deliberately a few tenths of a second wider than the classifier's window as well, because a
+    human needs to see the shuttle arrive and leave to name a stroke.
     """
     video = clip_shots.paths.work_video
     if not video.exists():
@@ -203,13 +208,27 @@ def make_previews(
             continue
         start = max(0.0, (sample.start_frame / fps) - pad_seconds)
         end = (sample.end_frame / fps) + pad_seconds
+        # Where the contact falls inside the trimmed clip.
+        at = (sample.hit_frame / fps) - start
+        lo, hi = max(0.0, at - mark_seconds), at + mark_seconds
+        header = (f"shot {sample.shot_id}  rally {sample.rally}  hitter {sample.hitter}"
+                  f"  frame {sample.hit_frame}")
+        filters = ",".join([
+            f"scale={width}:-2",
+            f"drawtext=text='{header}':x=8:y=6:fontsize=16:fontcolor=white:box=1:"
+            "boxcolor=black@0.55:boxborderw=4",
+            f"drawbox=x=0:y=0:w=iw:h=ih:color=red@0.9:t=6:"
+            f"enable='between(t,{lo:.3f},{hi:.3f})'",
+            f"drawtext=text='CONTACT — label THIS shot':x=(w-tw)/2:y=h-34:fontsize=20:"
+            f"fontcolor=yellow:box=1:boxcolor=black@0.6:boxborderw=5:"
+            f"enable='between(t,{lo:.3f},{hi:.3f})'",
+        ])
         target = out_dir / (
             f"shot{sample.shot_id:03d}_r{sample.rally}_f{sample.hit_frame}_{sample.hitter}.mp4"
         )
         subprocess.run(
             ["ffmpeg", "-loglevel", "error", "-y", "-ss", f"{start:.3f}",
-             "-to", f"{end:.3f}", "-i", str(video),
-             "-vf", f"scale={width}:-2", "-an", str(target)],
+             "-to", f"{end:.3f}", "-i", str(video), "-vf", filters, "-an", str(target)],
             check=True,
         )
         made.append(target)
