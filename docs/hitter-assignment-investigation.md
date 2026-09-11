@@ -188,6 +188,16 @@ contact, and `assoc.py` already documents that trap.
 
 ## Also found
 
-`test-video`'s shuttle track is broken in a way the other clips' are not: 13% of steps exceed
-150 px and 89 exceed 400 px within a single frame. Its 50% repeat rate has that separate cause,
-and it should not be pooled with the others when scoring this component.
+`test-video`'s shuttle track is worse than the others', though not in the way first claimed here.
+That claim -- 13% of steps over 150 px, 89 over 400 px -- was measured on the raw TrackNet CSV,
+which is not what the pipeline reads: `mask_offcourt_shuttle` drops detections outside the court
+airspace first, and most of those jumps never reach the detector. Measured on the track actually
+used, and against a speed limit scaled by the player's own size, 0.3% of its steps are physically
+impossible.
+
+What is genuinely wrong with it is thinner and slower: the shuttle is missing on 25% of its rally
+frames against 2-5% elsewhere, and its 99th percentile step is 78% of the physical maximum where
+the other three sit between 12% and 21%. A shuttle is near top speed for a few frames of a smash
+and nowhere else, so that tail is the tracker jumping. `shuttle_track_quality` in `analysis.json`
+now reports all of this per clip. Nothing branches on the verdict; it exists so that a clip like
+this announces itself instead of quietly producing 38 confident contacts.

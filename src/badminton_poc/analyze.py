@@ -10,7 +10,7 @@ from .assoc import assign_hit, enforce_alternation, racket_reach
 from .config import AnalysisConfig, CourtROI, FlightConfig
 from .parsing import BallTrack, load_ball_csv, load_events_json, load_jsonl
 from .players import swing_features
-from .flight import find_fixed_points, segment_flight
+from .flight import find_fixed_points, segment_flight, track_quality
 from .rallies import (
     build_timeline,
     rallies_from_flight,
@@ -162,6 +162,20 @@ def analyze(
             trailing_trimmed.extend(dropped)
         rallies = trimmed
 
+    # Everything above is a reading of the shuttle track, so say plainly how much of that track
+    # was physically possible. Measured over rally frames, where it matters, and scaled by the
+    # near player's size so the verdict transfers between clips and frame rates.
+    rally_frames = {f for r in rallies for f in range(r["start_frame"], r["end_frame"] + 1)}
+    near_heights = sorted(
+        row["near"]["bbox"][3] - row["near"]["bbox"][1]
+        for row in players_by_frame.values() if row.get("near") and row["near"].get("bbox")
+    )
+    shuttle_quality = track_quality(
+        ball, fps,
+        body_height_px=near_heights[len(near_heights) // 2] if near_heights else None,
+        frames=rally_frames or None,
+    )
+
     summary = _summarise(player_rows, ball, timeline, rallies, assignments, fps)
     summary["two_player_coverage"]["during_detected_rallies"] = _rally_coverage(
         player_rows, rallies
@@ -197,6 +211,7 @@ def analyze(
         "weak_swing_hits_dropped": weak_swings,
         "trailing_hits_trimmed": trailing_trimmed,
         "offcourt_events_dropped": offcourt_events,
+        "shuttle_track_quality": shuttle_quality,
         "shuttle_fixed_points": fixed_points,
         "flight": None if flight_model is None else flight_model.to_dict(fps),
         "upstream_events_not_used": (

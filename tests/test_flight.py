@@ -11,6 +11,7 @@ import pytest
 
 from badminton_poc.config import FlightConfig
 from badminton_poc.flight import (
+    track_quality,
     _contact_frame,
     _quadratic_residual,
     find_fixed_points,
@@ -344,3 +345,58 @@ def test_segmentation_still_runs_without_being_told_about_players():
     from badminton_poc.config import FlightConfig
     model = segment_flight(_shallow_turn_track(), 60.0, FlightConfig(), width=1920)
     assert model.links
+
+
+# --- shuttle track quality -------------------------------------------------------------------
+# Everything downstream is a reading of one shuttle track, so a track that jumps produces
+# confident nonsense instead of an error. Nothing branches on the verdict; it exists to make a
+# person look at the clip.
+
+
+def _clean_track(n=200, fps=60.0):
+    from badminton_poc.parsing import BallSample, BallTrack
+    out = []
+    for f in range(n):
+        t = f / fps
+        out.append(BallSample(f, 300.0 + 400.0 * t, 400.0 - 200.0 * t + 300.0 * t * t, True))
+    return BallTrack(out)
+
+
+def test_a_clean_track_reads_as_sound():
+    q = track_quality(_clean_track(), 60.0, body_height_px=280.0)
+    assert q["verdict"] == "sound"
+    assert q["impossible_steps"] == 0
+    assert q["coverage"] == 1.0
+
+
+def test_a_track_that_teleports_is_flagged():
+    from badminton_poc.parsing import BallSample, BallTrack
+    samples = list(_clean_track())
+    for f in range(0, 200, 7):                       # jump to the far side of the frame
+        samples[f] = BallSample(f, 1800.0, 60.0, True)
+    q = track_quality(BallTrack(samples), 60.0, body_height_px=280.0)
+    assert q["verdict"] == "suspect"
+    assert q["impossible_steps"] > 0
+    assert "faster than" in q["why"]
+
+
+def test_a_track_full_of_holes_is_flagged():
+    q = track_quality(_clean_track(), 60.0, body_height_px=280.0,
+                      frames=range(0, 400))          # only the first half has any shuttle
+    assert q["verdict"] == "suspect"
+    assert "missing on" in q["why"]
+
+
+def test_without_a_player_to_scale_by_the_verdict_is_unknown_not_a_guess():
+    q = track_quality(_clean_track(), 60.0, body_height_px=None)
+    assert q["verdict"] == "unknown"
+    assert "no player box" in q["why"]
+
+
+def test_the_speed_limit_scales_with_the_player_and_the_frame_rate():
+    """Half the frame rate is twice the distance per frame; half the player is half the pixels."""
+    a = track_quality(_clean_track(), 60.0, body_height_px=280.0)
+    b = track_quality(_clean_track(), 30.0, body_height_px=280.0)
+    c = track_quality(_clean_track(), 60.0, body_height_px=140.0)
+    assert b["speed_limit_px_per_frame"] == pytest.approx(2 * a["speed_limit_px_per_frame"])
+    assert c["speed_limit_px_per_frame"] == pytest.approx(a["speed_limit_px_per_frame"] / 2)

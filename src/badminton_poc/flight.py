@@ -209,6 +209,107 @@ def _percentile(values: Iterable[float], fraction: float) -> float:
     return ordered[max(0, min(len(ordered) - 1, index))]
 
 
+PLAUSIBLE_SHUTTLE_SPEED_M_S = 120.0
+"""Faster than any shuttle in play, chosen to be generous rather than tight.
+
+The fastest smash ever recorded leaves the racket near 137 m/s and sheds speed immediately;
+amateur rally speeds are a small fraction of that. A tracked step implying more than this is not
+a shuttle moving, it is the tracker jumping to something else.
+"""
+
+ADULT_HEIGHT_M = 1.75
+"""What a player's box height stands for, to turn pixels into metres without a homography."""
+
+MIN_COVERAGE = 0.85
+MAX_IMPOSSIBLE_SHARE = 0.005
+MAX_P99_SHARE_OF_LIMIT = 0.5
+"""Screening thresholds, set by looking at four recordings, three sound and one not.
+
+They exist to make a person look at a clip, and nothing in the pipeline branches on the verdict.
+Treat a "suspect" as a prompt to watch the annotated video, not as a measurement: with one bad
+clip to calibrate against, the gap between 78% of the speed limit and 21% is the only thing
+these really know."""
+
+
+def track_quality(
+    ball: BallTrack,
+    fps: float,
+    *,
+    body_height_px: float | None,
+    frames: Iterable[int] | None = None,
+) -> dict[str, Any]:
+    """How much of the shuttle track is physically possible.
+
+    Everything downstream -- segments, contacts, rallies, shot windows -- is a reading of this
+    one track, so a track that teleports produces confident nonsense rather than an error. On
+    `test-video` 13% of steps exceed 150 px and 89 exceed 400 px within a single frame, and its
+    flight segments come out 4 frames long against 16 and 25 on the clips whose tracking is
+    sound. Nothing in the pipeline noticed.
+
+    The speed limit is physical, and scaled by the player's own size so it transfers between
+    clips and frame rates: a body height is about 1.75 m, which converts pixels to metres
+    wherever that player is standing. Without a body height there is no scale, so the verdict is
+    "unknown" rather than a guess.
+    """
+    positions = {s.frame: (s.x, s.y) for s in ball if s.visible}
+    wanted = set(frames) if frames is not None else set(positions)
+    seen = sorted(f for f in positions if f in wanted)
+    out: dict[str, Any] = {
+        "frames_considered": len(wanted),
+        "frames_with_a_shuttle": len(seen),
+        "coverage": round(len(seen) / len(wanted), 4) if wanted else 0.0,
+    }
+    steps = [
+        (f, math.dist(positions[f], positions[f - 1]))
+        for f in seen if f - 1 in positions and f - 1 in wanted
+    ]
+    if not steps or fps <= 0:
+        out["verdict"] = "unknown"
+        out["why"] = "not enough consecutive samples to measure"
+        return out
+    values = sorted(v for _, v in steps)
+    out["median_step_px"] = round(values[len(values) // 2], 1)
+    out["p99_step_px"] = round(values[min(len(values) - 1, int(0.99 * len(values)))], 1)
+    if not body_height_px or body_height_px <= 1:
+        out["verdict"] = "unknown"
+        out["why"] = "no player box to scale pixels by, so no speed limit can be applied"
+        return out
+
+    px_per_m = body_height_px / ADULT_HEIGHT_M
+    limit_px = PLAUSIBLE_SHUTTLE_SPEED_M_S / fps * px_per_m
+    impossible = [f for f, v in steps if v > limit_px]
+    share = len(impossible) / len(steps)
+    out["speed_limit_px_per_frame"] = round(limit_px, 1)
+    out["speed_limit_note"] = (
+        f"{PLAUSIBLE_SHUTTLE_SPEED_M_S:.0f} m/s at {fps:.2f} fps, "
+        f"scaled by a {body_height_px:.0f} px player standing for {ADULT_HEIGHT_M} m"
+    )
+    out["impossible_steps"] = len(impossible)
+    out["impossible_share"] = round(share, 4)
+    out["first_impossible_frames"] = impossible[:12]
+    out["p99_share_of_limit"] = round(values[min(len(values) - 1,
+                                                 int(0.99 * len(values)))] / limit_px, 3)
+
+    # A shuttle is near its top speed for a few frames of a smash and nowhere else, so a track
+    # whose 99th percentile sits close to the physical maximum is jumping, not flying.
+    faults = []
+    if out["coverage"] < MIN_COVERAGE:
+        faults.append(f"the shuttle is missing on {1 - out['coverage']:.0%} of rally frames")
+    if share >= MAX_IMPOSSIBLE_SHARE:
+        faults.append(f"{share:.1%} of steps imply a shuttle faster than "
+                      f"{PLAUSIBLE_SHUTTLE_SPEED_M_S:.0f} m/s")
+    if out["p99_share_of_limit"] >= MAX_P99_SHARE_OF_LIMIT:
+        faults.append(f"the 99th percentile step is {out['p99_share_of_limit']:.0%} of the "
+                      f"physical maximum, where a sound track sits near a fifth")
+    out["verdict"] = "suspect" if faults else "sound"
+    out["why"] = (
+        "; ".join(faults) + ". Events read off this track may not be measuring the shuttle, "
+        "so check the annotated video before pooling this clip's numbers with others."
+        if faults else "coverage, step sizes and the speed limit all look like a real shuttle"
+    )
+    return out
+
+
 def measure_track(
     ball: BallTrack, fps: float, *, window_frames: int
 ) -> tuple[dict[int, float], dict[int, float]]:
