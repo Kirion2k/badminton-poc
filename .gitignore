@@ -42,3 +42,6 @@ outputs/*/shots/*
 .DS_Store
 egg-info/
 *.egg-info/
+
+# Screening configs for downloaded reference clips are generated, not authored.
+configs/*.screen.json

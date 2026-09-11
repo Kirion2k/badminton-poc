@@ -400,3 +400,16 @@ def test_the_speed_limit_scales_with_the_player_and_the_frame_rate():
     c = track_quality(_clean_track(), 60.0, body_height_px=140.0)
     assert b["speed_limit_px_per_frame"] == pytest.approx(2 * a["speed_limit_px_per_frame"])
     assert c["speed_limit_px_per_frame"] == pytest.approx(a["speed_limit_px_per_frame"] / 2)
+
+
+def test_a_track_stolen_by_the_next_court_reports_where_the_jumps_land():
+    """The two causes of impossible steps need opposite answers, so the numbers that separate
+    them are reported even though the verdict does not try to decide between them."""
+    from badminton_poc.parsing import BallSample, BallTrack
+    samples = list(_clean_track())
+    for f in range(0, 200, 6):                       # hop to a court far to the left
+        samples[f] = BallSample(f, 40.0, 380.0, True)
+    q = track_quality(BallTrack(samples), 60.0, body_height_px=280.0)
+    assert q["verdict"] == "suspect"
+    assert q["jump_offset_from_median_x_px"] > 0
+    assert "shuttle_polygon" in q["why"]

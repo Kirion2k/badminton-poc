@@ -290,6 +290,27 @@ def track_quality(
     out["p99_share_of_limit"] = round(values[min(len(values) - 1,
                                                  int(0.99 * len(values)))] / limit_px, 3)
 
+    # A jumping track has two very different causes and they need different answers. A shuttle
+    # cannot be in two places, so if the impossible steps are long lateral hops that keep
+    # returning to the same band, the tracker is alternating between our court and the one next
+    # to it, and the fix is a tighter shuttle_polygon rather than a different clip.
+    if impossible:
+        all_x = sorted(x for x, _ in positions.values())
+        mid = all_x[len(all_x) // 2]
+        jump_x = sorted(positions[f][0] for f in impossible if f in positions)
+        if jump_x:
+            band = jump_x[3 * len(jump_x) // 4] - jump_x[len(jump_x) // 4]
+            offset = abs(sum(jump_x) / len(jump_x) - mid)
+            out["jump_band_iqr_px"] = round(band, 1)
+            out["jump_offset_from_median_x_px"] = round(offset, 1)
+            # Reported, not judged. Two causes produce impossible steps and they need opposite
+            # answers: the tracker taking the neighbouring court's shuttle, which is fixed by a
+            # tighter shuttle_polygon, or a track that is simply bad, which is fixed by a
+            # different clip. Separating them automatically was tried and the rule could not
+            # tell a second court from scatter on synthetic cases, so these two numbers are left
+            # for a person: a second court shows as jumps landing in a narrow band well away
+            # from where the shuttle otherwise sits.
+
     # A shuttle is near its top speed for a few frames of a smash and nowhere else, so a track
     # whose 99th percentile sits close to the physical maximum is jumping, not flying.
     faults = []
@@ -302,11 +323,15 @@ def track_quality(
         faults.append(f"the 99th percentile step is {out['p99_share_of_limit']:.0%} of the "
                       f"physical maximum, where a sound track sits near a fifth")
     out["verdict"] = "suspect" if faults else "sound"
-    out["why"] = (
-        "; ".join(faults) + ". Events read off this track may not be measuring the shuttle, "
-        "so check the annotated video before pooling this clip's numbers with others."
-        if faults else "coverage, step sizes and the speed limit all look like a real shuttle"
-    )
+    if faults:
+        tail = (". Events read off this track may not be measuring the shuttle. Check "
+                "jump_band_iqr_px against jump_offset_from_median_x_px first: jumps landing in "
+                "a narrow band well away from the rest of the track are the neighbouring "
+                "court's shuttle, which a tighter shuttle_polygon fixes without changing clip.")
+    else:
+        tail = ""
+    out["why"] = ("; ".join(faults) + tail if faults
+                  else "coverage, step sizes and the speed limit all look like a real shuttle")
     return out
 
 
