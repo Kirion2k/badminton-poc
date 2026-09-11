@@ -267,3 +267,80 @@ def test_contact_frame_rules():
 def test_an_unknown_contact_frame_rule_is_refused():
     with pytest.raises(ValueError):
         _contact_frame("whatever", 10, 13, {})
+
+
+def test_the_analyze_entry_point_honours_the_flight_config():
+    """The CLI dropped this section on the floor and fell back to defaults.
+
+    Three different `contact_frame_rule` settings produced byte-identical output, which read as
+    "the rule does not matter" when it actually meant the rule was never applied.
+    """
+    import inspect
+
+    from badminton_poc import cli
+
+    source = inspect.getsource(cli.main)
+    analyze_call = source[source.index('if args.command == "analyze"'):]
+    analyze_call = analyze_call[:analyze_call.index("return 0")]
+    assert "flight_cfg=config.flight" in analyze_call
+
+
+# --- contacts that barely deflect the shuttle ------------------------------------------------
+# A drive, a flat push and a block turn the shuttle very little, and by turn angle alone they
+# are indistinguishable from the tracker blinking mid-flight. Across the two labelled clips 15
+# of 31 joins classified as continuations sat within a racket's reach of a player, and three of
+# the six contacts known to be missing were among them.
+
+
+def _straight_track(frames, x0, dx, y0, dy):
+    from badminton_poc.parsing import BallSample
+    return [BallSample(f, x0 + dx * i, y0 + dy * i, True) for i, f in enumerate(frames)]
+
+
+def _shallow_turn_track():
+    """Two flights with a small direction change and a short gap between them."""
+    from badminton_poc.parsing import BallTrack
+    out = _straight_track(range(0, 30), 400.0, 12.0, 300.0, 2.0)
+    out += _straight_track(range(34, 64), 760.0, 11.0, 360.0, -6.0)
+    return BallTrack(out)
+
+
+def test_a_shallow_turn_beside_a_racket_is_promoted_to_a_contact():
+    from badminton_poc.config import FlightConfig
+    model = segment_flight(_shallow_turn_track(), 60.0, FlightConfig(),
+                           width=1920, racket_reach_at=lambda frame: 0.3)
+    kinds = [l.kind for l in model.links]
+    assert "contact_by_reach" in kinds
+    promoted = [l for l in model.links if l.kind == "contact_by_reach"]
+    assert all(l.hit_frame is not None for l in promoted)
+    assert all(l.turn_degrees < FlightConfig().min_turn_degrees for l in promoted)
+
+
+def test_the_same_shallow_turn_far_from_anyone_stays_a_continuation():
+    from badminton_poc.config import FlightConfig
+    model = segment_flight(_shallow_turn_track(), 60.0, FlightConfig(),
+                           width=1920, racket_reach_at=lambda frame: 2.5)
+    assert "contact_by_reach" not in [l.kind for l in model.links]
+
+
+def test_an_unknown_reach_does_not_promote():
+    """No players on the frame is not evidence that nobody hit it."""
+    from badminton_poc.config import FlightConfig
+    model = segment_flight(_shallow_turn_track(), 60.0, FlightConfig(),
+                           width=1920, racket_reach_at=lambda frame: None)
+    assert "contact_by_reach" not in [l.kind for l in model.links]
+
+
+def test_promotion_can_be_switched_off():
+    from badminton_poc.config import FlightConfig
+    cfg = FlightConfig(promote_continuation_within_body_heights=0.0)
+    model = segment_flight(_shallow_turn_track(), 60.0, cfg,
+                           width=1920, racket_reach_at=lambda frame: 0.1)
+    assert "contact_by_reach" not in [l.kind for l in model.links]
+
+
+def test_segmentation_still_runs_without_being_told_about_players():
+    """The module must stay a function of the shuttle track alone."""
+    from badminton_poc.config import FlightConfig
+    model = segment_flight(_shallow_turn_track(), 60.0, FlightConfig(), width=1920)
+    assert model.links

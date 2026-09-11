@@ -183,6 +183,7 @@ def main(argv: list[str] | None = None) -> int:
 
         result = analyze(args.players, args.ball, args.events, args.output,
                          fps=args.fps, court=config.court, cfg=config.analysis,
+                         flight_cfg=config.flight,
                          width=args.width, height=args.height)
         print(json.dumps(result["summary"], indent=2))
         return 0

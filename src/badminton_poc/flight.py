@@ -35,7 +35,7 @@ from __future__ import annotations
 import math
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Any, Iterable
+from typing import Any, Callable, Iterable
 
 from .config import FlightConfig
 from .parsing import BallTrack, ShuttleEvent
@@ -372,8 +372,16 @@ def segment_flight(
     cfg: FlightConfig,
     *,
     width: int = 1920,
+    racket_reach_at: "Callable[[int], float | None] | None" = None,
 ) -> FlightModel:
-    """Cut the shuttle track into flight segments and read the events off the segmentation."""
+    """Cut the shuttle track into flight segments and read the events off the segmentation.
+
+    ``racket_reach_at`` answers, for a frame, how far the shuttle was from the nearest player's
+    reach in that player's body heights, or None when there is nobody to measure against. It is
+    passed in rather than computed here so this module stays a function of the shuttle track
+    alone. Without it, joins are judged on turn angle by itself, which loses every contact that
+    barely deflects the shuttle.
+    """
     if fps <= 0:
         raise ValueError("fps must be positive")
     scale = width / cfg.reference_width if cfg.reference_width > 0 else 1.0
@@ -450,13 +458,20 @@ def segment_flight(
         turn = _turn_degrees(positions, exit_frame, entry_frame, turn_span)
         if turn is None:
             continue
+        hit_frame = _contact_frame(cfg.contact_frame_rule, exit_frame, entry_frame, residual)
         if turn < cfg.min_turn_degrees:
+            # A small turn is what a drive, a flat push or a block looks like, and it is also
+            # what a tracker blink mid-flight looks like. The angle cannot separate them; where
+            # it happened can. A join at the end of somebody's racket is a contact.
+            reach = None
+            if cfg.promote_continuation_within_body_heights > 0 and racket_reach_at is not None:
+                reach = racket_reach_at((exit_frame + entry_frame) // 2)
+            if reach is not None and reach <= cfg.promote_continuation_within_body_heights:
+                links.append(Link(index, index + 1, gap, turn, "contact_by_reach", hit_frame))
+                continue
             links.append(Link(index, index + 1, gap, turn, "continuation", None))
             continue
-        links.append(
-            Link(index, index + 1, gap, turn, "contact",
-                 _contact_frame(cfg.contact_frame_rule, exit_frame, entry_frame, residual))
-        )
+        links.append(Link(index, index + 1, gap, turn, "contact", hit_frame))
 
     linked = {link.before: link for link in links}
     chains: list[list[int]] = []
@@ -509,6 +524,7 @@ def segment_flight(
         "segments_before_length_filter": len(_runs_of(ball.frames, in_flight)),
         "links": {
             "contact": sum(1 for l in links if l.kind == "contact"),
+            "contact_by_reach": sum(1 for l in links if l.kind == "contact_by_reach"),
             "continuation": sum(1 for l in links if l.kind == "continuation"),
         },
         "chains": len(chains),

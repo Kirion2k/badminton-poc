@@ -430,6 +430,21 @@ class FlightConfig:
     the rally is reported as ``truncated``: the clip began mid-flight and its real start cannot
     be seen. The development clip opens with the far player already mid-stroke."""
     min_hits_per_rally: int = 2
+    promote_continuation_within_body_heights: float = 0.9
+    """Treat a low-turn join as a contact anyway when it happens this close to a racket.
+
+    `min_turn_degrees` asks whether the shuttle changed direction enough to have been hit. A
+    drive, a flat push and a block barely change it at all, so that test alone throws them away
+    as tracker dropout: across the two labelled clips 15 of 31 joins classified as continuations
+    sit within a racket's reach of a player, and three of the six contacts known to be missing
+    are among them, with turns of 42.8, 56.7 and 57.7 degrees against the 60 degree threshold.
+
+    Angle and position answer different questions. A large turn says a contact happened wherever
+    it was; being at the end of somebody's racket says one happened however small the turn. This
+    is the second test, and it shares its units and threshold with
+    `AnalysisConfig.max_contact_distance_body_heights` for the same reasons.
+
+    Set to 0 to disable and judge joins on turn angle alone."""
     contact_frame_rule: str = "exit"
     """Where in the gap between two flight segments to place the contact.
 

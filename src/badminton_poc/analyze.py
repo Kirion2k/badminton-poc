@@ -6,7 +6,7 @@ from pathlib import Path
 from statistics import mean
 from typing import Any
 
-from .assoc import assign_hit, enforce_alternation
+from .assoc import assign_hit, enforce_alternation, racket_reach
 from .config import AnalysisConfig, CourtROI, FlightConfig
 from .parsing import BallTrack, load_ball_csv, load_events_json, load_jsonl
 from .players import swing_features
@@ -68,7 +68,19 @@ def analyze(
         # The whole upstream filtering chain below exists to thin 777 candidates into something
         # usable. A segmentation does not produce them, so none of it runs; upstream's file is
         # still parsed above and its counts still reported, as a comparison rather than an input.
-        flight_model = segment_flight(ball, fps, flight_cfg, width=width)
+        def racket_reach_at(frame: int) -> float | None:
+            """How close the shuttle came to a racket on this frame, in body heights.
+
+            Supplied to the segmentation so it can tell a contact that barely deflected the
+            shuttle from a tracker dropout mid-flight, which look identical by turn angle.
+            """
+            sample = ball.nearest_visible(frame, radius=cfg.hit_search_radius_frames)
+            if sample is None:
+                return None
+            return racket_reach(players_by_frame.get(frame), sample.position())
+
+        flight_model = segment_flight(ball, fps, flight_cfg, width=width,
+                                      racket_reach_at=racket_reach_at)
         raw_events = list(flight_model.events)
     elif cfg.event_source == "tracknet":
         raw_events = upstream_events
@@ -167,7 +179,8 @@ def analyze(
     )
     output = {
         "metadata": metadata or {},
-        "config": {"analysis": vars(cfg), "court": court.to_dict(), "fps": fps},
+        "config": {"analysis": vars(cfg), "court": court.to_dict(), "fps": fps,
+                   "flight": vars(_flight_cfg) if cfg.event_source == "flight" else None},
         "summary": summary,
         "rallies": rallies,
         "events": [e.to_dict(fps) for e in timeline],

@@ -108,11 +108,72 @@ Same-player repeats fall on all four recordings, which uses no labels: 50 to 44%
 detector also *misses* contacts, and a missed contact shows up as two genuine same-player
 contacts in a row. The labels prove those exist and do not say how many.
 
-### What is still open
+## The other half: contacts that were never detected
 
-Three of fourteen spurious contacts survive the gate, and the missed-contact half is unmeasured.
-Both need labels on a third and fourth recording before anything else is tuned, since every
-number here rests on two rallies.
+The same labels measure recall for free. Two genuine same-player contacts in a row means a real
+contact was never found, and there are six such gaps in the two rallies: recall is **at most
+88%**, which made it the weaker half once precision reached 93%.
+
+Opening all six:
+
+| gap | what was actually there |
+|---|---|
+| `test-video2` 3932-4014 | a real contact *inside* one unbroken 74-frame flight |
+| `test-video2` 4234-4345 | a 55-frame shuttle dropout; nothing to segment |
+| `test-video5` 1828-1888, 1980-2029, 2217-2256, 2329-2382 | joins classified as tracker dropout |
+
+The last group is the pattern worth having. `min_turn_degrees` asks whether the shuttle changed
+direction enough to have been hit, and a drive, a flat push or a block barely changes it at all,
+so the test threw them away as tracker blinks -- at turns of 42.8, 56.7 and 57.7 degrees against
+the 60 degree threshold. Across both clips, 15 of the 31 joins called continuations sit within a
+racket's reach of a player.
+
+Angle and position answer different questions, so both are asked now. A large turn is a contact
+wherever it happened; a join at the end of somebody's racket is a contact however small the turn.
+`promote_continuation_within_body_heights` is the second test, sharing units and threshold with
+the gate above. `segment_flight` takes a `racket_reach_at` callback rather than learning about
+players, so it stays a function of the shuttle track alone.
+
+The first gap, a contact hidden inside a single flight, is a different fault and is **not fixed**.
+A quadratic fitted to x(t) *is* a parabola, so a clean there-and-back in x fits it perfectly and
+the residual test cannot see it. Exactly one segment across both clips reverses in x, so a
+monotonicity test would find it with no false positives. It is one contact and was not worth the
+change today.
+
+## Where this leaves the component
+
+| over the 57 hand labels | before | after |
+|---|---|---|
+| real contacts found | 41 of 43 | 39 of 43 |
+| contacts that never happened, kept | 11 of 14 | **3 of 14** |
+| precision | 79% | **93%** |
+| hitter correct | 85% | **90%** |
+| known-missing contacts recovered | 0 of 6 | 2 of 6 |
+
+**A regression to state plainly.** On `test-video` the promotion rule takes the hit count from 20
+to 39 and pushes same-player repeats from 44% to 52%. That clip's shuttle track is the broken one
+-- 13% of steps over 150 px, 89 over 400 px in a single frame -- and its flight segments have a
+median length of 4 frames for *ordinary* contacts too, against 16 and 8 on the other clips. Its
+segmentation is built on an unusable track, so neither its before nor its after number means
+much, but the rule does make it worse and no labels exist there to say by how much.
+
+## What is still open
+
+Three of fourteen spurious contacts survive the gate, and four of the six known-missing contacts
+are still missing. Everything here rests on two rallies from two recordings, so the next move is
+labels on a third and fourth clip, not more tuning against these.
+
+Two smaller things found on the way. The `analyze` subcommand never passed the flight
+configuration through, so that whole section of a config file was silently ignored and three
+different `contact_frame_rule` settings produced byte-identical output; it is now passed, and the
+flight config is recorded in `analysis.json` alongside the rest, which is what would have made
+the bug visible. And `contact_frame_rule: "exit"` timestamps a contact at the last frame before
+the tracker loses it, which is early by the whole dropout: the contacts labelled "nobody hit it"
+have a median gap of 15.5 frames against 6 for the real ones. Switching to `midpoint` moves the
+median reach from 0.45 to 0.36 body heights on one clip and 0.59 to 0.42 on the other, but it
+rescues none of the spurious contacts -- every one that lands within reach at the midpoint was
+already within reach at the exit frame -- so it is left at its default pending a reason to move
+it.
 
 ## What perspective does to this problem
 

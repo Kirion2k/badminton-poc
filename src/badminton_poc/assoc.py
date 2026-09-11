@@ -101,6 +101,30 @@ def body_height(player: dict[str, Any] | None) -> float | None:
     return height if height > 1.0 else None
 
 
+def racket_reach(
+    player_row: dict[str, Any] | None, shuttle: tuple[float, float]
+) -> float | None:
+    """How far the shuttle is from the nearer player's reach, in that player's body heights.
+
+    The same measure the assignment gate uses, exposed so the flight segmentation can ask "was
+    there a racket here" without knowing anything about players. Returns None when there is
+    nobody to measure against, which must not be read as "far away".
+    """
+    if not player_row:
+        return None
+    best: float | None = None
+    for slot in ("near", "far"):
+        player = player_row.get(slot)
+        anchors = player_anchors(player, shuttle)
+        height = body_height(player)
+        if not anchors or not height:
+            continue
+        reach = anchors[0].distance / height
+        if best is None or reach < best:
+            best = reach
+    return best
+
+
 def assign_hit(
     event: ShuttleEvent,
     ball: BallTrack,
