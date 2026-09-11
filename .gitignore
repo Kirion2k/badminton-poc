@@ -45,3 +45,5 @@ egg-info/
 
 # Screening configs for downloaded reference clips are generated, not authored.
 configs/*.screen.json
+configs/*.proposed.json
+data/input/yt/
