@@ -146,6 +146,23 @@ For a clip that will actually work:
 - 1–5 minutes
 - the original file, not a screen recording of one
 
+Two of those are worth more than they look, because four downloaded clips died on them.
+
+**Fixed means measurably fixed.** A clip that looks steady can still drift a fifth of the frame
+width, and a tripod can be knocked once and hold still either side of the knock. One polygon
+describes the whole video or it does not; `tools/screen_clip.py` measures the drift so the answer
+is a number rather than an impression.
+
+**Whole court visible means the court being played on.** A camera pointed at an empty court beside
+the match passes every automatic check there is.
+
+And one thing the list cannot ask for, because it works against the others: the further back and
+higher the camera, the smaller the far player, and below about 10% of frame height `yolo11m-pose`
+starts missing them at `imgsz: 1920`. Raise `players.imgsz` for those clips rather than move the
+camera in. Check the size before spending the runtime, though — yt-ccaa loses its far player just
+as often and more pixels do not help, because at 16% of frame height she is large enough already
+and what beats the detector there is motion blur at 30 fps.
+
 ## Evaluation
 
 `analysis.json` reports what the pipeline *produced*. It never reports accuracy. To measure
@@ -673,3 +690,113 @@ holds 32 candidate contacts, and it is the only way to find out whether any of t
 `badminton-poc report --video <clip>` renders any clip's `analysis.json` as a page, with every
 figure carrying the caveat it rests on. `badminton-poc refresh-labels` re-seeds a ground-truth
 file against a new run while keeping judgements already made.
+
+### Six clips off YouTube, and the four that were never going to work
+
+The one thing the milestone-1 numbers needed was a second recording, so six singles clips were
+pulled off YouTube to find one. Four of them cannot be used, and none of the four fails in a way
+that looks like failure from the pipeline's output — each one just reports no rallies, which is
+also what a bug looks like. Two of them cost a hand-fitted court before the real reason showed up,
+which is what `tools/screen_clip.py` now exists to prevent.
+
+| clip | camera drift | what it is | verdict |
+|---|---|---|---|
+| yt-armori | 231 px, 18% of width | handheld, low, close behind the baseline | reject |
+| yt-purplehall | 218 px, 23% of width | handheld, dark hall, panning between courts | reject |
+| yt-bluehall | fixed | side-on and close; the far half is outside the frame | reject |
+| yt-irish | fixed | the framed court is empty; the match is off the right edge | reject |
+| yt-ccaa | fixed | single court, elevated behind the baseline, whole court in view | fitted |
+| yt-melbourne | fixed | multi-court hall, wide lens, umpire chair inside the frame | fitted |
+| yt-warehouse | 40 px step at frame ~3250 | multi-court hall viewed down the row | fitted, with a caveat |
+
+**The camera has to be measurably fixed, not apparently fixed.** Phase-correlating sample frames
+against the first one puts a number on it, and the number separates the clips cleanly: four sit
+under 4 px across the whole clip and two drift by a fifth of the frame width. Warehouse is the
+interesting one. It holds still for 3136 frames, shifts 40 px horizontally and 2.5 px vertically
+somewhere before frame 3360, and then holds still again for the remaining 5600. A single court
+polygon is wrong for one side or the other of that step, by 0.021 of frame width. The net line is
+a `y` threshold and barely moves, so near/far assignment survives it; what does not survive is a
+player near a sideline, who can be on court before the bump and off court after it.
+
+**yt-irish is the one worth remembering.** The camera is fixed, the framing is a textbook
+elevated view of a full court, and the pipeline found two players on 87% of frames. The court in
+frame is empty for all 4500 frames: the match is being played on the next court along, mostly
+outside the right edge, and the two people it tracked are those players. Every automatic check
+passes. Only looking at a frame says otherwise, which is why the screening tool says so in its
+own docstring rather than pretending to catch it.
+
+### The far player was too small for the input size, on every 1080p clip
+
+Both fitted multi-court clips missed the far player far too often to pass the tracking criterion
+-- 65% of frames on warehouse and 52% on melbourne, against a 90% target -- and the obvious
+suspect was the court polygon, since that is what decides who counts as on court. It was not. On
+melbourne frame 1415 the far player is plainly visible, mid-rally, and the pose pass returned five
+detections, none of them at that position. Re-running the same model on the same frame at larger
+input sizes:
+
+| input size | detection confidence for the far player |
+|---|---|
+| 1920 (configured) | 0.149, below the 0.25 threshold |
+| 2560 | 0.262 |
+| 3200 | 0.741 |
+
+The player's box is 8% of frame height. That is where `yolo11m-pose` at `imgsz: 1920` starts to
+lose people, and it is exactly the geometry that a good clip produces: a camera far enough back
+and high enough to see the whole court makes the far player small. The two original test clips do
+not show it because their far player is larger in frame; they pass at 1920 with 93% and 89%
+coverage, which is why this sat undetected until a clip with a smaller far player arrived.
+
+Cost on an RTX 3070, measured: 52 ms/frame at 1920, 92 at 2560, 144 at 3200.
+
+Which is worth doing only where size is the thing that is wrong, and on two of the three fitted
+clips it is not. Warehouse ran again at 3200 and gained four points, 65.4% to 69.5%, for 2.7x the
+runtime. `tools/screen_clip.py` reports the far player's height in pixels after the model's own
+resize rather than as a share of the frame, because that is the number that separates the cases:
+melbourne's far player is 103 px at 1920 and needs more, warehouse's is 194 px at 3200 and never
+did.
+
+### Warehouse: the camera was behind the baseline but not elevated
+
+Warehouse kept its far player on 69% of rally frames whatever the input size, and the reason is
+visible the moment you crop to the right place. Its camera sits down the row of a multi-court hall
+at roughly playing height, which squeezes the whole far half into the band y 0.549 to 0.616 --
+6.7% of frame height for 6.7 m of court. The near player is 35% of frame height and stands between
+the camera and that band. On frame 3340, mid-rally, their legs cover it from x 0.45 to 0.53 and
+the far player is simply behind them.
+
+Counted over every rally frame with no far player: 1326 have no detection anywhere near where the
+far player normally stands, and 351 have one that was rejected. It is occlusion, not detection
+sensitivity and not the court polygon, and nothing in the pipeline can recover a player the camera
+cannot see.
+
+The clip also takes a one-off 40 px horizontal pan between frames 3136 and 3360. That looked like
+a promising second cause -- `foot_outside_court` rejections jump from 170 to 3701 across the step
+-- but shifting the polygon by the measured 40 px puts a far-side candidate back on court in only
+18 of the 1202 affected frames. The extra rejections are bystanders wandering the hall later in
+the clip, not the court moving out from under the polygon. The pan is real and worth knowing
+about; it is not what costs the coverage.
+
+So the recording-conditions list understates one line. **Elevated** is not a nice-to-have that
+improves the view, it is what stops the near player from standing in front of the far one.
+
+### None of the six is a second acceptance clip
+
+| clip | why not |
+|---|---|
+| yt-armori | handheld, 18% of frame width |
+| yt-purplehall | handheld, 23% of frame width |
+| yt-bluehall | side-on; the far half is outside the frame |
+| yt-irish | the framed court is empty |
+| yt-warehouse | camera not elevated; the near player occludes the far half |
+| yt-melbourne | far player 103 px at `imgsz: 1920`; untested at a larger size |
+| yt-ccaa | closest. 4 rallies, 26 hits, near player 99%, far player 88% overall but 65% during rallies |
+
+yt-ccaa is the one to pick up. Its camera is fixed to within 4 px, it is a single court with a
+real singles match, and fitting its court took it from 0 rallies to 4 -- the screening rectangle
+had been tracking the umpire on his chair, whose foot position never moved from (0.906, 0.508),
+and every hit was being discarded as out of racket reach. What stands between it and the tracking
+criterion is its far player dropping out for up to two thirds of a second at a time. Only 30% of
+those missing frames sit in gaps of five frames or fewer, so interpolation would take 65% to about
+76% and no further. It is 30 fps, and more input pixels make it worse rather than better: at 3200
+the far player falls out of the detection list entirely while background spectators a third her
+size come back at 0.75 confidence.

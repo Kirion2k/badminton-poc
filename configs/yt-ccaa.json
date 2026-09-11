@@ -1,0 +1,79 @@
+{
+  "notes": "Hand-fitted. Single court, fixed camera, elevated behind the near baseline. The polygon follows the green mat rather than the court lines, because the seated crowd runs right up to the mat's left edge and is what has to be excluded. Net floor line from the post bases (0.645 left, 0.62 right), which agrees with the net tape carried down 1.55 m through the player-size scale. The top edge sits in the empty band at y 0.46-0.48 that separates the far player's deepest foot positions from the officials standing behind the boards.",
+  "court": {
+    "polygon": [
+      [
+        0.36,
+        0.47
+      ],
+      [
+        0.88,
+        0.465
+      ],
+      [
+        0.99,
+        0.999
+      ],
+      [
+        0.185,
+        0.999
+      ]
+    ],
+    "net_line": [
+      [
+        0.325,
+        0.645
+      ],
+      [
+        0.79,
+        0.62
+      ]
+    ],
+    "shuttle_polygon": [
+      [
+        0.2,
+        0.0
+      ],
+      [
+        1.0,
+        0.0
+      ],
+      [
+        1.0,
+        1.0
+      ],
+      [
+        0.05,
+        1.0
+      ]
+    ]
+  },
+  "target_width": 1920,
+  "players": {
+    "model": "yolo11m-pose.pt",
+    "imgsz": 1920,
+    "conf": 0.25,
+    "min_box_height_frac": 0.05,
+    "max_box_height_frac": 0.8,
+    "identity_smoothing_frames": 20
+  },
+  "shuttle": {
+    "repo": "../BadmintonTrackNet",
+    "device": "auto",
+    "batch_size": 8
+  },
+  "analysis": {
+    "hit_search_radius_frames": 4,
+    "assignment_margin_px": 40.0,
+    "rally_gap_seconds": 2.5,
+    "shuttle_absent_seconds": 1.0,
+    "min_hit_confidence": 0.85,
+    "play_gate_min_speed_px": 0.0,
+    "min_swing_speed": 0.0,
+    "rally_end_at_last_hit": false,
+    "min_hits_per_rally": 2,
+    "trailing_swing_trim": 0.0,
+    "event_source": "flight",
+    "require_both_players": true
+  }
+}

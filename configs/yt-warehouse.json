@@ -1,0 +1,79 @@
+{
+  "notes": "REJECTED as an acceptance clip: the camera is behind the baseline but at playing height, so the far half compresses into y 0.549-0.616 and the near player stands in front of it. Far-player coverage is 69% of rally frames and 1326 of the misses have no detection near the far player at all. Kept because the court fit and the outputs are the evidence for that. imgsz is 3200 here, which is what produced the outputs on disk; it bought four points over 1920 for 2.7x the runtime, because size was never what was wrong. The clip also takes a one-off 40px horizontal pan between frames 3136 and 3360, which costs almost nothing but breaks the one-polygon assumption. Court geometry: the far player's foot cloud sits at y 0.52-0.62 and the near player's at 0.62-0.98, so the net floor line goes between them at 0.625 and the polygon's top edge at 0.495 clears the far baseline.",
+  "court": {
+    "polygon": [
+      [
+        0.415,
+        0.495
+      ],
+      [
+        0.635,
+        0.495
+      ],
+      [
+        0.88,
+        0.975
+      ],
+      [
+        0.02,
+        0.975
+      ]
+    ],
+    "net_line": [
+      [
+        0.415,
+        0.628
+      ],
+      [
+        0.635,
+        0.622
+      ]
+    ],
+    "shuttle_polygon": [
+      [
+        0.18,
+        0.0
+      ],
+      [
+        0.84,
+        0.0
+      ],
+      [
+        0.9,
+        1.0
+      ],
+      [
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "target_width": 1920,
+  "players": {
+    "model": "yolo11m-pose.pt",
+    "imgsz": 3200,
+    "conf": 0.25,
+    "min_box_height_frac": 0.05,
+    "max_box_height_frac": 0.8,
+    "identity_smoothing_frames": 20
+  },
+  "shuttle": {
+    "repo": "../BadmintonTrackNet",
+    "device": "auto",
+    "batch_size": 8
+  },
+  "analysis": {
+    "hit_search_radius_frames": 4,
+    "assignment_margin_px": 40.0,
+    "rally_gap_seconds": 2.5,
+    "shuttle_absent_seconds": 1.0,
+    "min_hit_confidence": 0.85,
+    "play_gate_min_speed_px": 0.0,
+    "min_swing_speed": 0.0,
+    "rally_end_at_last_hit": false,
+    "min_hits_per_rally": 2,
+    "trailing_swing_trim": 0.0,
+    "event_source": "flight",
+    "require_both_players": true
+  }
+}
