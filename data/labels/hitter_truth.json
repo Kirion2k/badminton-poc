@@ -1,0 +1,298 @@
+{
+ "_format": "badminton-poc/hitter-truth-v1",
+ "_what": "For each contact the hit detector reported, which player actually made it. 'none' means no contact happened at that frame at all.",
+ "_labelled_by": "The project owner, from marked contact images, 2026-09-11. The pipeline's own answer was deliberately not shown during labelling so it could not anchor them.",
+ "_covers": "Every contact in two whole rallies, so consecutive pairs are complete and a missed contact is visible as two genuine same-player contacts in a row.",
+ "_classes": [
+  "near",
+  "far",
+  "none"
+ ],
+ "contacts": [
+  {
+   "clip": "test-video2",
+   "frame": 3822,
+   "hitter": "near"
+  },
+  {
+   "clip": "test-video2",
+   "frame": 3865,
+   "hitter": "far"
+  },
+  {
+   "clip": "test-video2",
+   "frame": 3932,
+   "hitter": "near"
+  },
+  {
+   "clip": "test-video2",
+   "frame": 4014,
+   "hitter": "near"
+  },
+  {
+   "clip": "test-video2",
+   "frame": 4041,
+   "hitter": "none"
+  },
+  {
+   "clip": "test-video2",
+   "frame": 4100,
+   "hitter": "far"
+  },
+  {
+   "clip": "test-video2",
+   "frame": 4148,
+   "hitter": "near"
+  },
+  {
+   "clip": "test-video2",
+   "frame": 4179,
+   "hitter": "none"
+  },
+  {
+   "clip": "test-video2",
+   "frame": 4234,
+   "hitter": "far"
+  },
+  {
+   "clip": "test-video2",
+   "frame": 4345,
+   "hitter": "far"
+  },
+  {
+   "clip": "test-video2",
+   "frame": 4403,
+   "hitter": "near"
+  },
+  {
+   "clip": "test-video2",
+   "frame": 4452,
+   "hitter": "none"
+  },
+  {
+   "clip": "test-video2",
+   "frame": 4507,
+   "hitter": "far"
+  },
+  {
+   "clip": "test-video2",
+   "frame": 4553,
+   "hitter": "near"
+  },
+  {
+   "clip": "test-video2",
+   "frame": 4611,
+   "hitter": "far"
+  },
+  {
+   "clip": "test-video2",
+   "frame": 4641,
+   "hitter": "none"
+  },
+  {
+   "clip": "test-video2",
+   "frame": 4696,
+   "hitter": "near"
+  },
+  {
+   "clip": "test-video2",
+   "frame": 4747,
+   "hitter": "far"
+  },
+  {
+   "clip": "test-video2",
+   "frame": 4811,
+   "hitter": "near"
+  },
+  {
+   "clip": "test-video2",
+   "frame": 4885,
+   "hitter": "far"
+  },
+  {
+   "clip": "test-video2",
+   "frame": 4934,
+   "hitter": "near"
+  },
+  {
+   "clip": "test-video2",
+   "frame": 4953,
+   "hitter": "none"
+  },
+  {
+   "clip": "test-video2",
+   "frame": 5016,
+   "hitter": "far"
+  },
+  {
+   "clip": "test-video2",
+   "frame": 5057,
+   "hitter": "near"
+  },
+  {
+   "clip": "test-video2",
+   "frame": 5081,
+   "hitter": "none"
+  },
+  {
+   "clip": "test-video2",
+   "frame": 5120,
+   "hitter": "far"
+  },
+  {
+   "clip": "test-video2",
+   "frame": 5149,
+   "hitter": "near"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 1674,
+   "hitter": "near"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 1684,
+   "hitter": "none"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 1698,
+   "hitter": "far"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 1734,
+   "hitter": "near"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 1752,
+   "hitter": "far"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 1778,
+   "hitter": "near"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 1828,
+   "hitter": "far"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 1888,
+   "hitter": "far"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 1918,
+   "hitter": "near"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 1934,
+   "hitter": "none"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 1966,
+   "hitter": "far"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 1980,
+   "hitter": "near"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 1996,
+   "hitter": "none"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 2029,
+   "hitter": "near"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 2043,
+   "hitter": "none"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 2059,
+   "hitter": "far"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 2087,
+   "hitter": "near"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 2100,
+   "hitter": "none"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 2114,
+   "hitter": "far"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 2143,
+   "hitter": "near"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 2179,
+   "hitter": "far"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 2217,
+   "hitter": "near"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 2256,
+   "hitter": "near"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 2286,
+   "hitter": "far"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 2307,
+   "hitter": "none"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 2329,
+   "hitter": "near"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 2342,
+   "hitter": "none"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 2382,
+   "hitter": "near"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 2417,
+   "hitter": "far"
+  },
+  {
+   "clip": "test-video5",
+   "frame": 2437,
+   "hitter": "none"
+  }
+ ]
+}

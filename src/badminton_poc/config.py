@@ -306,7 +306,25 @@ class AnalysisConfig:
     """Distance gap below which a near/far assignment is treated as ambiguous."""
     max_assignment_distance_frac: float = 0.35
     """Reject an assignment if the shuttle is further than this fraction of frame
-    diagonal from the closest player anchor."""
+    diagonal from the closest player anchor.
+
+    A coarse outer bound only, and on our clips it never fires: 0.35 of a 1920x884 diagonal is
+    740 px, further than the court is wide. The gate that does the work is the next one."""
+    max_contact_distance_body_heights: float = 0.9
+    """Reject a contact if the shuttle is further than this from the closest player anchor,
+    measured in that player's own box heights.
+
+    A racket contact happens at arm plus racket length, which is about nine tenths of a person's
+    height, so this is a statement about badminton rather than about our footage. It is in body
+    heights and not pixels because the far player is half the near player's size in frame, so the
+    same real distance is half as many pixels at the far end -- the same reason the swing
+    features are normalised this way.
+
+    Hand labels on 57 detected contacts across two rallies say a quarter of them are not contacts
+    at all, and that the shuttle sits a median 75 px from the nearest player at a real contact
+    against 238 px at a spurious one. Fitting the threshold on one clip and testing it on the
+    other gives 0.75 and 1.08; this is the midpoint. Fitted in pixels instead, the same procedure
+    gives 118 and 185 and does not transfer between the two clips."""
     rally_gap_seconds: float = 2.5
     """Silence between events longer than this starts a new rally."""
     min_hits_per_rally: int = 2

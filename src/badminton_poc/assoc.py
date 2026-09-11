@@ -20,6 +20,13 @@ from .players import wrist_points
 
 UNASSIGNED = None
 
+NOT_FILLABLE_BY_ALTERNATION = frozenset({"out_of_racket_reach", "closest_player_too_far"})
+"""Outcomes that mean the contact did not happen, rather than that we could not decide.
+
+`enforce_alternation` fills unassigned hits from their neighbours. That is right for a hit whose
+two candidates were too close to separate, and wrong for one where the shuttle was nowhere near
+either player: filling those puts the spurious contacts straight back."""
+
 
 @dataclass
 class Anchor:
@@ -76,6 +83,22 @@ def player_anchors(player: dict[str, Any] | None, shuttle: tuple[float, float]) 
 
 def _best(anchors: list[Anchor]) -> Anchor | None:
     return anchors[0] if anchors else None
+
+
+def body_height(player: dict[str, Any] | None) -> float | None:
+    """The player's box height, which stands in for their distance from the camera.
+
+    People are roughly the same height, so how tall someone is in frame says how many pixels a
+    metre is worth where they are standing. It is the cheapest depth estimate available without a
+    court homography, and it is the unit the swing features already use.
+    """
+    if not player:
+        return None
+    bbox = player.get("bbox")
+    if not bbox:
+        return None
+    height = float(bbox[3]) - float(bbox[1])
+    return height if height > 1.0 else None
 
 
 def assign_hit(
@@ -139,18 +162,29 @@ def assign_hit(
     # shuttle's court half from a monocular view needs homography plus a height estimate, which
     # is a later milestone.
 
+    near_body = body_height(player_row.get("near"))
+    far_body = body_height(player_row.get("far"))
+    evidence["body_height_px"] = {
+        "near": round(near_body, 1) if near_body else None,
+        "far": round(far_body, 1) if far_body else None,
+    }
+
     if near_best is None and far_best is None:
         return HitAssignment(frame, UNASSIGNED, None, "no_players_detected", evidence)
     if near_best is None:
-        return _distance_gated("far", far_best, None, cfg, width, height, evidence, "only_far_detected")
+        return _distance_gated("far", far_best, None, far_body, cfg, width, height, evidence,
+                               "only_far_detected")
     if far_best is None:
-        return _distance_gated("near", near_best, None, cfg, width, height, evidence, "only_near_detected")
+        return _distance_gated("near", near_best, None, near_body, cfg, width, height, evidence,
+                               "only_near_detected")
 
     winner, loser = ("near", "far") if near_best.distance <= far_best.distance else ("far", "near")
     winner_anchor = near_best if winner == "near" else far_best
     loser_anchor = far_best if winner == "near" else near_best
+    winner_body = near_body if winner == "near" else far_body
     return _distance_gated(
-        winner, winner_anchor, loser_anchor, cfg, width, height, evidence, "closest_anchor"
+        winner, winner_anchor, loser_anchor, winner_body, cfg, width, height, evidence,
+        "closest_anchor"
     )
 
 
@@ -158,6 +192,7 @@ def _distance_gated(
     hitter: str,
     winner: Anchor,
     loser: Anchor | None,
+    winner_body_height: float | None,
     cfg: AnalysisConfig,
     width: int,
     height: int,
@@ -172,6 +207,17 @@ def _distance_gated(
     if winner.distance > limit:
         evidence["rejected_distance_px"] = round(winner.distance, 1)
         return HitAssignment(frame, UNASSIGNED, None, "closest_player_too_far", evidence)
+
+    # Out of reach for a racket. Measured in the winner's own body heights, because the far
+    # player is half the near player's size in frame and the same real distance is half as many
+    # pixels at the far end. Without a body height to scale by we cannot judge reach at all, so
+    # the contact passes rather than being rejected on a guess.
+    if winner_body_height:
+        reach = winner.distance / winner_body_height
+        evidence["distance_body_heights"] = round(reach, 3)
+        if reach > cfg.max_contact_distance_body_heights:
+            evidence["max_body_heights"] = cfg.max_contact_distance_body_heights
+            return HitAssignment(frame, UNASSIGNED, None, "out_of_racket_reach", evidence)
 
     if loser is None:
         # Only one side had a detection: plausible, but we cannot compare, so separation is 0.
@@ -198,6 +244,12 @@ def enforce_alternation(assignments: list[HitAssignment], max_gap_frames: int) -
     result = list(assignments)
     for i, current in enumerate(result):
         if current.hitter is not None:
+            continue
+        if current.reason in NOT_FILLABLE_BY_ALTERNATION:
+            # "Nobody could reach it" is a finding, not a gap to be filled. Alternation is for
+            # contacts we could not call, and treating the two alike lets this pass hand a
+            # hitter back to every contact the reach gate just rejected: on clip 5 it restored
+            # four of the seven spurious contacts that gate had removed.
             continue
         previous = next((result[j] for j in range(i - 1, -1, -1) if result[j].hitter), None)
         following = next((result[j] for j in range(i + 1, len(result)) if result[j].hitter), None)

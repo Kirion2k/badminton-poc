@@ -713,3 +713,84 @@ def test_timeline_keeps_each_event_own_source():
     ball = BallTrack([BallSample(frame=f, x=1.0, y=2.0, visible=True) for f in range(60)])
     timeline = build_timeline(events, {}, ball, 60.0, 1.0)
     assert [(e.frame, e.source) for e in timeline] == [(10, "flight"), (40, "tracknet")]
+
+
+# --- racket reach gate -------------------------------------------------------------------
+# A quarter of the contacts the detector reports are not contacts. Hand labels on 57 of them
+# put the shuttle a median 75 px from the nearest player at a real contact and 238 px at a
+# spurious one, so reach is the signal that separates them -- measured in the player's own
+# body heights, because the far player is half the near player's size in frame.
+
+
+def test_a_contact_out_of_racket_reach_is_refused():
+    """300 px box, nearest anchor 300 px away: a full body height, past arm plus racket."""
+    ball = BallTrack([BallSample(10, 1050.0, 200.0, True)])
+    players = {10: {"near": player(1000, 500, 1100, 800, wrist=(1050, 520)), "far": None}}
+    result = assign_hit(hit(10), ball, players, COURT, CFG, width=W, height=H)
+    assert result.hitter is None
+    assert result.reason == "out_of_racket_reach"
+    assert result.evidence["distance_body_heights"] == pytest.approx(1.0, abs=0.01)
+
+
+def test_a_contact_within_racket_reach_is_kept():
+    ball = BallTrack([BallSample(10, 1050.0, 380.0, True)])
+    players = {10: {"near": player(1000, 500, 1100, 800, wrist=(1050, 520)), "far": None}}
+    result = assign_hit(hit(10), ball, players, COURT, CFG, width=W, height=H)
+    assert result.hitter == "near"
+    assert result.evidence["distance_body_heights"] < CFG.max_contact_distance_body_heights
+
+
+def test_the_far_player_is_judged_on_their_own_scale_not_the_near_player_s():
+    """The same real reach. The far player is half the size, so half the pixels.
+
+    In pixels the far contact looks twice as close and a pixel threshold would treat the two
+    differently; in body heights they are the same contact and both survive.
+    """
+    near_ball = BallTrack([BallSample(10, 1050.0, 400.0, True)])          # 100 px off a 300 px box
+    near_only = {10: {"near": player(1000, 500, 1100, 800, wrist=(1050, 520)), "far": None}}
+    far_ball = BallTrack([BallSample(10, 1330.0, 350.0, True)])           # 50 px off a 150 px box
+    far_only = {10: {"near": None, "far": player(1300, 400, 1360, 550, wrist=(1330, 430))}}
+
+    a = assign_hit(hit(10), near_ball, near_only, COURT, CFG, width=W, height=H)
+    b = assign_hit(hit(10), far_ball, far_only, COURT, CFG, width=W, height=H)
+    assert a.hitter == "near" and b.hitter == "far"
+    assert a.evidence["near"]["distance_px"] == pytest.approx(2 * b.evidence["far"]["distance_px"],
+                                                              rel=0.1)
+    assert a.evidence["distance_body_heights"] == pytest.approx(
+        b.evidence["distance_body_heights"], rel=0.1)
+
+
+def test_reach_is_not_judged_without_a_body_height_to_scale_by():
+    """No box means no depth estimate. Refusing on a guess would drop real contacts."""
+    ball = BallTrack([BallSample(10, 1050.0, 240.0, True)])
+    keypoints = [[0.0, 0.0, 0.0] for _ in range(17)]
+    keypoints[9] = [1050.0, 520.0, 0.9]
+    players = {10: {"near": {"bbox": None, "keypoints": keypoints}, "far": None}}
+    result = assign_hit(hit(10), ball, players, COURT, CFG, width=W, height=H)
+    assert result.hitter == "near"
+    assert "distance_body_heights" not in result.evidence
+
+
+def test_alternation_does_not_revive_a_contact_nobody_could_reach():
+    """The reach gate and the alternation pass disagree, and the gate wins.
+
+    Filling these was undoing the gate: every spurious contact it removed came back with a
+    hitter attached, because its neighbours happened to name the same player.
+    """
+    out = enforce_alternation([
+        HitAssignment(0, "near", 0.5, "closest_anchor"),
+        HitAssignment(10, None, None, "out_of_racket_reach"),
+        HitAssignment(20, "near", 0.5, "closest_anchor"),
+    ], max_gap_frames=100)
+    assert out[1].hitter is None
+    assert out[1].reason == "out_of_racket_reach"
+
+
+def test_alternation_still_fills_a_contact_that_was_merely_ambiguous():
+    out = enforce_alternation([
+        HitAssignment(0, "near", 0.5, "closest_anchor"),
+        HitAssignment(10, None, None, "ambiguous_both_players_close"),
+        HitAssignment(20, "near", 0.5, "closest_anchor"),
+    ], max_gap_frames=100)
+    assert out[1].hitter == "far"
+    assert out[1].reason == "inferred_by_alternation"
