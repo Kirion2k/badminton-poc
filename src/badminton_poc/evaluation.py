@@ -315,21 +315,45 @@ def evaluate(analysis: dict[str, Any], ground_truth: dict[str, Any], players: li
             "accuracy": hitter_accuracy,
         },
         "rally_boundaries": boundaries,
-        "targets": _targets(coverage.get("both_players_fraction"), hitter_accuracy, rally_accuracy),
+        "targets": _targets(
+            coverage.get("both_players_fraction"), hitter_accuracy, rally_accuracy,
+            (analysis["summary"].get("tracked_player_plausibility") or {}).get("warnings") or [],
+        ),
     }
 
 
-def _targets(coverage: float | None, hitter: float | None, rally: float | None) -> dict[str, Any]:
+def _targets(coverage: float | None, hitter: float | None, rally: float | None,
+             slot_warnings: list[str] | None = None) -> dict[str, Any]:
+    """Score the criteria, and refuse to call coverage a pass when the slots look wrong.
+
+    Coverage counts how often a slot was filled, not whether the right person filled it. Both
+    times this project has tracked the wrong person -- a seated umpire, then officials behind the
+    back boards -- the coverage figure went up. A pass earned that way is worse than a fail,
+    because a fail gets investigated. Hitter assignment and rally boundaries are scored against
+    hand labels, so they cannot be inflated the same way and are left alone.
+    """
+    slot_warnings = slot_warnings or []
+
     def verdict(value: float | None, threshold: float) -> str:
         if value is None:
             return "not measurable (missing labels)"
         return "PASS" if value >= threshold else "FAIL"
 
-    return {
-        "two_player_coverage_active_play >= 0.90": verdict(coverage, 0.90),
+    coverage_verdict = verdict(coverage, 0.90)
+    if slot_warnings and coverage_verdict == "PASS":
+        coverage_verdict = (
+            "NOT TRUSTED: the coverage threshold is met, but a tracked slot does not behave like "
+            "a player, so the frames counted may not be the players. See "
+            "summary.tracked_player_plausibility."
+        )
+    out = {
+        "two_player_coverage_active_play >= 0.90": coverage_verdict,
         "hitter_assignment_accuracy >= 0.90": verdict(hitter, 0.90),
         "rally_boundary_accuracy >= 0.85": verdict(rally, 0.85),
     }
+    if slot_warnings:
+        out["tracked_player_warnings"] = slot_warnings
+    return out
 
 
 def _hit_detection(

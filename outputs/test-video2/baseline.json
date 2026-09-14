@@ -6,12 +6,12 @@
   "labelled_rallies": 6,
   "hit_detection": {
     "true_positives": 56,
-    "false_positives": 12,
+    "false_positives": 13,
     "false_negatives": 3,
-    "precision": 0.8235,
+    "precision": 0.8116,
     "recall": 0.9492,
-    "f1": 0.8819,
-    "predicted": 68,
+    "f1": 0.875,
+    "predicted": 69,
     "labelled_contacts": 62,
     "rally_shots": 60,
     "out_of_rally_matched": 0,
@@ -19,11 +19,11 @@
   },
   "hitter_assignment": {
     "matched_hits": 56,
-    "scored": 55,
-    "correct": 51,
+    "scored": 53,
+    "correct": 49,
     "incorrect": 4,
-    "unassigned": 0,
-    "accuracy": 0.9273
+    "unassigned": 3,
+    "accuracy": 0.9245
   },
   "rally_segmentation": {
     "labelled_rallies": 6,
@@ -105,7 +105,24 @@
     "near_identity_breaks": 0,
     "far_identity_breaks": 7,
     "identity_swaps": 0,
-    "note": "Coverage says a slot was filled, not that it held the right person. A slot following a bystander reads as 100%; record those in tracking_failures."
+    "plausibility": {
+      "near": {
+        "frames": 3541,
+        "median_detection_confidence": 0.923,
+        "median_movement_body_heights_per_s": 0.553,
+        "lateral_range_body_heights": 2.981
+      },
+      "far": {
+        "frames": 3288,
+        "median_detection_confidence": 0.822,
+        "median_movement_body_heights_per_s": 0.484,
+        "lateral_range_body_heights": 4.883
+      },
+      "warnings": [],
+      "note": "Measured over labelled rally frames. Empty warnings mean both slots behave like players; they do not mean the coverage figure is high."
+    },
+    "coverage_trusted": true,
+    "note": "Coverage says a slot was filled, not that it held the right person. A slot following a bystander reads as 100%; record those in tracking_failures. coverage_trusted is false when a slot does not behave like a player, which is how a coverage figure earned by tracking furniture announces itself, and null when there were too few frames to tell; the measurements behind it are in plausibility."
   },
   "tracking_failures_recorded": 0,
   "caveat": "Scored against hand labels for this clip only. A configuration that has been tuned on this clip is not validated by it."

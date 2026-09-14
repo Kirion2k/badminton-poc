@@ -26,6 +26,8 @@ from __future__ import annotations
 import statistics
 from typing import Any, Iterable
 
+from .analyze import tracked_player_plausibility
+
 TRUTH_FORMAT = "badminton-poc/truth-v2"
 
 # A racket contact is an instant, but the detector places it a few frames either side of the
@@ -424,6 +426,8 @@ def score_player_tracking(
             "near_identity_breaks": 0,
             "far_identity_breaks": 0,
             "identity_swaps": 0,
+            "plausibility": None,
+            "coverage_trusted": None,
             "note": "no labelled rally spans, so there is no active play to measure over",
         }
 
@@ -459,6 +463,13 @@ def score_player_tracking(
             last[slot] = current
 
     total = len(rows)
+    plausibility = tracked_player_plausibility(
+        player_rows, labelled_rallies, fps, spans="labelled")
+    # A slot the plausibility check could not judge leaves the question open. Reporting that as
+    # trusted would turn "not enough frames to tell" into an endorsement, which is the same
+    # mistake as reading a high coverage figure as proof of the right person.
+    judged = all(isinstance(plausibility.get(slot), dict) and "note" not in plausibility[slot]
+                 for slot in ("near", "far"))
     return {
         "active_play_frames": total,
         "both_players_frames": both,
@@ -469,9 +480,15 @@ def score_player_tracking(
         "near_identity_breaks": breaks["near"],
         "far_identity_breaks": breaks["far"],
         "identity_swaps": swaps,
+        "plausibility": plausibility,
+        "coverage_trusted": (not plausibility.get("warnings")) if judged else None,
         "note": (
             "Coverage says a slot was filled, not that it held the right person. A slot "
-            "following a bystander reads as 100%; record those in tracking_failures."
+            "following a bystander reads as 100%; record those in tracking_failures. "
+            "coverage_trusted is false when a slot does not behave like a player, which is "
+            "how a coverage figure earned by tracking furniture announces itself, and null "
+            "when there were too few frames to tell; the measurements behind it are in "
+            "plausibility."
         ),
     }
 

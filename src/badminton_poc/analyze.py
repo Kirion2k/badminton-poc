@@ -180,6 +180,9 @@ def analyze(
     summary["two_player_coverage"]["during_detected_rallies"] = _rally_coverage(
         player_rows, rallies
     )
+    summary["tracked_player_plausibility"] = tracked_player_plausibility(
+        player_rows, rallies, fps
+    )
     summary["hits"]["raw_detector_candidates"] = raw_counts.get("hit", 0)
     summary["raw_detector_candidates"] = raw_counts
     summary["merged_bursts"] = len(merge_audit)
@@ -285,6 +288,89 @@ def _rally_coverage(player_rows, rallies) -> dict[str, Any]:
             "acceptance-criteria figure comes from hand-labelled active_play_ranges."
         ),
     }
+
+
+def tracked_player_plausibility(player_rows, rallies, fps: float,
+                                *, spans: str = "detected") -> dict[str, Any]:
+    """Ask whether the thing in each slot behaves like a player, not just how often it was there.
+
+    Coverage rises whether the pipeline is holding the right person or the wrong one, and twice
+    now it has been the wrong one. With a permissive court polygon, yt-ccaa reported 94% coverage
+    while its far slot sat on the umpire, whose foot point never left (0.906, 0.508); relaxing the
+    detection threshold on the same clip later reported 90% during rallies while the slot held
+    officials standing behind the back boards. Both read as a pass. Neither was one.
+
+    Three things separate a player from a bystander, measured over rally frames only:
+
+      confidence   how sure the detector was. Across the eight genuine tracks measured in this
+                   project -- near and far on four clips -- the median runs 0.636 to 0.924; the
+                   officials sat at 0.237.
+      movement     median frame-to-frame travel, in the player's own body heights per second so
+                   that frame rate, resolution and how far away they are all divide out. Genuine
+                   tracks run 0.48 to 0.90; the officials 0.29, the umpire nothing.
+      sway         how far the slot ranged sideways over the clip, in body heights. Genuine
+                   tracks run 1.49 to 4.88; a person in a chair does not move.
+
+    The thresholds sit below the genuine range rather than between the two, because a real player
+    having a quiet rally should not be flagged. This does not decide anything; it puts the numbers
+    next to the coverage figure so that a coverage figure earned by tracking furniture says so.
+
+    ``spans`` names where the rally boundaries came from, because the two callers differ: analyze
+    has only its own detected rallies, while the baseline has hand-labelled ones. It reaches the
+    note so a saved file never claims to have measured over spans it did not.
+    """
+    bounds = [(r["start_frame"], r["end_frame"]) for r in rallies]
+    if not bounds:
+        return {"note": f"no {spans} rallies, so there is nothing to judge the slots over"}
+    frames = {f for start, end in bounds for f in range(start, end + 1)}
+    out: dict[str, Any] = {}
+    warnings: list[str] = []
+    for slot in ("near", "far"):
+        seq = [(int(r["frame"]), r[slot]) for r in player_rows
+               if int(r["frame"]) in frames and r.get(slot)]
+        seq.sort()
+        if len(seq) < 20:
+            out[slot] = {"frames": len(seq), "note": "too few frames to judge"}
+            continue
+        confs = [p.get("conf", 0.0) for _, p in seq]
+        heights = [p["bbox"][3] - p["bbox"][1] for _, p in seq]
+        height = sorted(heights)[len(heights) // 2]
+        steps = []
+        for (fa, pa), (fb, pb) in zip(seq, seq[1:]):
+            if fb - fa != 1:            # a gap is the slot being lost, not the player teleporting
+                continue
+            ax = (pa["bbox"][0] + pa["bbox"][2]) / 2
+            bx = (pb["bbox"][0] + pb["bbox"][2]) / 2
+            steps.append(((bx - ax) ** 2 + (pb["bbox"][3] - pa["bbox"][3]) ** 2) ** 0.5)
+        xs = [(p["bbox"][0] + p["bbox"][2]) / 2 for _, p in seq]
+        median_conf = sorted(confs)[len(confs) // 2]
+        move = (sorted(steps)[len(steps) // 2] / height * fps) if steps and height else 0.0
+        sway = (max(xs) - min(xs)) / height if height else 0.0
+        out[slot] = {
+            "frames": len(seq),
+            "median_detection_confidence": round(median_conf, 3),
+            "median_movement_body_heights_per_s": round(move, 3),
+            "lateral_range_body_heights": round(sway, 3),
+        }
+        if median_conf < 0.45:
+            warnings.append(
+                f"the {slot} slot's median detection confidence is {median_conf:.2f}; every "
+                f"genuine track measured in this project sits at 0.63 or above, so this slot is "
+                f"probably not holding a player")
+        if move < 0.25:
+            warnings.append(
+                f"the {slot} slot moves {move:.2f} body heights per second during rallies; a "
+                f"player runs 0.48 to 0.90, so this slot is probably on something stationary")
+        if sway < 0.8:
+            warnings.append(
+                f"the {slot} slot ranged {sway:.2f} body heights sideways across the whole clip; "
+                f"a player covers 1.5 to 4.9, so this slot is probably on a fixed object")
+    out["warnings"] = warnings
+    out["note"] = (
+        f"Measured over {spans} rally frames. Empty warnings mean both slots behave like "
+        "players; they do not mean the coverage figure is high."
+    )
+    return out
 
 
 def mask_offcourt_shuttle(

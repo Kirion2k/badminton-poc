@@ -165,16 +165,32 @@ and what beats the detector there is motion blur at 30 fps.
 
 ## Evaluation
 
-`analysis.json` reports what the pipeline *produced*. It never reports accuracy. To measure
-accuracy:
+`analysis.json` reports what the pipeline *produced*. It never reports accuracy. Accuracy comes
+from hand labels, and there are two label files for historical reasons.
 
-1. Watch `annotated.mp4`.
-2. Edit `ground_truth.json`: fill in `active_play_ranges`, mark false positives with
-   `is_real_hit: false`, correct `true_hitter`, add `missed_hits`, set `boundary_ok` per rally.
-3. Set `labelled: true`.
-4. `badminton-poc evaluate --video data/input/<clip>.mp4`
+**`truth.json` and `badminton-poc baseline` are the live path.** The file records only what
+happened in the video, so one labelling scores every configuration; `baseline.json` is a clip's
+accuracy record. How it works and why the earlier format was wrong is below, under *Ground truth
+is what happened in the video*.
 
-That produces the six numbers the POC is judged on, with PASS/FAIL against the targets:
+```bash
+badminton-poc truth --video data/input/<clip>.mp4    # create or migrate the truth file
+badminton-poc baseline --video data/input/<clip>.mp4 # score the current run
+```
+
+**`ground_truth.json` and `badminton-poc evaluate` are the earlier, detector-coupled path.** One
+row per detected candidate, judged real or false. Label it by watching `annotated.mp4`, filling
+in `active_play_ranges` and `missed_hits`, marking false positives with `is_real_hit: false`,
+correcting `true_hitter`, setting `boundary_ok` per rally, then `labelled: true`. It still runs,
+and `badminton-poc refresh-labels` carries judgements across a configuration change. On
+test-video2 its labels describe the upstream event detector, and its rally ends are the ones
+later corrected in `truth.json`. So `evaluate` reports that clip's hit and hitter figures as
+unscorable rather than scoring one detector's hits against another's labels, and fails its rally
+boundaries against ends that have since been superseded. That is the format's original flaw
+showing, not a regression: `baseline.json` is that clip's record, and it has all six rallies
+recovered.
+
+Either way the targets are:
 
 | Metric | Target |
 |---|---|
@@ -185,6 +201,12 @@ That produces the six numbers the POC is judged on, with PASS/FAIL against the t
 | rally-boundary accuracy | ≥ 85% |
 
 `evaluate` refuses to run on an unlabelled file rather than produce a number from nothing.
+
+The coverage figure counts frames where a slot was filled, which is not the same as frames where
+it held a player. Every scoring path now carries slot-plausibility measurements beside it and
+withholds trust in the coverage number when they look wrong: `coverage_trusted` in
+`baseline.json`, `NOT TRUSTED` in place of `PASS` in `evaluation.json`, and
+`summary.tracked_player_plausibility` in `analysis.json`. See below for what is measured.
 
 ## Tests
 
@@ -622,9 +644,18 @@ Clip 2, corrected labels, `event_source: flight`:
 | criterion | target | result |
 |---|---|---|
 | both players tracked in active play | >= 90% | **92.9%** |
-| hitter assignment on detected hits | >= 90% | **92.7%** |
+| hitter assignment on detected hits | >= 90% | **92.5%** |
 | rally boundaries approximately correct | >= 85% | **6 of 6** |
-| hit detection scorable | precision/recall | **0.82 / 0.95**, F1 0.882 |
+| hit detection scorable | precision/recall | **0.81 / 0.95**, F1 0.875 |
+
+Two commits have moved those numbers since they were first recorded, and re-scoring every
+intermediate commit against the same labels says exactly which. `Gate contacts on racket reach`
+left three hits with no hitter rather than a guessed one, taking hitter accuracy from 92.7% to
+92.5% over 53 scored hits instead of 55. `Recover contacts that barely deflect the shuttle` added
+one prediction on this clip and it was a false positive, taking precision from 0.824 to 0.812 and
+F1 from 0.882 to 0.875; recall did not move, so the contact it recovered was not one of this
+clip's three missed hits. Both were judged worth it for reasons measured elsewhere, and the table
+above is the current run, not the best one.
 
 Against the same labels and the same clip, upstream's detector scores 0.62 / 0.90 on hits, 94.1%
 on hitters and 1 of 6 on rallies. The old path is still runnable with `event_source: tracknet`,
@@ -721,9 +752,16 @@ player near a sideline, who can be on court before the bump and off court after 
 **yt-irish is the one worth remembering.** The camera is fixed, the framing is a textbook
 elevated view of a full court, and the pipeline found two players on 87% of frames. The court in
 frame is empty for all 4500 frames: the match is being played on the next court along, mostly
-outside the right edge, and the two people it tracked are those players. Every automatic check
-passes. Only looking at a frame says otherwise, which is why the screening tool says so in its
-own docstring rather than pretending to catch it.
+outside the right edge, and the two people it tracked are those players.
+
+Every check that existed when it was screened passed it. The slot-plausibility measurements
+described below do not: over its detected rallies the near slot ranges 0.09 body heights
+sideways and the far slot moves 0.21 body heights per second, against 0.48 to 0.90 and 1.5 to
+4.9 for genuine tracks. Three warnings, and they are right. That does not rescue the screening
+tool, which runs before the pose pass and so has no track to measure; it means the failure is
+visible in `analysis.json` after a run rather than only to someone watching the video. It is
+also a thin sample -- two detected rallies, 239 slot-frames -- so treat it as one clip agreeing,
+not as a check that has been validated on wrong-court footage.
 
 ### The far player was too small for the input size, on every 1080p clip
 
@@ -800,3 +838,50 @@ those missing frames sit in gaps of five frames or fewer, so interpolation would
 76% and no further. It is 30 fps, and more input pixels make it worse rather than better: at 3200
 the far player falls out of the detection list entirely while background spectators a third her
 size come back at 0.75 confidence.
+
+### Coverage counts filled frames, not the right person
+
+Twice the pipeline has reported a passing coverage figure while a slot held someone who was not
+playing. Under the screening rectangle, yt-ccaa's far slot sat on the umpire in his chair and
+reported 94%; relaxing the detection threshold on the same clip later gave 90% during rallies
+with the slot on officials standing behind the back boards. Both read as a pass, and a false pass
+is worse than a fail because a fail gets investigated.
+
+Three measurements separate a player from a bystander, taken over rally frames only and scaled by
+the tracked person's own body height so that frame rate, resolution and distance from the camera
+all divide out:
+
+| measurement | what it is | flagged below |
+|---|---|---|
+| median detection confidence | how sure the pose model was | 0.45 |
+| median movement | frame-to-frame travel, body heights per second | 0.25 |
+| lateral range | how far the slot ranged sideways, in body heights | 0.8 |
+
+Across every clip that reaches rally detection, measured over that clip's *detected* rallies,
+which is what `analysis.json` reports:
+
+| clip | near move / sway | far move / sway | verdict |
+|---|---|---|---|
+| test-video2 | 0.55 / 3.09 | 0.50 / 3.27 | no warnings |
+| yt-ccaa | 0.57 / 1.50 | 0.90 / 2.54 | no warnings |
+| yt-melbourne | 0.66 / 1.82 | 0.88 / 1.79 | no warnings |
+| yt-warehouse | 0.72 / 3.86 | 0.74 / 3.69 | no warnings |
+| yt-irish | 0.38 / 0.09 | 0.21 / 0.80 | three warnings |
+
+Only test-video2 has hand-labelled rallies, and `baseline.json` measures it over those instead:
+0.55 / 2.98 near and 0.48 / 4.88 far. Same clip, same run, different spans, so the two files do
+not agree to the decimal and neither is wrong. The ranges quoted above and in the warnings --
+0.48 to 0.90 for movement, 1.5 to 4.9 for lateral range -- span both sets, which is why their
+ends do not all appear in the table.
+
+The thresholds sit below the genuine range rather than halfway between the two, because a real
+player having a quiet rally must not be flagged. Nothing here decides anything: the coverage
+number is reported unchanged, with the measurements next to it, so a figure earned by tracking
+furniture says so.
+
+**What it cannot do.** It catches a slot on something that does not move like a player. A wrong
+person who does move like one -- a player on an adjacent court close enough to fill the frame --
+would pass it, and yt-irish is one clip agreeing rather than evidence it catches that class. The
+lowest genuine confidence measured so far is yt-ccaa's far player at 0.64, against 0.24 for the
+officials, so the confidence threshold has roughly one and a half times the margin the movement
+one does.

@@ -24,6 +24,10 @@ passes the camera check and reports two players, because there are two people in
 they are on the next court along, and the court the camera frames is empty for the whole
 clip. Look at a frame before trusting a pass.
 
+Nothing here can catch that, because all three checks run before the pose pass and so have no
+track to measure. After a full run the slot-plausibility measurements in `analysis.json` do flag
+yt-irish, on all three signals. That is a reason to read them, not a reason to skip the frame.
+
 Usage: screen_clip.py <clip> [<clip> ...]
 """
 import csv, json, sys

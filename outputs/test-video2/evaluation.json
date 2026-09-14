@@ -13,35 +13,29 @@
     "note": "Coherence through rallies is a visual judgement; record it in notes."
   },
   "hit_detection": {
-    "scorable": true,
-    "detected_hits": 88,
-    "labelled_hits": 88,
-    "unlabelled_hits": 0,
+    "scorable": false,
+    "detected_hits": 69,
+    "labelled_hits": 1,
+    "unlabelled_hits": 68,
     "unjudged_hits": 0,
-    "dropped_real_hits": 6,
-    "dropped_false_hits": 95,
-    "true_positives": 55,
-    "false_positives": 33,
-    "missed": 7,
-    "precision": 0.625,
-    "recall": 0.8871
+    "dropped_real_hits": 61,
+    "dropped_false_hits": 127,
+    "note": "Precision and recall are withheld: the labels do not describe this run. 68 detected hits have no label and 0 are present but not yet judged. That happens when a threshold or filter changed after labelling. Run 'badminton-poc refresh-labels' to carry the existing judgements onto the current run, then judge the rows marked NEW."
   },
   "hitter_assignment": {
-    "scored_hits": 54,
-    "correct": 53,
-    "accuracy": 0.9815
+    "scored_hits": 0,
+    "correct": 0,
+    "accuracy": null
   },
   "rally_boundaries": {
     "real_rallies": 6,
-    "detected_rallies": 8,
+    "detected_rallies": 6,
     "approximately_correct": 4,
     "accuracy": 0.6666666666666666,
-    "split": 1,
+    "split": 0,
     "missed": 0,
-    "spurious": 1,
-    "spurious_rallies": [
-      6
-    ],
+    "spurious": 0,
+    "spurious_rallies": [],
     "tolerance_seconds": 1.0,
     "detail": [
       {
@@ -50,8 +44,8 @@
         "detected_rallies": [
           1
         ],
-        "start_error_s": 0.0,
-        "end_error_s": 4.284,
+        "start_error_s": -1.117,
+        "end_error_s": -0.15,
         "verdict": "edges outside tolerance"
       },
       {
@@ -60,47 +54,48 @@
         "detected_rallies": [
           2
         ],
-        "start_error_s": 0.0,
-        "end_error_s": 0.934,
-        "verdict": "ok"
+        "start_error_s": 0.067,
+        "end_error_s": -1.767,
+        "verdict": "edges outside tolerance"
       },
       {
         "true_start_frame": 1502,
         "true_end_frame": 2767,
         "detected_rallies": [
-          3,
-          4
+          3
         ],
-        "verdict": "split across several detected rallies"
+        "start_error_s": 0.133,
+        "end_error_s": -0.433,
+        "verdict": "ok"
       },
       {
         "true_start_frame": 3821,
         "true_end_frame": 5217,
         "detected_rallies": [
-          5
+          4
         ],
-        "start_error_s": -0.183,
-        "end_error_s": -0.1,
+        "start_error_s": 0.017,
+        "end_error_s": -0.167,
         "verdict": "ok"
       },
       {
         "true_start_frame": 6185,
         "true_end_frame": 6439,
         "detected_rallies": [
-          7
+          5
         ],
-        "start_error_s": -0.233,
-        "end_error_s": 0.517,
+        "start_error_s": -0.167,
+        "end_error_s": -0.2,
         "verdict": "ok"
       },
       {
         "true_start_frame": 7024,
         "true_end_frame": 7355,
         "detected_rallies": [
-          8
+          6
         ],
-        "start_error_s": -0.183,
-        "end_error_s": -0.683,
+        "start_error_s": -0.15,
+        "end_error_s": 0.283,
         "verdict": "ok"
       }
     ],
@@ -114,7 +109,7 @@
   },
   "targets": {
     "two_player_coverage_active_play >= 0.90": "PASS",
-    "hitter_assignment_accuracy >= 0.90": "PASS",
+    "hitter_assignment_accuracy >= 0.90": "not measurable (missing labels)",
     "rally_boundary_accuracy >= 0.85": "FAIL"
   }
 }
