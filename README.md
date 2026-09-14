@@ -153,6 +153,14 @@ width, and a tripod can be knocked once and hold still either side of the knock.
 describes the whole video or it does not; `tools/screen_clip.py` measures the drift so the answer
 is a number rather than an impression.
 
+It measures the drift that *persists*, not the worst frame in the clip. Judging on the worst
+frame, the tool rejected clips 3 and 5 for 14.9% and 23.0% of frame width when neither camera
+moves more than 0.3px: both are phone screen recordings of YouTube, and both end with the iOS
+Control Centre swiped in to stop the capture. It now discards the three largest samples before
+deciding, which a stop gesture fits inside and a moving camera does not -- a knocked tripod
+leaves every later sample displaced, not three. The outlier frames are still reported by number,
+because a clip that is steady apart from a few frames has something wrong with those frames.
+
 **Whole court visible means the court being played on.** A camera pointed at an empty court beside
 the match passes every automatic check there is.
 

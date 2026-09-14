@@ -11,7 +11,11 @@ Three checks, in the order that rules a clip out soonest:
 
   camera drift   phase-correlate frames against the first one. The pipeline assumes one court
                  polygon for the whole video, so a frame that moves makes every coordinate mean
-                 something different at the end of the clip than at the start.
+                 something different at the end of the clip than at the start. Judged on the
+                 drift that survives discarding the few largest samples, because a phone screen
+                 recording ends with the UI swiped in to stop it and that one frame is not the
+                 camera moving; the worst sample is still reported, and named, so the frames
+                 behind it get looked at.
   far player     how tall is the smaller of the two players, and does the pose model see them?
                  Confidence is reported at the configured input size and at 3200, because the
                  gap between those two numbers is the difference between a clip that fails the
@@ -40,13 +44,52 @@ DRIFT_SAMPLES = 25
 PROXY_WIDTH = 960
 
 
+# How many samples may be junk before the movement is the camera's rather than the recording's.
+# Both remaining labelling candidates are phone screen captures of YouTube that end with the
+# swipe that stopped the recording, and the worst-sample rule rejected both: clip 3 at 14.9% of
+# frame width and clip 5 at 23.0%, while neither court moves more than 0.3px. Three is enough for
+# a stop gesture at either end and far too few to cover a camera that is actually moving -- a
+# tripod knocked once leaves every sample after the knock displaced, not three.
+JUNK_SAMPLES = 3
+
+
+def summarise_drift(magnitudes: list[float], frames: list[int], width: int) -> dict:
+    """Separate a camera that moves from a recording with rubbish at one end.
+
+    Reports both numbers rather than choosing one. ``max_drift_px`` is the worst single sample,
+    which is what a swiped-in phone UI shows up as; ``sustained_drift_px`` is the worst that
+    survives discarding the JUNK_SAMPLES largest, which is what a hand-held or knocked camera
+    shows up as, because those displace far more samples than a stop gesture can. The verdict
+    turns on the sustained figure, and the outliers are named so somebody looks at those frames
+    instead of the tool quietly forgiving them.
+    """
+    if not magnitudes:
+        return {"max_drift_px": None, "at_frame": None, "frac_of_width": None,
+                "sustained_drift_px": None, "sustained_frac_of_width": None,
+                "outlier_frames": [], "samples": 0}
+    order = sorted(range(len(magnitudes)), key=lambda i: magnitudes[i], reverse=True)
+    worst = magnitudes[order[0]]
+    keep = order[JUNK_SAMPLES:]
+    sustained = magnitudes[keep[0]] if keep else 0.0
+    # An outlier is a sample the sustained figure had to discard to get there, and only one that
+    # is actually far above it -- on a clip that drifts throughout, the largest three samples are
+    # ordinary members of the distribution and naming them would be noise.
+    outliers = sorted(frames[i] for i in order[:JUNK_SAMPLES]
+                      if magnitudes[i] > max(sustained * 4, 2.0))
+    return {"max_drift_px": round(worst, 1), "at_frame": frames[order[0]],
+            "frac_of_width": round(worst / max(1, width), 4),
+            "sustained_drift_px": round(sustained, 1),
+            "sustained_frac_of_width": round(sustained / max(1, width), 4),
+            "outlier_frames": outliers, "samples": len(magnitudes)}
+
+
 def camera_drift(path: Path) -> dict:
     cap = cv2.VideoCapture(str(path))
     n = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     ref = None
-    worst = 0.0
-    worst_frame = 0
+    mags: list[float] = []
+    frames: list[int] = []
     for i in np.linspace(0, max(0, n - 1), DRIFT_SAMPLES).astype(int):
         cap.set(cv2.CAP_PROP_POS_FRAMES, int(i))
         ok, img = cap.read()
@@ -58,12 +101,10 @@ def camera_drift(path: Path) -> dict:
             ref = g
             continue
         (dx, dy), _ = cv2.phaseCorrelate(ref, g)
-        mag = float(np.hypot(dx, dy)) * width / PROXY_WIDTH
-        if mag > worst:
-            worst, worst_frame = mag, int(i)
+        mags.append(float(np.hypot(dx, dy)) * width / PROXY_WIDTH)
+        frames.append(int(i))
     cap.release()
-    return {"max_drift_px": round(worst, 1), "at_frame": worst_frame,
-            "frac_of_width": round(worst / max(1, width), 4)}
+    return summarise_drift(mags, frames, width)
 
 
 def far_player(clip: str, cfg: dict, src_w: int, src_h: int) -> dict:
@@ -118,11 +159,22 @@ def shuttle_parking(clip: str) -> dict:
 
 
 def verdict(drift: dict, far: dict, ball: dict) -> str:
-    if drift["frac_of_width"] > 0.005:
-        return (f"REJECT: the camera moves {drift['max_drift_px']:.0f}px "
-                f"({drift['frac_of_width']*100:.1f}% of frame width) by frame {drift['at_frame']}. "
+    if drift["sustained_frac_of_width"] is None:
+        return "UNKNOWN: could not measure camera drift; no frames were readable."
+    if drift["sustained_frac_of_width"] > 0.005:
+        return (f"REJECT: the camera moves {drift['sustained_drift_px']:.0f}px "
+                f"({drift['sustained_frac_of_width']*100:.1f}% of frame width) and stays moved, "
+                f"worst {drift['max_drift_px']:.0f}px at frame {drift['at_frame']}. "
                 f"One court polygon cannot describe the whole clip.")
     notes = []
+    if drift["outlier_frames"]:
+        n = len(drift["outlier_frames"])
+        where = ", ".join(str(f) for f in drift["outlier_frames"])
+        notes.append(f"the camera is steady ({drift['sustained_drift_px']:.1f}px) except for "
+                     f"{n} sample{'s' if n > 1 else ''} at frame {where}, reaching "
+                     f"{drift['max_drift_px']:.0f}px -- look at those frames; on a phone screen "
+                     f"recording they are usually the UI swiped in to stop the capture, and the "
+                     f"clip should be trimmed before them")
     px = far.get("far_height_px_at_imgsz")
     if px is not None and px < 120:
         want = int(far["configured_imgsz"] * 140 / max(1, px))
@@ -137,24 +189,31 @@ def verdict(drift: dict, far: dict, ball: dict) -> str:
     return "USABLE" if not notes else "NEEDS WORK: " + "; ".join(notes)
 
 
-for clip in sys.argv[1:]:
-    work = Path("outputs") / clip / "work.mp4"
-    if not work.exists():
-        print(f"{clip}: no outputs/{clip}/work.mp4")
-        continue
-    cfg_path = Path("configs") / f"{clip}.json"
-    cfg = json.loads(cfg_path.read_text()) if cfg_path.exists() else {}
-    drift = camera_drift(work)
-    cap = cv2.VideoCapture(str(work))
-    src_w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)); src_h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    cap.release()
-    far = far_player(clip, cfg, src_w, src_h)
-    ball = shuttle_parking(clip)
-    print(f"\n{clip}")
-    print(f"  camera   max drift {drift['max_drift_px']:.1f}px "
-          f"({drift['frac_of_width']*100:.2f}% of width) at frame {drift['at_frame']}")
-    print(f"  players  far detected {far.get('far_detected_fraction')}, "
-          f"far box height p10 {far.get('far_box_height_frac_p10')} of frame "
-          f"= {far.get('far_height_px_at_imgsz')} px at imgsz {far.get('configured_imgsz')}")
-    print(f"  shuttle  parked {ball.get('parked_fraction')}, moving {ball.get('moving_fraction')}")
-    print(f"  -> {verdict(drift, far, ball)}")
+def main(clips: list[str]) -> None:
+    for clip in clips:
+        work = Path("outputs") / clip / "work.mp4"
+        if not work.exists():
+            print(f"{clip}: no outputs/{clip}/work.mp4")
+            continue
+        cfg_path = Path("configs") / f"{clip}.json"
+        cfg = json.loads(cfg_path.read_text()) if cfg_path.exists() else {}
+        drift = camera_drift(work)
+        cap = cv2.VideoCapture(str(work))
+        src_w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        src_h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        cap.release()
+        far = far_player(clip, cfg, src_w, src_h)
+        ball = shuttle_parking(clip)
+        print(f"\n{clip}")
+        print(f"  camera   sustained {drift['sustained_drift_px']}px "
+              f"({(drift['sustained_frac_of_width'] or 0)*100:.2f}% of width), "
+              f"worst {drift['max_drift_px']}px at frame {drift['at_frame']}")
+        print(f"  players  far detected {far.get('far_detected_fraction')}, "
+              f"far box height p10 {far.get('far_box_height_frac_p10')} of frame "
+              f"= {far.get('far_height_px_at_imgsz')} px at imgsz {far.get('configured_imgsz')}")
+        print(f"  shuttle  parked {ball.get('parked_fraction')}, moving {ball.get('moving_fraction')}")
+        print(f"  -> {verdict(drift, far, ball)}")
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
