@@ -654,7 +654,7 @@ Clip 2, corrected labels, `event_source: flight`:
 | both players tracked in active play | >= 90% | **92.9%** |
 | hitter assignment on detected hits | >= 90% | **92.5%** |
 | rally boundaries approximately correct | >= 85% | **6 of 6** |
-| hit detection scorable | precision/recall | **0.81 / 0.95**, F1 0.875 |
+| hit detection scorable | precision/recall | **0.82 / 0.95**, F1 0.882 |
 
 Two commits have moved those numbers since they were first recorded, and re-scoring every
 intermediate commit against the same labels says exactly which. `Gate contacts on racket reach`
@@ -662,8 +662,11 @@ left three hits with no hitter rather than a guessed one, taking hitter accuracy
 92.5% over 53 scored hits instead of 55. `Recover contacts that barely deflect the shuttle` added
 one prediction on this clip and it was a false positive, taking precision from 0.824 to 0.812 and
 F1 from 0.882 to 0.875; recall did not move, so the contact it recovered was not one of this
-clip's three missed hits. Both were judged worth it for reasons measured elsewhere, and the table
-above is the current run, not the best one.
+clip's three missed hits. Both were judged worth it for reasons measured elsewhere.
+
+`Merge the second hit a shuttlecock's drag knee produces` has since taken precision back to
+**0.824** and F1 to **0.882**, by running hit consolidation on the flight path where it had never
+run. It removed one false positive here and four on clip 3, and cost no recall on either.
 
 Against the same labels and the same clip, upstream's detector scores 0.62 / 0.90 on hits, 94.1%
 on hitters and 1 of 6 on rallies. The old path is still runnable with `event_source: tracknet`,
@@ -724,14 +727,17 @@ systematic mistake would read as agreement rather than as failure.
 | both players tracked in active play | >= 90% | 92.9% | **98.3%** |
 | hitter assignment on detected hits | >= 90% | 92.5% | **90.0%** (9 of 10) |
 | rally boundaries approximately correct | >= 85% | 6 of 6 | **4 of 4** |
-| hit detection | precision / recall | 0.81 / 0.95, F1 0.875 | **0.45 / 0.71, F1 0.556** |
+| hit detection | precision / recall | 0.82 / 0.95, F1 0.882 | **0.56 / 0.71, F1 0.625** |
 
 Three criteria clear their targets on a second recording. Hitter assignment clears it on ten
-scored hits, which is too few to mean much. **Hit detection does not transfer**: precision falls
-from 0.81 to 0.45. Of the 12 false positives in 22 predictions, 3 are a second detection of a
-contact already found (bursts that survived consolidation), 5 are extra hits inside real rallies
-and 4 are an entire invented rally at frames 2017-2122. Of the 4 missed contacts, 2 sit in the
-stretch where the shuttle track is lost altogether.
+scored hits, which is too few to mean much. **Hit detection does not transfer**: precision is
+0.56 against clip 2's 0.82.
+
+It was 0.45 when this clip was first scored. Four of those twelve false positives were the same
+contact reported twice, from the drag knee described below, and consolidating them took precision
+to 0.556 with no loss of recall. What is left is 8 false positives in 18 predictions: 4 are an
+entire invented rally at frames 2017-2122 and 4 are extra hits inside real rallies. Of the 4
+missed contacts, 2 sit in the stretch where the shuttle track is lost altogether.
 
 **The clip is far thinner than its draft suggested, and most of what the draft contained was
 not there.** The seeded draft had 6 rallies and 32 candidate contacts. The clip actually holds
@@ -799,18 +805,59 @@ of 0.81 -- and that is left as it is rather than widened, because it is the hone
 of the point: these bounds come from ten rallies and a real rally already sits on the edge of
 them. Read the numbers, not the count.
 
-**The gate was also the smaller half of the problem.** Of clip 3's 12 false positives only 4 are
-the invented rally. Three are a second detection of a contact already found and five are spurious
-hits inside real rallies. A perfect play gate takes precision from 0.45 to 0.556; removing the
-duplicates as well takes it to 0.667, still short of clip 2's 0.81. The duplicates and the
-in-rally false positives are the better target.
+**The gate was also the smaller half of the problem.** Of clip 3's twelve false positives at the
+time, only 4 were the invented rally; 4 were the same contact reported twice and 4 were spurious
+hits inside real rallies. Consolidating the duplicates has since been done and took precision from
+0.45 to 0.556 on clip 3 and 0.812 to 0.824 on clip 2 -- more than a perfect play gate would have
+been worth on either. The remaining 4 in-rally false positives are the next target.
+
+### One contact, two hits: the shuttlecock's drag knee
+
+A shuttlecock does not fly like a ball. It sheds its horizontal speed to drag within about a
+third of a second, and there is a moment in every struck flight where the horizontal speed is
+spent and the vertical speed has not yet built -- the shuttle is barely moving at all. For a few
+frames it travels below `min_flight_speed_px_s` (150 px/s), the segmenter stops calling it
+flight, and **one physical flight is cut into two segments**.
+
+The join across that cut turns 60-80 degrees, because the path genuinely bends from horizontal
+to vertical. `min_turn_degrees` is 60, chosen because real contacts sit at a median 150 degrees
+and frames inside a flight at 9. The knee falls between the two and is read as a racket contact.
+So a real contact is followed about 0.3s later by a second hit that never happened.
+
+Clip 3 does it at frames 106/123, 810/831 and 1619/1636; clip 2 at 7054/7071. On clip 3's frames
+110-145 it is plain in the raw track: struck at 109, the shuttle runs left at 47px/frame decaying
+to 11 by frame 122, then from 123 moves 0.7px/frame sideways while falling 3.4px/frame.
+
+`consolidate_events` exists to collapse exactly this, and had never been run on the flight path:
+`analyze` took `events = raw_events` whenever a flight model was present, so
+`min_hit_interval_seconds` applied to nothing the flight detector produced. Running it there
+costs no recall on either clip and removes 4 false positives on clip 3 and 1 on clip 2:
+
+| | clip 2 before | clip 2 after | clip 3 before | clip 3 after |
+|---|---|---|---|---|
+| precision | 0.812 | **0.824** | 0.455 | **0.556** |
+| recall | 0.949 | 0.949 | 0.714 | 0.714 |
+| F1 | 0.875 | **0.882** | 0.556 | **0.625** |
+
+The claim consolidation rests on is about badminton rather than about this detector: two racket
+contacts are never 0.3s apart. The closest pair in the project's hand labels is 0.350s (clip 2,
+frames 7227 and 7248), above the window, and a test holds that pair against it.
+
+**It does not fix the cause.** The knee still splits flights; the second hit is merged away
+afterwards. Two of the pairs -- clip 3's 810/831 at 0.355s and 881/899 at 0.304s -- fall outside
+the window and survive as false positives. Fixing it at source means the segmenter not cutting a
+flight where the shuttle slows, which is a change to what counts as flight, and that is worth
+doing against a clip labelled for it rather than guessed at here. Two discriminators were tried
+on the link itself and both overlap on clip 2: the speed ratio across the join (real contacts run
+as low as 0.22, false ones as high as 3.18) and the single-frame velocity jump (a tracker
+teleporting 576px scores 79.6, far above any real contact).
 
 ### Where it stands
 
 All four milestone-1 criteria pass on clip 2 with the flight-segment detector, against labels
 that were re-measured from the video rather than taken on trust. Three of the four pass again on
-clip 3 against model-produced labels. Hit detection does not: its precision falls from 0.81 to
-0.45, and that is the honest headline.
+clip 3 against model-produced labels. Hit detection does not: its precision is 0.56 there against
+0.82 on clip 2, and that is the honest headline.
 
 **Player tracking and rally boundaries look like properties of the pipeline. Hit-detection
 precision looks like a property of clip 2.** It was tuned there and does not survive the move.
@@ -822,11 +869,16 @@ Clip 3 also turned out to be thin: 4 rallies and 14 rally shots in its first 30 
 clip 2's 6 rallies and 62 contacts, with 53 of its 85 seconds containing no play at all. It is
 enough to falsify a claim, as it just did, and not enough to establish one.
 
-The next thing worth doing is the duplicate and in-rally false positives, which are 8 of clip
-3's 12. A play gate was attempted first and abandoned: seven signals measured, none separates on
-both labelled clips, and it would have addressed only the other 4. Each detected rally now
-carries a `play_evidence` block instead, which describes it without deciding anything. Clip 5 is
-the remaining unlabelled clip, and its camera is steady once the trailing junk frames are
+The duplicates are fixed: one racket contact was producing two hits, and consolidating them took
+clip 3's precision from 0.45 to 0.556 and clip 2's from 0.812 to 0.824 with no loss of recall. A
+play gate was attempted before that and abandoned -- seven signals measured, none separates on
+both labelled clips -- so each detected rally carries a `play_evidence` block instead, which
+describes it without deciding anything.
+
+What is left on clip 3 is 8 false positives: 4 an invented rally during an interval, 4 spurious
+hits inside real rallies. Both need the hit detector to know something it currently cannot, and
+both would be better attacked against a third labelled clip than against this one. Clip 5 is the
+remaining unlabelled candidate, and its camera is steady once the trailing junk frames are
 discounted.
 
 `badminton-poc report --video <clip>` renders any clip's `analysis.json` as a page, with every

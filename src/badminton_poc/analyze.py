@@ -110,7 +110,24 @@ def analyze(
         )
         merge_audit = merge_audit + landing_audit
     else:
-        events, off_play, low_confidence, merge_audit = raw_events, [], [], []
+        # The flight detector emits one hit per segment join, so it has no bursts to collapse --
+        # except the ones a shuttlecock makes for itself. A struck shuttle sheds its horizontal
+        # speed to drag before it has built vertical speed, and for a few frames it travels below
+        # min_flight_speed_px_s; the segmenter stops calling that flight and cuts one physical
+        # flight in two. The join across the cut turns 60-80 degrees, between the 9 of a frame
+        # inside a flight and the 150 of a real contact, so it is read as a second contact about
+        # 0.3s after the real one. Clip 3 does it at frames 106/123, 810/831 and 1619/1636; clip
+        # 2 at 7054/7071.
+        #
+        # Consolidation is the right answer to it whatever the cause, because the claim it rests
+        # on is about badminton rather than about this detector: two racket contacts are never
+        # that close. The nearest pair in the project's hand labels is 0.350s apart, above the
+        # 0.30s window. Landings are left alone -- the flight detector emits one per rally end,
+        # not a metronome, so there is nothing there to merge.
+        events, merge_audit = consolidate_events(
+            raw_events, fps, cfg.min_hit_interval_seconds, "hit"
+        )
+        off_play, low_confidence = [], []
 
     hits = [e for e in events if e.event_type == "hit"]
     swing_by_frame = {}
