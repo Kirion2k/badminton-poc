@@ -91,6 +91,152 @@ def detect_play_spans(
     return [(s, e) for s, e in spans if e - s + 1 >= min_span]
 
 
+# The range each measurement takes across every hand-labelled rally in this project: clip 2's six
+# and clip 3's four, ten in all, on two recordings. These are observed extremes, not thresholds.
+# A rally outside them is unlike everything that has been labelled, which is a reason to look at
+# it and not a reason to believe anything -- ten rallies is a small sample and a real rally that
+# is short, flat or central could sit outside on any of these axes.
+LABELLED_RALLY_RANGES: dict[str, tuple[float, float]] = {
+    "shuttle_lateral_range_frac": (0.188, 0.568),
+    "slower_slot_movement_bh_s": (0.318, 0.742),
+    "median_shuttle_speed_px": (5.30, 11.88),
+    "usable_shuttle_fraction": (0.81, 1.00),
+}
+
+MIN_EVIDENCE_FRAMES = 30
+"""Below this the medians describe noise. Half a second at 60fps."""
+
+MIN_USABLE_SHUTTLE = 0.15
+"""Below this the shuttle measurements describe the tracker, not the shuttle."""
+
+
+def _usable_samples(ball, start, end, fixed_points):
+    """Shuttle samples in the span that are a shuttle rather than the tracker sitting still.
+
+    TrackNetV3 emits one shuttle per frame whether or not one is in play and settles on a fixed
+    fixture between points, so a parked sample is not evidence of a slow rally -- counting it
+    would make an interval look like a rally with a stationary shuttle.
+    """
+    tolerance = 12.0
+    out = []
+    for frame in range(start, end + 1):
+        sample = ball.get(frame)
+        if sample is None or not sample.visible:
+            continue
+        if any(abs(sample.x - float(p["x"])) < tolerance and abs(sample.y - float(p["y"])) < tolerance
+               for p in fixed_points):
+            continue
+        out.append((frame, sample.x, sample.y))
+    return out
+
+
+def _slot_movement(player_rows, start, end, slot, fps):
+    """Median frame-to-frame travel of one slot, in its own body heights per second.
+
+    Dividing by the tracked person's own height takes frame rate, resolution and distance from
+    the camera out of it, so the number means the same on any clip.
+    """
+    steps: list[float] = []
+    previous: tuple[int, float, float, float] | None = None
+    for row in player_rows:
+        frame = int(row["frame"])
+        if not (start <= frame <= end):
+            continue
+        player = row.get(slot)
+        if not player:
+            previous = None
+            continue
+        box = player["bbox"]
+        cx, cy, height = (box[0] + box[2]) / 2.0, box[3], box[3] - box[1]
+        if previous is not None and frame - previous[0] == 1 and height > 0:
+            steps.append(math.hypot(cx - previous[1], cy - previous[2]) / height * fps)
+        previous = (frame, cx, cy, height)
+    if not steps:
+        return None
+    steps.sort()
+    return steps[len(steps) // 2]
+
+
+def play_evidence(
+    ball: "BallTrack",
+    player_rows: list[dict[str, Any]],
+    start_frame: int,
+    end_frame: int,
+    *,
+    fps: float,
+    width: int,
+    fixed_points: "list[dict[str, Any]] | tuple" = (),
+) -> dict[str, Any]:
+    """What a detected rally looks like, measured, beside the rally it claims to be.
+
+    Clip 3's detector invented a rally at frames 2017-2122 from two people hand-throwing shuttles
+    during an interval, and the obvious cure is a gate that suppresses hits when no rally is in
+    progress. Seven candidate signals were measured for it and every one of them overlaps on clip
+    2, the only clip with hand labels:
+
+      median shuttle speed   5.46 px/frame in the invented rally against 4.85-6.29 in real ones
+      player motion          0.235 body heights/s against a real rally's 0.322 -- a 1.4x margin
+      shuttle p90 speed      11.4 against 15.8-22.8, but shuttle collection scores 29.8
+      wrist speed            4.13 against a real rally's 2.37, the wrong way round
+      per-rally plausibility flags two real rallies, and the invented one scores best on sway
+      shuttle lateral range  separates clip 3, but a clip 2 dead gap beats four real rallies
+      slot identity switches two ids, where clip 2's real rallies reach three
+
+    So this suppresses nothing and returns no verdict. It reports four measurements and names the
+    ones that fall outside ``LABELLED_RALLY_RANGES``, which is where every hand-labelled rally in
+    the project sits. On the invented rally two of the four fall outside; on all ten labelled
+    rallies none does. That is an observation about a sample of ten, offered so somebody looks at
+    the rally, and it is deliberately not wired to anything that drops a hit.
+    """
+    frames = end_frame - start_frame + 1
+    note_tail = (" This does not decide anything: no signal measured so far separates a rally "
+                 "from an interval on both labelled clips, so the numbers are reported and the "
+                 "rally is kept.")
+    if frames < MIN_EVIDENCE_FRAMES:
+        return {"frames": frames, "outside_labelled_range": [],
+                "note": f"span is too short to measure over ({frames} frames)." + note_tail}
+
+    samples = _usable_samples(ball, start_frame, end_frame, list(fixed_points))
+    usable = len(samples) / frames
+    if usable < MIN_USABLE_SHUTTLE:
+        return {"frames": frames, "usable_shuttle_fraction": round(usable, 3),
+                "outside_labelled_range": [],
+                "note": ("too little usable shuttle track to measure over; what is here "
+                         "describes the tracker rather than a shuttle." + note_tail)}
+
+    xs = [x for _, x, _ in samples]
+    steps = [math.hypot(b[1] - a[1], b[2] - a[2])
+             for a, b in zip(samples, samples[1:]) if b[0] - a[0] == 1]
+    steps.sort()
+    near = _slot_movement(player_rows, start_frame, end_frame, "near", fps)
+    far = _slot_movement(player_rows, start_frame, end_frame, "far", fps)
+    both = [v for v in (near, far) if v is not None]
+
+    measured: dict[str, Any] = {
+        "frames": frames,
+        # the slower slot, not the average: a player standing still is not excused by their
+        # opponent running about, and in every wrong-person case so far one slot was the problem
+        "slower_slot_movement_bh_s": round(min(both), 3) if len(both) == 2 else None,
+        "shuttle_lateral_range_frac": round((max(xs) - min(xs)) / max(1, width), 3),
+        "median_shuttle_speed_px": round(steps[len(steps) // 2], 2) if steps else None,
+        "usable_shuttle_fraction": round(usable, 3),
+    }
+    outside = []
+    for name, (low, high) in LABELLED_RALLY_RANGES.items():
+        value = measured.get(name)
+        if value is None or low <= value <= high:
+            continue
+        outside.append({"measurement": name, "value": value,
+                        "labelled_range": [low, high],
+                        "direction": "below" if value < low else "above"})
+    measured["outside_labelled_range"] = outside
+    measured["note"] = (
+        "Measurements over this detected rally, against the range every hand-labelled rally in "
+        "the project falls in (ten rallies, two clips)." + note_tail
+    )
+    return measured
+
+
 def reject_hits_outside_play(
     events: list[ShuttleEvent],
     play_spans: list[tuple[int, int]],

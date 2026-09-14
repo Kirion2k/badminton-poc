@@ -764,6 +764,47 @@ clip: the threshold that gives 0.81 there gives 0.45 here. The largest single ca
 nothing asks whether a rally is being played at all before reporting hits -- the same blind spot
 that let a seated umpire pass as a tracked player.
 
+### Seven attempts at a play gate, all measured, none of them separates
+
+Clip 3's detector invented a rally at frames 2017-2122 out of two people hand-throwing shuttles
+during an interval. The obvious cure is a gate: suppress hits when no rally is in progress. One
+already exists -- `detect_play_spans` keys on shuttle motion -- but it is disabled on the flight
+path and would not have caught this, because a thrown shuttle moves.
+
+Seven signals were measured, against clip 2 as well as clip 3, because clip 2 is the only clip
+with hand labels and so the only place a threshold fitted on clip 3 can be falsified:
+
+| signal | real rallies | the invented rally | why it fails |
+|---|---|---|---|
+| median shuttle speed | 4.85-6.29 px/frame | 5.46 | inside the range |
+| player motion, slower slot | 0.322-0.742 bh/s | 0.235 | 1.4x margin, fitted to one example |
+| shuttle p90 speed | 15.8-22.8 | 11.4 | shuttle collection scores 29.8, above every rally |
+| wrist speed p90 | 2.37-8.71 bh/s | 4.13 | a real rally scores *lower* than the invented one |
+| per-rally slot plausibility | 0-2 warnings | 2 warnings | flags two real rallies; the invented one has the highest far-slot sway of all |
+| shuttle lateral range | 0.234-0.568 of width | 0.122 | separates clip 3; a clip 2 dead gap scores 0.478, above four real rallies |
+| slot identity switches | up to 3 ids | 2 ids | clip 2's real rallies switch more |
+
+**So no gate was added.** Every signal that looked decisive on clip 3 overlapped on clip 2, and
+the lateral-range one would have dropped real rallies there. Fitting a threshold to a single
+invented rally is how a number that means nothing gets into a scoring path.
+
+What was added is `play_evidence`, attached to each detected rally in `analysis.json`. It reports
+four measurements over the rally and names the ones falling outside `LABELLED_RALLY_RANGES` --
+the range every hand-labelled rally in the project sits in, ten rallies across two clips. It
+suppresses nothing, returns no verdict, and a test asserts it never grows one.
+
+On clip 3 the invented rally falls outside on three of four; clip 2's six rallies fall outside on
+none. Clip 3's real rally 3 falls outside on one -- usable shuttle fraction 0.808 against a bound
+of 0.81 -- and that is left as it is rather than widened, because it is the honest demonstration
+of the point: these bounds come from ten rallies and a real rally already sits on the edge of
+them. Read the numbers, not the count.
+
+**The gate was also the smaller half of the problem.** Of clip 3's 12 false positives only 4 are
+the invented rally. Three are a second detection of a contact already found and five are spurious
+hits inside real rallies. A perfect play gate takes precision from 0.45 to 0.556; removing the
+duplicates as well takes it to 0.667, still short of clip 2's 0.81. The duplicates and the
+in-rally false positives are the better target.
+
 ### Where it stands
 
 All four milestone-1 criteria pass on clip 2 with the flight-segment detector, against labels
@@ -781,10 +822,12 @@ Clip 3 also turned out to be thin: 4 rallies and 14 rally shots in its first 30 
 clip 2's 6 rallies and 62 contacts, with 53 of its 85 seconds containing no play at all. It is
 enough to falsify a claim, as it just did, and not enough to establish one.
 
-The next thing worth doing is fixing what clip 3 exposed rather than labelling more footage: the
-detector reports hits when nobody is playing, and invented a whole rally out of two people
-hand-throwing shuttles during an interval. Clip 5 is the remaining unlabelled clip, and its
-camera is steady once the trailing junk frames are discounted.
+The next thing worth doing is the duplicate and in-rally false positives, which are 8 of clip
+3's 12. A play gate was attempted first and abandoned: seven signals measured, none separates on
+both labelled clips, and it would have addressed only the other 4. Each detected rally now
+carries a `play_evidence` block instead, which describes it without deciding anything. Clip 5 is
+the remaining unlabelled clip, and its camera is steady once the trailing junk frames are
+discounted.
 
 `badminton-poc report --video <clip>` renders any clip's `analysis.json` as a page, with every
 figure carrying the caveat it rests on. `badminton-poc refresh-labels` re-seeds a ground-truth

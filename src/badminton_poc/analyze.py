@@ -19,6 +19,7 @@ from .rallies import (
     drop_weak_swings,
     trim_trailing_weak_hits,
     drop_low_confidence,
+    play_evidence,
     reject_hits_outside_play,
     segment_rallies,
 )
@@ -161,6 +162,17 @@ def analyze(
             trimmed.append(out)
             trailing_trimmed.extend(dropped)
         rallies = trimmed
+
+    # Say what each rally actually looks like, next to the rally itself. A rally invented out of
+    # an interval reads exactly like a real one in this file otherwise: clip 3 reported one at
+    # frames 2017-2122 built from two people hand-throwing shuttles. Nothing here drops it --
+    # every signal measured for that job overlaps on the one clip with hand labels -- so the
+    # measurements go beside it and the reader decides.
+    for rally in rallies:
+        rally["play_evidence"] = play_evidence(
+            ball, player_rows, rally["start_frame"], rally["end_frame"],
+            fps=fps, width=width, fixed_points=fixed_points,
+        )
 
     # Everything above is a reading of the shuttle track, so say plainly how much of that track
     # was physically possible. Measured over rally frames, where it matters, and scaled by the
