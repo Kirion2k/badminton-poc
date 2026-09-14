@@ -843,6 +843,15 @@ The claim consolidation rests on is about badminton rather than about this detec
 contacts are never 0.3s apart. The closest pair in the project's hand labels is 0.350s (clip 2,
 frames 7227 and 7248), above the window, and a test holds that pair against it.
 
+Checking that interval turned up a labelling fault: clip 2 held **two byte-identical contact rows
+at frame 2006**, 0.000s apart. A racket cannot strike the shuttle twice in one frame, and the
+hitters either side read `far, far` with both rows and alternate correctly with one. It scored
+correctly only by luck -- `match_contacts` claims contacts by frame number, so the two collapsed
+to one entry and a prediction did reach that frame. With nothing matching it, both rows land in
+the missed list and the file carries a false negative no detector change could ever clear.
+The duplicate is removed (labelled contacts 62 to 61, rally shots 60 to 59, no accuracy figure
+moved) and `evaluate_against_truth` now refuses a truth file with two contacts on one frame.
+
 **It does not fix the cause.** The knee still splits flights; the second hit is merged away
 afterwards. Two of the pairs -- clip 3's 810/831 at 0.355s and 881/899 at 0.304s -- fall outside
 the window and survive as false positives. Fixing it at source means the segmenter not cutting a

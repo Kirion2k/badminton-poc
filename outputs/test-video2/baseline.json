@@ -2,7 +2,7 @@
   "_format": "badminton-poc/truth-v2",
   "clip": "test-video2",
   "fps": 59.986172678840134,
-  "labelled_contacts": 62,
+  "labelled_contacts": 61,
   "labelled_rallies": 6,
   "hit_detection": {
     "true_positives": 56,
@@ -12,8 +12,8 @@
     "recall": 0.9492,
     "f1": 0.8819,
     "predicted": 68,
-    "labelled_contacts": 62,
-    "rally_shots": 60,
+    "labelled_contacts": 61,
+    "rally_shots": 59,
     "out_of_rally_matched": 0,
     "out_of_rally_missed": 2
   },

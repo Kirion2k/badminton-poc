@@ -516,6 +516,19 @@ def evaluate_against_truth(
             f"{len(unreviewed)} contacts are still marked unreviewed. They were seeded from "
             "detector output; scoring them as truth would make the detector agree with itself."
         )
+    # A contact is claimed once, and claims are tracked by frame number, so two rows on one frame
+    # cannot both be matched. Clip 2 carried two identical rows at frame 2006 and scored correctly
+    # only because a prediction happened to reach that frame; with nothing matching it, both rows
+    # land in the missed list and the file holds a false negative no detector change can clear.
+    frames = [int(c["frame"]) for c in (truth.get("contacts") or [])]
+    repeated = sorted({f for f in frames if frames.count(f) > 1})
+    if repeated:
+        raise ValueError(
+            f"contacts are labelled twice on frame(s) {', '.join(map(str, repeated))}. A racket "
+            "cannot strike the shuttle twice in one frame, and a contact is claimed at most once "
+            "when predictions are matched, so the duplicate can never be matched and would score "
+            "as a permanent miss. Remove the duplicate row."
+        )
     fps = float(truth.get("fps") or analysis.get("config", {}).get("fps") or 0.0)
     if fps <= 0:
         raise ValueError("cannot score without a frame rate")

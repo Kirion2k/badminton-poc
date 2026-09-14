@@ -378,3 +378,58 @@ def test_contacts_default_to_being_rally_shots():
     """Existing labels have no in_rally field and every one of them is a rally shot."""
     result = score_hit_detection([100], [_c(103)], fps=FPS, tolerance_seconds=0.25)
     assert result["true_positives"] == 1 and result["out_of_rally_matched"] == 0
+
+
+# --- duplicate contact rows -----------------------------------------------------------
+#
+# Clip 2's labels carried two byte-identical rows at frame 2006. It scored correctly only by
+# luck: match_contacts claims contacts by frame number, so the two collapsed to one entry and a
+# prediction happened to match it. With nothing matching that frame both rows reach the missed
+# list, and the file carries a false negative no detector change can ever clear.
+
+
+def _truth_with(contacts, rallies=None):
+    return {
+        "_format": "badminton-poc/truth-v2",
+        "clip": "t", "fps": 60.0, "labelled": True,
+        "contacts": contacts,
+        "rallies": rallies if rallies is not None else [
+            {"rally": 1, "start_frame": 0, "end_frame": 400}],
+        "tracking_failures": [],
+    }
+
+
+def test_two_contacts_on_one_frame_are_refused():
+    from badminton_poc.truth import evaluate_against_truth
+    truth = _truth_with([
+        {"frame": 100, "hitter": "near", "notes": ""},
+        {"frame": 200, "hitter": "far", "notes": ""},
+        {"frame": 200, "hitter": "far", "notes": ""},
+    ])
+    with pytest.raises(ValueError) as exc:
+        evaluate_against_truth({"rallies": [], "summary": {}, "events": [],
+                                "config": {"fps": 60.0}}, truth, [])
+    assert "200" in str(exc.value)
+
+
+def test_the_refusal_says_why_a_duplicate_frame_cannot_be_scored():
+    from badminton_poc.truth import evaluate_against_truth
+    truth = _truth_with([
+        {"frame": 100, "hitter": "near", "notes": ""},
+        {"frame": 100, "hitter": "near", "notes": ""},
+    ])
+    with pytest.raises(ValueError) as exc:
+        evaluate_against_truth({"rallies": [], "summary": {}, "events": [],
+                                "config": {"fps": 60.0}}, truth, [])
+    message = str(exc.value).lower()
+    assert "twice" in message or "duplicate" in message
+    assert "once" in message or "claimed" in message
+
+
+def test_distinct_frames_are_not_refused():
+    """The guard must catch a repeated frame, not a rally with many contacts in it."""
+    from badminton_poc.truth import evaluate_against_truth
+    truth = _truth_with([{"frame": f, "hitter": "near" if i % 2 else "far", "notes": ""}
+                         for i, f in enumerate(range(0, 400, 25))])
+    evaluate_against_truth({"rallies": [], "summary": {}, "events": [],
+                                "config": {"fps": 60.0}}, truth, [])

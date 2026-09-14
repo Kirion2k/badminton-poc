@@ -99,11 +99,6 @@
       "notes": ""
     },
     {
-      "frame": 2006,
-      "hitter": "far",
-      "notes": ""
-    },
-    {
       "frame": 2077,
       "hitter": "near",
       "notes": "real hit you flagged as missed at frame 2079; now detected. CONFIRM true_hitter. near player hits the shuttle, doesnt get registered, but the far player is not being properly registered, its being registered as someone on the sideline"
@@ -376,6 +371,13 @@
       "why": "Rally 2's labelled end of 1098 was 2.7 seconds into dead time. Checking it exposed a systematic bias: five of six ends were labelled 20 to 40 frames after play stopped, and rally 2 by 160. The convention is now that a rally ends when the shuttle lands or the point is otherwise decided, not when the players finish walking.",
       "method": "Frames pulled from outputs/test-video2/work.mp4 with ffmpeg and read directly. Each end was bracketed by one frame with the point visibly live and one with both players upright and disengaged, then set between them.",
       "effect": "The correction was applied to all six ends before any of them was scored, and it moves two ends earlier than the detector reports and four later. Rally 4's correction made a rest-based end rule fail that the uncorrected label had passed. Rally starts were also aligned to the labelled serve contact, moving three of them 11 to 14 frames earlier. That works against the detector, whose starts already ran late."
+    },
+    {
+      "date": "2026-09-14",
+      "what": "Removed one of two byte-identical contact rows at frame 2006 (hitter far, no notes).",
+      "why": "A racket cannot strike the shuttle twice in the same frame, so one row was a data-entry duplicate. It was unmatchable by construction -- each contact is claimed once, so at most one prediction could ever pair with the two of them -- which made it a permanent false negative that no detector change could clear. The hitters around it read near, near, near, far, far, near, far with both rows and alternate correctly with one.",
+      "method": "Found by checking the interval between consecutive labelled contacts while validating the 0.30s consolidation window: the closest pair in the file was 0.000s apart. The rows are identical in every field.",
+      "effect": "Labelled contacts fall from 62 to 61 and rally shots from 60 to 59. No accuracy figure moves: precision, recall, F1, hitter accuracy and every rally number are unchanged. The duplicate was harmless only by luck -- match_contacts tracks claimed contacts by frame number, so the two rows collapsed to one entry and a prediction did match frame 2006. Had nothing matched it, both rows would have been counted as missed and the file would have carried a false negative no detector change could ever clear. score_clip now refuses a truth file containing two contacts on one frame, so this cannot come back silently."
     }
   ]
 }
