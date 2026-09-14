@@ -703,20 +703,80 @@ five false hits and took hit precision from 0.778 to **0.824**, F1 to **0.882**.
 Clip 2 after the fix: hits 0.82 precision, 0.95 recall, F1 0.882; hitter 92.7%; rally boundaries
 6 of 6; coverage 92.9%.
 
+### Clip 3, labelled and scored
+
+Clip 3 is now labelled and `outputs/test-video3/baseline.json` is its accuracy record. **The
+labels are model-produced, not hand-made** -- written by reading frames of `work.mp4` against the
+raw TrackNet shuttle CSV -- so they are weaker evidence than clip 2's, and `_provenance` in the
+truth file says so. The same model that tuned this pipeline produced them, which means a
+systematic mistake would read as agreement rather than as failure.
+
+| criterion | target | clip 2 | clip 3 |
+|---|---|---|---|
+| both players tracked in active play | >= 90% | 92.9% | **98.3%** |
+| hitter assignment on detected hits | >= 90% | 92.5% | **90.0%** (9 of 10) |
+| rally boundaries approximately correct | >= 85% | 6 of 6 | **4 of 4** |
+| hit detection | precision / recall | 0.81 / 0.95, F1 0.875 | **0.45 / 0.71, F1 0.556** |
+
+Three criteria clear their targets on a second recording. Hitter assignment clears it on ten
+scored hits, which is too few to mean much. **Hit detection does not transfer**: precision falls
+from 0.81 to 0.45. Of the 12 false positives in 22 predictions, 3 are a second detection of a
+contact already found (bursts that survived consolidation), 5 are extra hits inside real rallies
+and 4 are an entire invented rally at frames 2017-2122. Of the 4 missed contacts, 2 sit in the
+stretch where the shuttle track is lost altogether.
+
+**The clip is far thinner than its draft suggested, and most of what the draft contained was
+not there.** The seeded draft had 6 rallies and 32 candidate contacts. The clip actually holds
+**4 rallies and 14 rally shots, all inside its first 30 seconds**; labelled play covers 723 of
+5031 frames, 14.4%. The rest is an interval. Specifically:
+
+- draft rallies 5 (2296-2460) and 6 (3949-4034) contain no play at all -- the court is empty and
+  officials are standing about at the far end;
+- draft rally 1 (9-477) is two rallies: the shuttle lands at about frame 155, both players stand
+  still, and the near player picks it up at 300 and serves again at 375;
+- draft rally 3 ends at 1702 but play runs to about 1790;
+- the candidates at 1068 and 1152 are the tracker sitting on a shuttle lying on the floor, which
+  the near player then walks over and picks up.
+
+From frame 1790 to the end -- 53 of the clip's 85 seconds -- nobody plays. The players collect
+shuttles and hand-throw them, the near player catching with both hands raised; then the court
+empties entirely. No racket contacts are recorded there, so every hit the pipeline reports after
+1790 is a real false positive, and the invented rally at 2017-2122 is the detector firing on
+hand-thrown shuttles. Both pose slots stay filled throughout by stationary bystanders (the far
+slot's box moves 1px between frames 2114 and 2182), which is why coverage must be measured over
+labelled spans and not over the clip.
+
+One contact is recorded with `in_rally: false`: at frame 315 the near player flicks the shuttle
+up to himself before serving. The detector found it, and the in_rally mechanism counted it in
+neither column, which is what it exists for.
+
+**What this says about the pipeline.** Player tracking and rally boundaries transfer. Hit
+detection was tuned on clip 2 and its precision is not a property of the detector but of that
+clip: the threshold that gives 0.81 there gives 0.45 here. The largest single cause is that
+nothing asks whether a rally is being played at all before reporting hits -- the same blind spot
+that let a seated umpire pass as a tracked player.
+
 ### Where it stands
 
 All four milestone-1 criteria pass on clip 2 with the flight-segment detector, against labels
-that were re-measured from the video rather than taken on trust. That is the milestone met on one
-recording and not yet on any other.
+that were re-measured from the video rather than taken on trust. Three of the four pass again on
+clip 3 against model-produced labels. Hit detection does not: its precision falls from 0.81 to
+0.45, and that is the honest headline.
 
-**Every number here comes from one recording.** Clip 1 is a poor clip -- occlusion alone costs
-it ten points of far-player coverage, so it cannot pass the tracking criterion however good the
-code is -- and is kept as a regression clip, not an acceptance one. Nothing has been
-cross-validated on a second usable recording, and the flight detector's parameters were measured
-on the same clip whose labels were corrected in the same session.
+**Player tracking and rally boundaries look like properties of the pipeline. Hit-detection
+precision looks like a property of clip 2.** It was tuned there and does not survive the move.
+Clip 1 is a poor clip -- occlusion alone costs it ten points of far-player coverage, so it cannot
+pass the tracking criterion however good the code is -- and is kept as a regression clip, not an
+acceptance one.
 
-The next thing worth doing is labelling clip 3. It is the smallest unlabelled clip, its draft
-holds 32 candidate contacts, and it is the only way to find out whether any of this transfers.
+Clip 3 also turned out to be thin: 4 rallies and 14 rally shots in its first 30 seconds, against
+clip 2's 6 rallies and 62 contacts, with 53 of its 85 seconds containing no play at all. It is
+enough to falsify a claim, as it just did, and not enough to establish one.
+
+The next thing worth doing is fixing what clip 3 exposed rather than labelling more footage: the
+detector reports hits when nobody is playing, and invented a whole rally out of two people
+hand-throwing shuttles during an interval. Clip 5 is the remaining unlabelled clip, and its
+camera is steady once the trailing junk frames are discounted.
 
 `badminton-poc report --video <clip>` renders any clip's `analysis.json` as a page, with every
 figure carrying the caveat it rests on. `badminton-poc refresh-labels` re-seeds a ground-truth
