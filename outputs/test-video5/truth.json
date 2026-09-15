@@ -9,192 +9,232 @@
   {
    "frame": 1674,
    "hitter": "near",
-   "notes": "serve"
+   "notes": "serve",
+   "shot_type": "serve"
   },
   {
    "frame": 1698,
    "hitter": "far",
-   "notes": "lift"
+   "notes": "lift",
+   "shot_type": "lift"
   },
   {
    "frame": 1736,
    "hitter": "near",
-   "notes": "drive"
+   "notes": "drive",
+   "shot_type": "drive"
   },
   {
    "frame": 1760,
    "hitter": "far",
-   "notes": "net"
+   "notes": "net",
+   "shot_type": "net"
   },
   {
    "frame": 1782,
    "hitter": "near",
-   "notes": "lift"
+   "notes": "lift",
+   "shot_type": "lift"
   },
   {
    "frame": 1835,
    "hitter": "far",
-   "notes": "smash"
+   "notes": "smash",
+   "shot_type": "smash"
   },
   {
    "frame": 1851,
    "hitter": "near",
-   "notes": "net defensive smash"
+   "notes": "net defensive smash",
+   "shot_type": "net",
+   "shot_type_note": "defensive net shot played against a smash; labeller resolved \"net defensive smash\" to net"
   },
   {
    "frame": 1890,
    "hitter": "far",
-   "notes": "lift"
+   "notes": "lift",
+   "shot_type": "lift"
   },
   {
    "frame": 1918,
    "hitter": "near",
-   "notes": "backhand clear"
+   "notes": "backhand clear",
+   "shot_type": "clear"
   },
   {
    "frame": 1968,
    "hitter": "far",
-   "notes": "smash"
+   "notes": "smash",
+   "shot_type": "smash"
   },
   {
    "frame": 1983,
    "hitter": "near",
-   "notes": "lift defensive lift"
+   "notes": "lift defensive lift",
+   "shot_type": "lift"
   },
   {
    "frame": 2016,
    "hitter": "far",
-   "notes": "smash"
+   "notes": "smash",
+   "shot_type": "smash"
   },
   {
    "frame": 2032,
    "hitter": "near",
-   "notes": "net defensive"
+   "notes": "net defensive",
+   "shot_type": "net"
   },
   {
    "frame": 2061,
    "hitter": "far",
-   "notes": "net cross-net shot"
+   "notes": "net cross-net shot",
+   "shot_type": "net"
   },
   {
    "frame": 2090,
    "hitter": "near",
-   "notes": "lift drive lift shot"
+   "notes": "lift drive lift shot",
+   "shot_type": "lift",
+   "shot_type_note": "labeller resolved \"lift drive lift shot\" to lift"
   },
   {
    "frame": 2115,
    "hitter": "far",
-   "notes": "drop cross-drop"
+   "notes": "drop cross-drop",
+   "shot_type": "drop"
   },
   {
    "frame": 2150,
    "hitter": "near",
-   "notes": "lift"
+   "notes": "lift",
+   "shot_type": "lift"
   },
   {
    "frame": 2180,
    "hitter": "far",
-   "notes": "clear"
+   "notes": "clear",
+   "shot_type": "clear"
   },
   {
    "frame": 2219,
    "hitter": "near",
-   "notes": "drive"
+   "notes": "drive",
+   "shot_type": "drive"
   },
   {
    "frame": 2236,
    "hitter": "far",
-   "notes": "net cross-net"
+   "notes": "net cross-net",
+   "shot_type": "net"
   },
   {
    "frame": 2259,
    "hitter": "near",
-   "notes": "net"
+   "notes": "net",
+   "shot_type": "net"
   },
   {
    "frame": 2285,
    "hitter": "far",
-   "notes": "lift"
+   "notes": "lift",
+   "shot_type": "lift"
   },
   {
    "frame": 2335,
    "hitter": "near",
-   "notes": "clear"
+   "notes": "clear",
+   "shot_type": "clear"
   },
   {
    "frame": 2370,
    "hitter": "far",
-   "notes": "smash"
+   "notes": "smash",
+   "shot_type": "smash"
   },
   {
    "frame": 2385,
    "hitter": "near",
-   "notes": "net cross-net shot"
+   "notes": "net cross-net shot",
+   "shot_type": "net"
   },
   {
    "frame": 2419,
    "hitter": "far",
-   "notes": "lift"
+   "notes": "lift",
+   "shot_type": "lift"
   },
   {
    "frame": 2449,
    "hitter": "near",
-   "notes": "smash"
+   "notes": "smash",
+   "shot_type": "smash"
   },
   {
    "frame": 3509,
    "hitter": "far",
-   "notes": "serve"
+   "notes": "serve",
+   "shot_type": "serve"
   },
   {
    "frame": 3536,
    "hitter": "near",
-   "notes": "net"
+   "notes": "net",
+   "shot_type": "net"
   },
   {
    "frame": 3568,
    "hitter": "far",
-   "notes": "drive"
+   "notes": "drive",
+   "shot_type": "drive"
   },
   {
    "frame": 3613,
    "hitter": "near",
-   "notes": "clear backend late shot"
+   "notes": "clear backend late shot",
+   "shot_type": "clear"
   },
   {
    "frame": 3660,
    "hitter": "far",
-   "notes": "clear crosscourt clear"
+   "notes": "clear crosscourt clear",
+   "shot_type": "clear"
   },
   {
    "frame": 3698,
    "hitter": "near",
-   "notes": "clear"
+   "notes": "clear",
+   "shot_type": "clear"
   },
   {
    "frame": 3729,
    "hitter": "far",
-   "notes": "smash"
+   "notes": "smash",
+   "shot_type": "smash"
   },
   {
    "frame": 3744,
    "hitter": "near",
-   "notes": "net"
+   "notes": "net",
+   "shot_type": "net"
   },
   {
    "frame": 3774,
    "hitter": "far",
-   "notes": "net"
+   "notes": "net",
+   "shot_type": "net"
   },
   {
    "frame": 3806,
    "hitter": "near",
-   "notes": "lift"
+   "notes": "lift",
+   "shot_type": "lift"
   },
   {
    "frame": 3846,
    "hitter": "far",
-   "notes": "drop backhand drop"
+   "notes": "drop backhand drop",
+   "shot_type": "drop"
   }
  ],
  "_contacts_help": "[{\"frame\": 1234, \"hitter\": \"near\"|\"far\"|null, \"in_rally\": true, \"notes\": \"\"}] -- every racket contact in the clip, whether or not anything detected it. Set in_rally=false for a contact that is not a rally shot: handing the shuttle back to the server, a knock-up between points. Those are real, but they do not belong in a rally timeline, so they are scored as neither hits nor misses.",
@@ -264,5 +304,6 @@
   "The notes carry a shot type for most contacts -- serve, lift, drive, net, smash, clear, drop. Nothing in milestone 1 reads them; they are gold data for milestone 2 if it resumes.",
   "Only the two spans in labelled_contact_spans are exhaustive. Rallies are labelled across the whole clip and were carried over unchanged from the earlier pass, where they rest on the scoreboard reading 3-7 at frames 200, 480, 900 and 960 and 3-8 by 1020."
  ],
- "_rally_labelling_note": "The rally spans were wrong in the first pass and are corrected here. Seven were claimed; the clip holds five. The instrument that settled it is the scoreboard, which runs 3-7, 3-8, 3-9, 4-9, 4-10, 4-11 across the clip -- five points, five rallies -- and not the shuttle track, from which the first pass had derived them by taking every run of moving shuttle for a rally. Two of those runs are players knocking the shuttle back between points. Ends are the frame the shuttle comes to rest, read off the raw track. Three automatic rules for that were tried first and each failed differently: the first standstill runs late because a grounded shuttle jitters up to 31 px, sustained-travel runs late for the same reason and cuts rallies short at blind gaps, and both are confounded by the tracker leaping onto its parked point, which looks like motion."
+ "_rally_labelling_note": "The rally spans were wrong in the first pass and are corrected here. Seven were claimed; the clip holds five. The instrument that settled it is the scoreboard, which runs 3-7, 3-8, 3-9, 4-9, 4-10, 4-11 across the clip -- five points, five rallies -- and not the shuttle track, from which the first pass had derived them by taking every run of moving shuttle for a rally. Two of those runs are players knocking the shuttle back between points. Ends are the frame the shuttle comes to rest, read off the raw track. Three automatic rules for that were tried first and each failed differently: the first standstill runs late because a grounded shuttle jitters up to 31 px, sustained-travel runs late for the same reason and cuts rallies short at blind gaps, and both are confounded by the tracker leaping onto its parked point, which looks like motion.",
+ "_shot_type_provenance": "Shot types are the labeller's own words, recorded in labels.tsv at the same time as the contacts and lifted into shot_type here without reinterpretation. Two notes named more than one shot and were resolved by the labeller on 2026-09-15: 1851 is a net shot played defensively against a smash, and 2090 is a lift. Nothing in Milestone 1 reads this field."
 }

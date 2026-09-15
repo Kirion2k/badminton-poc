@@ -19,7 +19,7 @@ from .bst_adapter import BSTConfig, BSTUnavailable, predict as bst_predict
 from .court import CourtDepth
 from .features import FeatureConfig, ShotFeatures, build_features
 from .taxonomy import mapping_document
-from .windows import ShotSample, ShotWindowConfig, build_samples
+from .windows import ShotSample, ShotWindowConfig, build_samples, build_samples_from_truth
 
 
 @dataclass(frozen=True)
@@ -46,6 +46,12 @@ class ShotPaths:
     @property
     def truth(self) -> Path:
         return self.shots_dir / "ground_truth.json"
+
+    @property
+    def m1_truth(self) -> Path:
+        """Milestone 1's hand labels: the contacts a human confirmed, and the source of every
+        Milestone 2 sample. Distinct from ``truth`` above, which holds shot-type labels."""
+        return self.clip_dir / "truth.json"
 
     @property
     def evaluation(self) -> Path:
@@ -100,15 +106,38 @@ def load_clip(
     config: PipelineConfig | None = None,
     window_cfg: ShotWindowConfig | None = None,
     feature_cfg: FeatureConfig | None = None,
+    source: str = "truth",
 ) -> ClipShots:
+    """Assemble one clip's shot samples and their features.
+
+    ``source`` decides where the contacts come from and it is not a detail:
+
+    * ``'truth'`` -- the hand-labelled contacts. This is what Milestone 2 evaluates against,
+      because a classifier scored on Milestone 1's false positives is being asked to name
+      strokes that never happened.
+    * ``'analysis'`` -- Milestone 1's own hits. Right when the question is what the pipeline
+      produced end to end, wrong when the question is how well a stroke is read.
+    """
+    if source not in ("truth", "analysis"):
+        raise ValueError(f"unknown sample source {source!r}; expected 'truth' or 'analysis'")
     paths = ShotPaths(Path(output_root), clip)
     analysis = json.loads(paths.analysis.read_text(encoding="utf-8"))
     working = json.loads(paths.metadata.read_text(encoding="utf-8"))["working"]
     width, height = int(working["width"]), int(working["height"])
-    samples, skipped = build_samples(
-        analysis, clip=clip, width=width, height=height, cfg=window_cfg,
-        last_frame=int(working.get("frame_count", 0)) - 1 or None,
-    )
+    last_frame = int(working.get("frame_count", 0)) - 1 or None
+    if source == "truth":
+        m1 = json.loads(paths.m1_truth.read_text(encoding="utf-8"))
+        if not m1.get("labelled"):
+            raise ValueError(
+                f"{paths.m1_truth} is not labelled; Milestone 2 will not take model-produced "
+                "contacts as ground truth"
+            )
+        samples, skipped = build_samples_from_truth(
+            m1, clip=clip, width=width, height=height, cfg=window_cfg, last_frame=last_frame)
+    else:
+        samples, skipped = build_samples(
+            analysis, clip=clip, width=width, height=height, cfg=window_cfg,
+            last_frame=last_frame)
     ball = load_ball_csv(paths.ball_csv())
     players = {int(r["frame"]): r for r in load_jsonl(paths.players)}
     fixed = analysis.get("shuttle_fixed_points") or []

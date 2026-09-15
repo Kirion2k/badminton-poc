@@ -1,8 +1,8 @@
 {
  "_what": "Milestone 1 frozen as an upstream dependency for Milestone 2. The detector settings below are the tuning surface of Milestone 1; tests/test_milestone1_frozen.py asserts they still hold these values, so retuning Milestone 1 fails the suite rather than passing unnoticed.",
- "_metrics_note": "Metrics are frozen for every clip: all three now carry hand labels. A figure moving because a detector setting changed is retuning and the test should fail. A figure moving because a labelling was revised is not -- re-run tools/freeze_milestone1.py and commit the new manifest with the labelling change, so the diff shows what moved and why.",
- "version": "milestone-1/1.1",
- "frozen_at_commit": "5f207199ebebe4e79bdba224f99fdfc45e70e1bf",
+ "_metrics_note": "Metrics are frozen only for clips whose labels are final. test-video3 still carries model-produced labels; when it is labelled by hand its metrics will move, and that is a change of labelling, not of the detector. Re-run the freeze script and record the new figures rather than tuning anything to reach them.",
+ "version": "milestone-1/1.0",
+ "frozen_at_commit": "af3c1576321117ccb3d0f2899d42d009db8f9d2f",
  "frozen_on": "2026-09-15",
  "detector_defaults": {
   "PlayerConfig": {
@@ -109,7 +109,7 @@
   "test-video5": {
    "label_provenance": "human",
    "config_sha256_16": "ed56e0fdd0243811",
-   "truth_sha256_16": "ef014c7067f416bd",
+   "truth_sha256_16": "5a3218373b1e843a",
    "labelled_contacts": 38,
    "labelled_rallies": 5,
    "metrics": {
@@ -126,6 +126,5 @@
    },
    "metrics_are_frozen": true
   }
- },
- "_changed_since_1_0": "test-video3 relabelled by hand on 2026-09-15, replacing model-produced labels. No detector setting changed; the 53 frozen knobs are identical to 1.0."
+ }
 }

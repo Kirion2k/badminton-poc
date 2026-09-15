@@ -148,3 +148,98 @@ def test_windows_are_clipped_to_the_end_of_the_clip():
     samples, _ = build_samples(analysis, clip="c", width=1920, height=884,
                                cfg=ShotWindowConfig(require_hitter=False))
     assert samples[0].end_frame <= 4999
+
+
+# --- samples built from hand labels rather than from detector output ---
+# Milestone 2 evaluates the classifier, not Milestone 1, so a shot sample has to come from a
+# contact a human confirmed. Building them from analysis.json would put the detector's false
+# positives into the dataset and score the classifier on strokes that never happened.
+
+
+def _truth(contacts, rallies=None, spans=None):
+    out = {
+        "clip": "t", "fps": 60.0, "labelled": True,
+        "contacts": contacts,
+        "rallies": rallies if rallies is not None else [
+            {"rally": 1, "start_frame": 0, "end_frame": 1000}],
+    }
+    if spans is not None:
+        out["labelled_contact_spans"] = spans
+    return out
+
+
+def test_samples_come_from_the_labelled_contacts_and_keep_their_shot_type():
+    from badminton_poc.shots.windows import build_samples_from_truth
+    truth = _truth([
+        {"frame": 100, "hitter": "near", "shot_type": "serve"},
+        {"frame": 160, "hitter": "far", "shot_type": "lift"},
+        {"frame": 230, "hitter": "near", "shot_type": "smash"},
+    ])
+    samples, skipped = build_samples_from_truth(truth, clip="t", width=1920, height=1080)
+    assert [s.hit_frame for s in samples] == [100, 160, 230]
+    assert [s.shot_type for s in samples] == ["serve", "lift", "smash"]
+    assert [s.index_in_rally for s in samples] == [0, 1, 2]
+    assert samples[1].prev_hit_frame == 100 and samples[1].next_hit_frame == 230
+    assert samples[0].is_first_in_rally and samples[2].is_last_in_rally
+    assert skipped == []
+
+
+def test_a_contact_that_is_not_a_rally_shot_is_left_out():
+    """Handing the shuttle back is a real contact and not a stroke to classify."""
+    from badminton_poc.shots.windows import build_samples_from_truth
+    truth = _truth([
+        {"frame": 100, "hitter": "near", "shot_type": "serve"},
+        {"frame": 160, "hitter": "far", "shot_type": "lift"},
+        {"frame": 900, "hitter": "near", "in_rally": False},
+    ])
+    samples, skipped = build_samples_from_truth(truth, clip="t", width=1920, height=1080)
+    assert [s.hit_frame for s in samples] == [100, 160]
+    assert [s["frame"] for s in skipped] == [900]
+    assert "not a rally shot" in skipped[0]["reason"]
+
+
+def test_a_contact_outside_the_labelled_spans_is_left_out():
+    """Clip 5 is labelled in parts. Outside those spans the contact list is incomplete by
+    declaration, so a window there would carry neighbours that were never checked."""
+    from badminton_poc.shots.windows import build_samples_from_truth
+    truth = _truth(
+        [{"frame": 100, "hitter": "near", "shot_type": "serve"},
+         {"frame": 160, "hitter": "far", "shot_type": "lift"}],
+        spans=[{"start_frame": 0, "end_frame": 120}],
+    )
+    samples, skipped = build_samples_from_truth(truth, clip="t", width=1920, height=1080)
+    assert [s.hit_frame for s in samples] == [100]
+    assert [s["frame"] for s in skipped] == [160]
+    assert "labelled_contact_spans" in skipped[0]["reason"]
+
+
+def test_a_contact_with_no_hitter_is_left_out_and_says_so():
+    from badminton_poc.shots.windows import build_samples_from_truth
+    truth = _truth([
+        {"frame": 100, "hitter": "near", "shot_type": "serve"},
+        {"frame": 160, "hitter": None, "shot_type": "net"},
+        {"frame": 230, "hitter": "near", "shot_type": "smash"},
+    ])
+    samples, skipped = build_samples_from_truth(truth, clip="t", width=1920, height=1080)
+    assert [s.hit_frame for s in samples] == [100, 230]
+    assert [s["frame"] for s in skipped] == [160]
+    assert "could not tell which player" in skipped[0]["reason"]
+    # the neighbour chain still runs through the dropped contact, because it happened
+    assert samples[1].prev_hit_frame == 160
+
+
+def test_contacts_are_grouped_by_the_rally_they_fall_in():
+    from badminton_poc.shots.windows import build_samples_from_truth
+    truth = _truth(
+        [{"frame": 100, "hitter": "near", "shot_type": "serve"},
+         {"frame": 160, "hitter": "far", "shot_type": "lift"},
+         {"frame": 700, "hitter": "far", "shot_type": "serve"},
+         {"frame": 760, "hitter": "near", "shot_type": "net"}],
+        rallies=[{"rally": 1, "start_frame": 0, "end_frame": 300},
+                 {"rally": 2, "start_frame": 650, "end_frame": 900}],
+    )
+    samples, _ = build_samples_from_truth(truth, clip="t", width=1920, height=1080)
+    assert [s.rally for s in samples] == [1, 1, 2, 2]
+    assert [s.index_in_rally for s in samples] == [0, 1, 0, 1]
+    # the window of the last shot of rally 1 must not reach into rally 2
+    assert samples[1].next_hit_frame is None

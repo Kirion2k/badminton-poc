@@ -67,6 +67,9 @@ class ShotSample:
     rally_start_frame: int
     rally_end_frame: int
     rally_start_kind: str | None
+    shot_type: str | None = None
+    """The labeller's own word for this stroke, carried through untouched. None when the clip's
+    contacts were labelled without one. Never written by a model."""
 
     @property
     def frames(self) -> int:
@@ -199,4 +202,129 @@ def build_samples(
                 rally_start_kind=rally.get("start_kind"),
             ))
             shot_id += 1
+    return samples, skipped
+
+
+def build_samples_from_truth(
+    truth: dict[str, Any],
+    *,
+    clip: str,
+    width: int,
+    height: int,
+    cfg: ShotWindowConfig | None = None,
+    last_frame: int | None = None,
+) -> tuple[list[ShotSample], list[dict[str, Any]]]:
+    """One sample per hand-labelled racket contact, plus a record of every one left out.
+
+    The sibling :func:`build_samples` reads Milestone 1's own hits, which is the right source
+    when the question is what the pipeline produced. It is the wrong source here. Milestone 2
+    asks how well a classifier reads a stroke, so a sample has to come from a contact a human
+    confirmed; building from detector output would put Milestone 1's false positives into the
+    dataset and score the classifier on strokes that never happened.
+
+    Three kinds of contact are deliberately left out, each recorded with its reason:
+
+    * ``in_rally: false`` -- handing the shuttle back, a knock-up between points. A real racket
+      contact and not a stroke to classify.
+    * outside ``labelled_contact_spans`` -- clip 5 is labelled in parts, and outside those spans
+      its contact list is incomplete by declaration, so a window there would take its neighbours
+      from contacts nobody checked.
+    * no hitter -- the labeller could not tell who played it, and the window is built around a
+      player.
+
+    A contact that is left out still counts as a neighbour for the windows either side of it,
+    because it happened: the shuttle really did change direction there.
+    """
+    cfg = cfg or ShotWindowConfig()
+    fps = float(truth.get("fps") or 0.0)
+    if fps <= 0:
+        raise ValueError("truth file carries no usable fps")
+    if width <= 0 or height <= 0:
+        raise ValueError("width and height must be positive; they normalize every coordinate")
+
+    spans = truth.get("labelled_contact_spans") or []
+
+    def inside_spans(frame: int) -> bool:
+        return not spans or any(
+            int(s["start_frame"]) <= frame <= int(s["end_frame"]) for s in spans
+        )
+
+    rallies = sorted(
+        (
+            {
+                "rally": int(r.get("rally", i + 1)),
+                "start": int(r["start_frame"]),
+                "end": int(r["end_frame"]),
+            }
+            for i, r in enumerate(truth.get("rallies") or [])
+        ),
+        key=lambda r: r["start"],
+    )
+    contacts = sorted((truth.get("contacts") or []), key=lambda c: int(c["frame"]))
+
+    samples: list[ShotSample] = []
+    skipped: list[dict[str, Any]] = []
+    shot_id = 0
+
+    for rally in rallies:
+        in_rally = [c for c in contacts if rally["start"] <= int(c["frame"]) <= rally["end"]]
+        frames = [int(c["frame"]) for c in in_rally]
+        kept = 0
+        for index, contact in enumerate(in_rally):
+            frame = int(contact["frame"])
+            reason = None
+            if contact.get("in_rally") is False:
+                reason = "a real contact but not a rally shot, so not a stroke to classify"
+            elif not inside_spans(frame):
+                reason = (
+                    "outside labelled_contact_spans, where the contact list is incomplete by "
+                    "declaration"
+                )
+            elif contact.get("hitter") not in ("near", "far"):
+                reason = "the labeller could not tell which player made this contact"
+            if reason is not None:
+                skipped.append({"clip": clip, "rally": rally["rally"], "frame": frame,
+                                "reason": reason})
+                continue
+
+            start, end = window_for(
+                frame,
+                frames[index - 1] if index > 0 else None,
+                frames[index + 1] if index + 1 < len(frames) else None,
+                fps=fps, cfg=cfg, last_frame=last_frame,
+            )
+            samples.append(ShotSample(
+                clip=clip,
+                shot_id=shot_id,
+                rally=rally["rally"],
+                index_in_rally=kept,
+                hit_frame=frame,
+                hit_time_s=round(frame / fps, 3),
+                hitter=contact.get("hitter"),
+                prev_hit_frame=frames[index - 1] if index > 0 else None,
+                next_hit_frame=frames[index + 1] if index + 1 < len(frames) else None,
+                start_frame=start,
+                end_frame=end,
+                fps=fps,
+                width=width,
+                height=height,
+                is_first_in_rally=index == 0,
+                is_last_in_rally=index == len(in_rally) - 1,
+                rally_start_frame=rally["start"],
+                rally_end_frame=rally["end"],
+                rally_start_kind=None,
+                shot_type=contact.get("shot_type"),
+            ))
+            shot_id += 1
+            kept += 1
+
+    inside_any = {int(c["frame"]) for r in rallies
+                  for c in contacts if r["start"] <= int(c["frame"]) <= r["end"]}
+    for contact in contacts:
+        frame = int(contact["frame"])
+        if frame not in inside_any:
+            skipped.append({"clip": clip, "rally": None, "frame": frame,
+                            "reason": "not inside any labelled rally span"})
+
+    skipped.sort(key=lambda s: s["frame"])
     return samples, skipped
