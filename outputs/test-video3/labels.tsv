@@ -1,0 +1,59 @@
+# Hand labels for test-video3. Blank lines and lines starting with # are ignored.
+# Frame numbers are the ones burned into label-part-A.mp4 and label-part-B.mp4.
+#
+#   label-part-A.mp4   frames 0-2500, at a third speed   (128 s to watch)
+#   label-part-B.mp4   frames 2450-5030, at full speed   (44 s to watch)
+#
+# The two parts overlap by 50 frames on purpose, so nothing falls down the join.
+# Both are the working video with a frame number burned on and nothing else: no boxes,
+# no hit markers, no rally spans, no predictions. Label the whole clip, both parts.
+#
+# This clip is a phone recording of a broadcast, so it is letterboxed and carries a
+# Subscribe overlay. The court sits inside the black bars; frame numbers still refer to
+# the working video and are what every label means.
+#
+#
+# ONE LINE PER RACKET CONTACT
+#
+#     c  <frame>  <near|far|?>  [shot]  [note...]
+#
+#   frame   where the racket meets the shuttle. Within 3 or 4 frames is fine; the scorer
+#           matches a prediction to a contact within 0.2 s, which is 12 frames here.
+#   near    the player on this side of the net, nearer the camera.
+#   far     the player beyond the net.
+#   ?       you could not tell who hit it. Use it freely -- a contact with no hitter is
+#           still scored for detection and is simply left out of the hitter figure, which
+#           is better than a guess.
+#
+# ONE LINE PER CONTACT THAT IS REAL BUT NOT A RALLY SHOT
+#
+#     k  <frame>  <near|far|?>  [shot]  [note...]
+#
+#   Handing the shuttle back, a knock-up between points, a player bouncing it on their
+#   racket. Real contacts, but not part of a rally, and scored as neither hit nor miss.
+#
+# ONE LINE PER RALLY
+#
+#     r  <start_frame>  <end_frame>  [note...]
+#
+#   Start at the serve contact. End where the shuttle comes to rest or play plainly stops.
+#   Include every rally you see in either part of the video.
+#
+#
+# THE SHOT FIELD IS OPTIONAL and is for the next milestone, not this one.
+# If you want to save yourself watching this clip a second time later, add one of:
+#
+#     smash  drop  clear  lift  drive  net  serve  other  uncertain
+#
+# straight after the hitter. Nothing in the current scoring reads it. Leave it off and
+# nothing is lost from this task.
+#
+#
+# Example of the format, not of this clip:
+#
+#     r 120 890
+#     c 120 near serve
+#     c 151 far lift
+#     c 188 near smash
+#     k 940 near        returning the shuttle to the server
+#

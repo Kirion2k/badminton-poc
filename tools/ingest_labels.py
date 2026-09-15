@@ -18,6 +18,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 from badminton_poc.truth import empty_truth  # noqa: E402
 
+# Optional fourth field on a contact line. Nothing in Milestone 1 reads it; it exists so a shot
+# type can be captured in the same pass rather than costing a second viewing of the same video.
+SHOT_TYPES = {"smash", "drop", "clear", "lift", "drive", "net", "serve", "other", "uncertain"}
+
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
@@ -25,7 +29,8 @@ def main() -> int:
     ap.add_argument("--clip", required=True)
     ap.add_argument("--labels", required=True)
     ap.add_argument("--span", nargs=2, type=int, action="append", metavar=("START", "END"),
-                    required=True, help="a span labelled exhaustively; repeat for more")
+                    help="a span labelled exhaustively; repeat for more. Omit when the whole "
+                         "clip was gone through, which is what an empty list means.")
     ap.add_argument("--keep-rallies-from", help="a truth file whose rallies should be reused")
     ap.add_argument("--output-root", default="outputs")
     args = ap.parse_args()
@@ -41,25 +46,40 @@ def main() -> int:
         parts = line.split()
         kind = parts[0].lower()
         try:
-            if kind == "c":
+            if kind in ("c", "k"):
                 frame, hitter = int(parts[1]), parts[2].lower()
                 if hitter not in ("near", "far", "?"):
                     problems.append(f"line {number}: hitter must be near, far or ? -- got {hitter!r}")
                     continue
-                contacts.append({"frame": frame,
-                                 "hitter": None if hitter == "?" else hitter,
-                                 "notes": " ".join(parts[3:])})
-            elif kind == "r":
+                rest = parts[3:]
+                shot = None
+                if rest and rest[0].lower() in SHOT_TYPES:
+                    shot = rest[0].lower()
+                    rest = rest[1:]
+                entry = {"frame": frame,
+                         "hitter": None if hitter == "?" else hitter,
+                         "notes": " ".join(([shot] if shot else []) + rest)}
+                if shot:
+                    # Recorded as its own field as well as in the notes, so a later shot-type
+                    # experiment can read it without parsing prose. Nothing in Milestone 1 reads it.
+                    entry["shot_type"] = shot
+                if kind == "k":
+                    # A real racket contact that is not a rally shot: handing the shuttle back,
+                    # a knock-up between points. Scored as neither a hit nor a miss.
+                    entry["in_rally"] = False
+                contacts.append(entry)
+            elif kind == "r":  # a rally span
                 rallies.append({"start_frame": int(parts[1]), "end_frame": int(parts[2]),
                                 "notes": " ".join(parts[3:])})
             else:
-                problems.append(f"line {number}: expected a line starting c or r -- got {kind!r}")
+                problems.append(
+                    f"line {number}: expected a line starting c, k or r -- got {kind!r}")
         except (IndexError, ValueError):
             problems.append(f"line {number}: could not read {raw.strip()!r}")
 
-    spans = [{"start_frame": a, "end_frame": b} for a, b in args.span]
+    spans = [{"start_frame": a, "end_frame": b} for a, b in (args.span or [])]
     stray = [c["frame"] for c in contacts
-             if not any(s["start_frame"] <= c["frame"] <= s["end_frame"] for s in spans)]
+             if spans and not any(s["start_frame"] <= c["frame"] <= s["end_frame"] for s in spans)]
     if stray:
         problems.append(f"contacts outside every labelled span: {sorted(stray)}")
     frames = [c["frame"] for c in contacts]
@@ -75,6 +95,13 @@ def main() -> int:
 
     truth = empty_truth(args.clip, fps)
     truth["labelled"] = True
+    truth["_provenance"] = (
+        f"HAND LABELS, written by the project owner as one line per contact in {args.labels}, "
+        "which is kept beside this file as the primary record; this file is derived from it. "
+        "Labelled against a video carrying frame numbers and nothing else -- no boxes, no hit "
+        "markers, no rally spans, no classifier output -- so that the labelling is independent "
+        "of anything the pipeline decided."
+    )
     truth["contacts"] = sorted(contacts, key=lambda c: c["frame"])
     truth["labelled_contact_spans"] = spans
     if rallies:
