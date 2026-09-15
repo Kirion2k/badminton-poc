@@ -1,0 +1,130 @@
+{
+ "_what": "Phase A: official BST-0 inference on the authors' own ShuttleSet_merged test split, reproduced before any of our data is adapted to it.",
+ "upstream_commit": "fb9b310",
+ "architecture": "BST_0 (the backbone variant: pose and shuttle only, no player positions). The checkpoints available are bst_0_*; the example in bst_infer.py names BST_CG_AP weights we do not have.",
+ "pose_style": "JnB_bone",
+ "seq_len": 100,
+ "shapes": {
+  "human_pose": [
+   3499,
+   100,
+   2,
+   36,
+   2
+  ],
+  "pos": [
+   3499,
+   100,
+   2,
+   2
+  ],
+  "shuttle": [
+   3499,
+   100,
+   2
+  ],
+  "videos_len": [
+   3499
+  ],
+  "labels": [
+   3499
+  ],
+  "model_in_dim": 72,
+  "n_joints": 17,
+  "n_bones": 19,
+  "n_classes": 25
+ },
+ "environment": {
+  "python": "3.11.16",
+  "torch": "2.14.0+cu130",
+  "numpy": "2.4.6",
+  "device": "cuda",
+  "gpu": "NVIDIA GeForce RTX 3070",
+  "upstream_asks_for": "Python 3.11, PyTorch 2.4.0+cu121, NumPy 1.26.4"
+ },
+ "published_bst0_merged_seq100": {
+  "accuracy": 0.8284,
+  "macro_f1": 0.8041,
+  "min_class_f1": 0.5822,
+  "top2": 0.9584
+ },
+ "reproduced": {
+  "n_checkpoints": 7,
+  "accuracy_mean": 0.8294,
+  "accuracy_best": 0.8345,
+  "macro_f1_mean": 0.8049,
+  "top2_mean": 0.9585
+ },
+ "per_checkpoint": [
+  {
+   "accuracy": 0.8288,
+   "macro_f1": 0.798,
+   "min_class_f1": 0.5769,
+   "top2_accuracy": 0.9586,
+   "classes_present": 25,
+   "checkpoint": "bst_0_JnB_bone_between_2_hits_with_max_limits_seq_100_merged.pt",
+   "seconds": 1.51,
+   "parameters": 1826975
+  },
+  {
+   "accuracy": 0.83,
+   "macro_f1": 0.8033,
+   "min_class_f1": 0.6349,
+   "top2_accuracy": 0.9617,
+   "classes_present": 25,
+   "checkpoint": "bst_0_JnB_bone_between_2_hits_with_max_limits_seq_100_merged_10.pt",
+   "seconds": 1.17,
+   "parameters": 1826975
+  },
+  {
+   "accuracy": 0.83,
+   "macro_f1": 0.8081,
+   "min_class_f1": 0.5298,
+   "top2_accuracy": 0.9577,
+   "classes_present": 25,
+   "checkpoint": "bst_0_JnB_bone_between_2_hits_with_max_limits_seq_100_merged_2.pt",
+   "seconds": 1.17,
+   "parameters": 1826975
+  },
+  {
+   "accuracy": 0.8257,
+   "macro_f1": 0.8021,
+   "min_class_f1": 0.5732,
+   "top2_accuracy": 0.9571,
+   "classes_present": 25,
+   "checkpoint": "bst_0_JnB_bone_between_2_hits_with_max_limits_seq_100_merged_3.pt",
+   "seconds": 1.16,
+   "parameters": 1826975
+  },
+  {
+   "accuracy": 0.828,
+   "macro_f1": 0.8043,
+   "min_class_f1": 0.5875,
+   "top2_accuracy": 0.956,
+   "classes_present": 25,
+   "checkpoint": "bst_0_JnB_bone_between_2_hits_with_max_limits_seq_100_merged_4.pt",
+   "seconds": 1.16,
+   "parameters": 1826975
+  },
+  {
+   "accuracy": 0.8288,
+   "macro_f1": 0.8063,
+   "min_class_f1": 0.5978,
+   "top2_accuracy": 0.9568,
+   "classes_present": 25,
+   "checkpoint": "bst_0_JnB_bone_between_2_hits_with_max_limits_seq_100_merged_5.pt",
+   "seconds": 1.17,
+   "parameters": 1826975
+  },
+  {
+   "accuracy": 0.8345,
+   "macro_f1": 0.8125,
+   "min_class_f1": 0.5714,
+   "top2_accuracy": 0.9614,
+   "classes_present": 25,
+   "checkpoint": "bst_0_JnB_bone_between_2_hits_with_max_limits_seq_100_merged_6.pt",
+   "seconds": 1.17,
+   "parameters": 1826975
+  }
+ ]
+}
