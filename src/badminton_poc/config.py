@@ -426,7 +426,21 @@ class FlightConfig:
     """How long the shuttle may go unmodelled between two segments and still belong to the same
     rally. Generous because TrackNet loses fast strokes for over a second: three intra-rally
     dropouts on the development clip run 0.8s, 1.53s and 1.55s, and a tighter limit split two
-    rallies in half. Dead time between real rallies on that clip is never shorter than 2.3s."""
+    rallies in half. Dead time between real rallies on that clip is never shorter than 2.3s.
+
+    Counted over the frames of the gap where the tracker actually had a sample, not over
+    wall-clock time. A gap the tracker spent blind is not evidence that play stopped -- it is
+    evidence of nothing at all -- and measuring it as though it were is what reported clip 5's
+    first rally as starting nearly nine seconds late. That rally breaks twice inside itself, at
+    284-370 and 451-512, the second by a single frame over this limit, and the tracker carries a
+    sample on only 32% and 19% of those frames. Across the three labelled clips every gap that
+    really ends a rally is visible for the whole of it, and settled_between fires on all nine of
+    them, so nothing is lost by declining to guess from the blind ones.
+
+    What this leaves exposed: two rallies separated by a long stretch the tracker saw nothing of
+    would now be joined, because neither this nor settled_between has anything to go on. No gap
+    in the three labelled clips is of that shape, so there is no measurement to set a ceiling
+    from and none is invented here."""
     min_turn_degrees: float = 60.0
     """Turn between the velocity leaving one segment and entering the next, above which the join
     is a racket contact rather than one flight the tracker briefly lost. Real contacts sit at a

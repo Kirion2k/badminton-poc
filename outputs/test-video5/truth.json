@@ -202,44 +202,32 @@
   {
    "rally": 1,
    "start_frame": 213,
-   "end_frame": 915,
-   "notes": "One rally, not three. The shuttle track breaks twice inside it -- invisible at 306-339 and 476-509, not stationary -- and the scoreboard reads 3-7 at frames 200, 480, 900 and 960 and 3-8 by 1020, so exactly one point is played across the whole stretch. Contacts not labelled."
+   "end_frame": 912,
+   "notes": "Serve at 213. One rally, not three: the track breaks twice inside it where the tracker lost the shuttle, and the scoreboard reads 3-7 at frames 200, 480, 900 and 960 and 3-8 by 1020, so exactly one point is played across it. Ends where the tracker parks for good at 912."
   },
   {
    "rally": 2,
    "start_frame": 1674,
-   "end_frame": 2462,
-   "notes": "Contacts labelled. Serve at 1674; the shuttle is stationary from 2464, so the rally ends just before that."
+   "end_frame": 2470,
+   "notes": "Contacts hand-labelled. Serve at 1674, last contact 2449, shuttle down at (778,534) by 2468 and jittering on the floor after. Score reaches 3-9 by 2600."
   },
   {
    "rally": 3,
-   "start_frame": 2562,
-   "end_frame": 2770,
-   "notes": "Contacts not labelled."
+   "start_frame": 2998,
+   "end_frame": 3112,
+   "notes": "Contacts not labelled. Shuttle lies still on the near court from 3112. Score ticks 3-9 to 4-9 between frames 3210 and 3260, which is this point with the umpires usual delay of about 120 frames."
   },
   {
    "rally": 4,
-   "start_frame": 2998,
-   "end_frame": 3145,
-   "notes": "Contacts not labelled."
+   "start_frame": 3509,
+   "end_frame": 3878,
+   "notes": "Contacts hand-labelled. Serve at 3509, last contact 3846, shuttle settles at (1179,589) by 3878. Score reaches 4-10 by 4000."
   },
   {
    "rally": 5,
-   "start_frame": 3191,
-   "end_frame": 3336,
-   "notes": "Contacts not labelled."
-  },
-  {
-   "rally": 6,
-   "start_frame": 3501,
-   "end_frame": 3884,
-   "notes": "Contacts labelled."
-  },
-  {
-   "rally": 7,
    "start_frame": 4395,
-   "end_frame": 4555,
-   "notes": "Contacts not labelled."
+   "end_frame": 4557,
+   "notes": "Contacts not labelled. Shuttle settles at (939,669) by 4557 and the track goes invisible after. Score reaches 4-11 by 4600."
   }
  ],
  "_rallies_help": "[{\"rally\": 1, \"start_frame\": 83, \"end_frame\": 236, \"notes\": \"\"}] -- inclusive spans where a rally was in progress.",
@@ -254,7 +242,20 @@
   }
  ],
  "_labelled_contact_spans_help": "Optional. [{\"start_frame\": 1674, \"end_frame\": 2467, \"notes\": \"\"}] -- the spans in which *every* racket contact has been recorded. Leave it empty when the whole clip has been gone through, which is what an empty list means. Outside these spans the contact list is known to be incomplete, so a predicted hit there is not evidence of anything and is counted in neither column. Rallies are scored over the whole clip either way: this scopes contacts, not rallies.",
- "tracking_failures": [],
+ "tracking_failures": [
+  {
+   "start_frame": 2562,
+   "end_frame": 2770,
+   "kind": "not play",
+   "notes": "Labelled as a rally in the first pass and it is not one. The score is already 3-9 here, the point having ended around 2460; the track stands still on the parked point at 2600-2632 and on the court floor at 2691-2713, and at 2745 the near player is preparing to serve the next point. Players knocking the shuttle back between points."
+  },
+  {
+   "start_frame": 3191,
+   "end_frame": 3336,
+   "kind": "not play",
+   "notes": "Labelled as a rally in the first pass and it is not one. The score ticks 3-9 to 4-9 between 3210 and 3260, so this stretch is after that point ended, not during it."
+  }
+ ],
  "_tracking_failures_help": "Optional. [{\"start_frame\": 1918, \"end_frame\": 3291, \"kind\": \"...\", \"notes\": \"...\"}] -- stretches where the vision stack visibly followed the wrong thing. Not scored; kept so a known failure is not rediscovered twice.",
  "_provenance": "HAND LABELS. Made by the project owner on 2026-09-15 by watching label-rally-A.mp4 and label-rally-B.mp4 -- the working video at a third speed with its frame numbers burned in and no pipeline output drawn on it -- and written as one line per contact in labels.tsv, which is kept beside this file as the primary record. Every contact carries a hitter; none was left unattributed. The hitters alternate strictly across both spans, which is what singles requires and which no labelling produced here before had achieved.",
  "_supersedes": "Model-produced labels for the same two spans, written by Claude on 2026-09-15 and kept at git f7e7a81. They were made without sight of these, and comparing the two measures how far model labelling can be trusted: contact precision 0.829 and recall 0.763, hitter accuracy 0.864 over the 22 contacts the model was willing to name. The model missed 9 contacts, invented 6, and named the wrong player 3 times. Seven of the nine frames it recorded as detector false positives were real contacts it had itself missed.",
@@ -262,5 +263,6 @@
   "One weak anchor: before labelling began the labeller had been told the model found \"~35 contacts\". That is an anchor on the total, not on positions or hitters. The hand count came to 38.",
   "The notes carry a shot type for most contacts -- serve, lift, drive, net, smash, clear, drop. Nothing in milestone 1 reads them; they are gold data for milestone 2 if it resumes.",
   "Only the two spans in labelled_contact_spans are exhaustive. Rallies are labelled across the whole clip and were carried over unchanged from the earlier pass, where they rest on the scoreboard reading 3-7 at frames 200, 480, 900 and 960 and 3-8 by 1020."
- ]
+ ],
+ "_rally_labelling_note": "The rally spans were wrong in the first pass and are corrected here. Seven were claimed; the clip holds five. The instrument that settled it is the scoreboard, which runs 3-7, 3-8, 3-9, 4-9, 4-10, 4-11 across the clip -- five points, five rallies -- and not the shuttle track, from which the first pass had derived them by taking every run of moving shuttle for a rally. Two of those runs are players knocking the shuttle back between points. Ends are the frame the shuttle comes to rest, read off the raw track. Three automatic rules for that were tried first and each failed differently: the first standstill runs late because a grounded shuttle jitters up to 31 px, sustained-travel runs late for the same reason and cuts rallies short at blind gaps, and both are confounded by the tracker leaping onto its parked point, which looks like motion."
 }

@@ -145,11 +145,19 @@ def test_a_dropout_without_a_turn_is_a_continuation_not_a_contact():
     assert model.links[0].hit_frame is None
 
 
-def test_a_gap_longer_than_the_limit_breaks_the_chain():
+def test_a_gap_with_no_samples_at_all_does_not_break_the_chain():
+    """This asserted the opposite until the limit began counting only frames the tracker had a
+    sample for, and it is kept as a plain statement of what that leaves exposed: two rallies
+    separated by a long stretch the tracker saw nothing of would now be joined.
+
+    A wall-clock ceiling is the obvious guard and the measurements refuse it. Across the three
+    labelled clips the largest gap inside a rally is 87 frames and the smallest gap that really
+    ends one is 85, so length does not separate the two populations at all. There is nothing to
+    set a ceiling from, and none is invented here."""
     points = straight(0, 40, 100.0, 400.0, 12.0, 0.0)
     points += straight(300, 40, 570.0, 400.0, -12.0, 0.0)
     model = segment_flight(track(points), FPS, _cfg(max_link_gap_seconds=0.5))
-    assert model.links == ()
+    assert len(model.links) == 1
 
 
 def test_a_standstill_inside_a_gap_breaks_the_chain():
@@ -465,3 +473,34 @@ def test_a_turn_from_falling_to_rising_is_never_an_apex():
     rising = {f: (400.0 + 10.0 * i, 400.0 + 25.0 * i) for i, f in enumerate(range(100, 111))}
     rising.update({f: (500.0 + 10.0 * i, 650.0 - 5.0 * i) for i, f in enumerate(range(111, 121))})
     assert _gravity_apex(rising, 109, 111, span=8, max_speed_ratio=1.0) is False
+
+
+# --- a gap the tracker spent blind is not the end of a rally ---
+# Clip 5's first rally runs from the serve at 213 to 915 and was reported as starting at 513,
+# nearly nine seconds late, because the chain broke twice inside it: at 284-370 and again at
+# 451-512, the second by a single frame over the limit. The tracker had lost the shuttle in
+# both -- 32% and 19% of those gaps carry a sample at all. Across the three labelled clips every
+# gap that really does end a rally is visible for the whole of it, and settled_between fires on
+# all nine of them; these two are the only gaps with an invisible stretch and it fires on
+# neither.
+
+
+def test_a_gap_the_tracker_spent_blind_does_not_end_a_rally():
+    points = straight(0, 30, 100.0, 400.0, 12.0, 0.0)
+    # 80 frames of gap: 20 carry a sample, 60 do not. Too slow to be a flight, too far-ranging
+    # to be a standstill, so the gap is exactly what a lost shuttle leaves behind.
+    points += [(30 + i, 460.0 + 2.0 * i, 400.0, i < 20) for i in range(80)]
+    points += straight(110, 30, 700.0, 400.0, -12.0, 0.0)
+    model = segment_flight(track(points), FPS, _cfg(max_link_gap_seconds=0.5))
+    assert len(model.links) == 1
+    assert model.links[0].kind == "contact"
+
+
+def test_a_gap_the_tracker_watched_all_the_way_through_still_ends_a_rally():
+    """The other half. The limit still means something when the shuttle was in view for the
+    whole gap: nine of nine real rally endings look like this."""
+    points = straight(0, 30, 100.0, 400.0, 12.0, 0.0)
+    points += [(30 + i, 460.0 + 2.0 * i, 400.0) for i in range(80)]
+    points += straight(110, 30, 700.0, 400.0, -12.0, 0.0)
+    model = segment_flight(track(points), FPS, _cfg(max_link_gap_seconds=0.5))
+    assert model.links == ()

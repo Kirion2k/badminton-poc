@@ -616,7 +616,10 @@ def segment_flight(
         exit_frame = segments[index].end_frame
         entry_frame = segments[index + 1].start_frame
         gap = entry_frame - exit_frame - 1
-        if gap > gap_limit:
+        # Only the frames the tracker had a sample for. A gap it spent blind says nothing about
+        # whether play stopped; see max_link_gap_seconds.
+        seen_in_gap = sum(1 for f in range(exit_frame + 1, entry_frame) if f in positions)
+        if seen_in_gap > gap_limit:
             continue
         if settled_between(exit_frame + 1, entry_frame - 1):
             # The shuttle track stood still between the two flights, so the rally the earlier

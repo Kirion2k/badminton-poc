@@ -1328,3 +1328,68 @@ shape a labelling with invented contacts produces. Clip 2's hand labels are unaf
 The reverse also holds and is worth saying plainly: the hand labelling took well under an hour
 and moved three of this project's numbers, one of them by ten points. Nothing else available to
 this project buys that much.
+
+### A gap the tracker spent blind is not the end of a rally
+
+Clip 5's first rally runs from the serve at 213 to 912 and was reported as starting at 513,
+nearly nine seconds late. The chain broke twice inside it, at 284-370 and again at 451-512, and
+both breaks were the same rule: `max_link_gap_seconds`, at 1.8 s. The second one lost by a
+single frame, 62 against a limit of 61.
+
+**The limit was measuring wall-clock time, and a gap the tracker spent blind is not evidence
+that play stopped -- it is evidence of nothing at all.** Counted over every gap-limit break in
+the three labelled clips:
+
+| | gaps | shuttle visible through the gap | `settled_between` fires |
+|---|---|---|---|
+| gap ends a real rally | 9 | 100% on all nine | 9 of 9 |
+| gap sits inside a rally | 2 | 32% and 19% | 0 of 2 |
+
+The two populations separate perfectly, and not on length: the largest gap inside a rally is 87
+frames and the smallest gap that really ends one is 85, so no ceiling on duration could ever
+have split them. What splits them is whether the tracker had anything to look at. The limit now
+counts only the frames of a gap that carry a sample, and `settled_between` -- which was already
+measured to separate the two kinds of gap on the development clip -- does the deciding.
+
+Clips 2 and 3 cannot move under this change and do not: every gap in both is visible for all of
+it. What it leaves exposed is written into a test rather than hidden -- two rallies separated by
+a long stretch the tracker saw nothing of would now be joined, and there is no measurement in
+these clips to set a ceiling from, so none is invented.
+
+### The rally labels were wrong too, and the scoreboard settled it
+
+Fixing the detector moved clip 5 from 4 of 7 rallies to 5 of 7, which was still short of target,
+and the remaining failures turned out not to be the detector's. **The clip holds five rallies and
+the first labelling claimed seven.**
+
+The labels had been derived by taking every run of moving shuttle for a rally. Two of those runs
+are players knocking the shuttle back to each other between points. The scoreboard says so
+plainly -- it reads 3-7, 3-8, 3-9, 4-9, 4-10, 4-11 across the clip, five points and therefore
+five rallies -- and it is visible in the frames: at 2745 the near player is preparing to serve,
+and the score ticks 3-9 to 4-9 *between* frames 3210 and 3260, so the span labelled 3191-3336
+sits after that point rather than during it.
+
+Rally ends are now the frame the shuttle comes to rest, read off the raw track. Three automatic
+rules for that were tried first and each failed differently, which is worth recording because
+each looked reasonable: the first sustained standstill runs late, because a shuttle lying on the
+court jitters by up to 31 px and defeats any tolerance tight enough to mean anything; a
+last-sustained-travel rule runs late for the same reason and also cuts rallies short at the very
+blind gaps the fix above exists for; and both are confounded by the tracker leaping onto its
+parked point, which looks exactly like motion.
+
+| clip 5 rally | labelled | predicted | start error | end error |
+|---|---|---|---|---|
+| 1 | 213-912 | 191-896 | -0.65 s | -0.47 s |
+| 2 | 1674-2470 | 1674-2467 | 0.00 s | -0.09 s |
+| 3 | 2998-3112 | 3008-3110 | +0.30 s | -0.06 s |
+| 4 | 3509-3878 | 3506-3862 | -0.09 s | -0.47 s |
+| 5 | 4395-4557 | 4400-4552 | +0.15 s | -0.15 s |
+
+**Five of five recovered, every edge inside tolerance, median start error 0.00 s and median end
+error -0.15 s.** Clip 2 stays at 6 of 6 and clip 3 at 4 of 4, both unchanged in every figure.
+
+**What is left is two invented rallies**, at 2646-2681 and 3203-3325, and both are the same thing
+the labels got wrong: players knocking the shuttle back between points. That is not a boundary
+problem, it is the play gate, and seven attempts at one are recorded above as having failed to
+separate on two clips. It now has a third clip to fail or succeed against, and two labelled
+examples of exactly the stretch it has to reject.
