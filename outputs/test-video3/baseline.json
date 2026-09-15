@@ -15,7 +15,10 @@
     "labelled_contacts": 15,
     "rally_shots": 14,
     "out_of_rally_matched": 1,
-    "out_of_rally_missed": 0
+    "out_of_rally_missed": 0,
+    "predictions_outside_labelled_spans": 0,
+    "labelled_contact_spans": [],
+    "labelled_seconds": null
   },
   "hitter_assignment": {
     "matched_hits": 11,

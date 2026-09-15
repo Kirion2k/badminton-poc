@@ -69,6 +69,15 @@ def empty_truth(clip: str, fps: float) -> dict[str, Any]:
             "[{\"rally\": 1, \"start_frame\": 83, \"end_frame\": 236, \"notes\": \"\"}] -- "
             "inclusive spans where a rally was in progress."
         ),
+        "labelled_contact_spans": [],
+        "_labelled_contact_spans_help": (
+            "Optional. [{\"start_frame\": 1674, \"end_frame\": 2467, \"notes\": \"\"}] -- "
+            "the spans in which *every* racket contact has been recorded. Leave it empty when "
+            "the whole clip has been gone through, which is what an empty list means. Outside "
+            "these spans the contact list is known to be incomplete, so a predicted hit there "
+            "is not evidence of anything and is counted in neither column. Rallies are scored "
+            "over the whole clip either way: this scopes contacts, not rallies."
+        ),
         "tracking_failures": [],
         "_tracking_failures_help": (
             "Optional. [{\"start_frame\": 1918, \"end_frame\": 3291, \"kind\": \"...\", "
@@ -224,15 +233,34 @@ def match_contacts(
     }
 
 
+def _in_spans(frame: int, spans: list[dict[str, Any]] | None) -> bool:
+    """True when this frame lies in a span that was exhaustively labelled.
+
+    No spans means the whole clip was, which is how every clip labelled before this existed.
+    """
+    if not spans:
+        return True
+    return any(int(s["start_frame"]) <= frame <= int(s["end_frame"]) for s in spans)
+
+
 def score_hit_detection(
     predicted_frames: Iterable[int],
     contacts: list[dict[str, Any]],
     *,
     fps: float,
     tolerance_seconds: float = DEFAULT_MATCH_TOLERANCE_S,
+    spans: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
-    """Precision, recall and F1 of hit detection against the labelled contacts."""
-    match = match_contacts(predicted_frames, contacts, fps=fps,
+    """Precision, recall and F1 of hit detection against the labelled contacts.
+
+    ``spans`` restricts the question to the part of the clip that was actually gone through. A
+    prediction outside them is not scored: the contact list there is incomplete by declaration,
+    so calling it a false positive would measure the labelling rather than the detector.
+    """
+    predicted = list(predicted_frames)
+    outside = [f for f in predicted if not _in_spans(int(f), spans)]
+    predicted = [f for f in predicted if _in_spans(int(f), spans)]
+    match = match_contacts(predicted, contacts, fps=fps,
                            tolerance_seconds=tolerance_seconds)
     # A racket contact that is not a rally shot -- handing the shuttle back to the server, a
     # knock-up between points -- is real but has no place in a rally timeline. Detecting one is
@@ -258,6 +286,7 @@ def score_hit_detection(
         "rally_shots": len(contacts) - len(out_of_rally),
         "out_of_rally_matched": out_matched,
         "out_of_rally_missed": out_missed,
+        "predictions_outside_labelled_spans": len(outside),
         "match": match,
     }
 
@@ -529,6 +558,16 @@ def evaluate_against_truth(
             "when predictions are matched, so the duplicate can never be matched and would score "
             "as a permanent miss. Remove the duplicate row."
         )
+    spans = truth.get("labelled_contact_spans") or []
+    stray = sorted(f for f in frames if not _in_spans(f, spans))
+    if stray:
+        raise ValueError(
+            f"contacts are labelled on frame(s) {', '.join(map(str, stray))}, outside the "
+            "labelled_contact_spans this file declares. A file that says which part of the clip "
+            "it went through and then labels something else is telling two different stories, "
+            "and the scorer cannot tell which is the true one. Widen the spans or move the "
+            "contact."
+        )
     fps = float(truth.get("fps") or analysis.get("config", {}).get("fps") or 0.0)
     if fps <= 0:
         raise ValueError("cannot score without a frame rate")
@@ -539,7 +578,17 @@ def evaluate_against_truth(
 
     detection = score_hit_detection(
         (h["frame"] for h in hits), contacts, fps=fps,
-        tolerance_seconds=match_tolerance_seconds)
+        tolerance_seconds=match_tolerance_seconds, spans=spans)
+    detection["labelled_contact_spans"] = spans
+    detection["labelled_seconds"] = round(
+        sum(int(s["end_frame"]) - int(s["start_frame"]) + 1 for s in spans) / fps, 3
+    ) if spans else None
+    if spans:
+        detection["scope_note"] = (
+            "Precision and recall cover only the labelled_contact_spans. Predicted hits "
+            "outside them are counted in predictions_outside_labelled_spans and scored as "
+            "neither, because the contact list there is incomplete by declaration."
+        )
     hitter = score_hitter_assignment(
         {h["frame"]: h.get("hitter") for h in hits}, contacts, fps=fps,
         tolerance_seconds=match_tolerance_seconds)

@@ -433,3 +433,63 @@ def test_distinct_frames_are_not_refused():
                          for i, f in enumerate(range(0, 400, 25))])
     evaluate_against_truth({"rallies": [], "summary": {}, "events": [],
                                 "config": {"fps": 60.0}}, truth, [])
+
+
+# --- labelling a clip in parts ---
+# Clip 5 holds 126 contact candidates, and adjudicating every one of them at the net, where the
+# far player is 130 px of dark kit standing behind the near player, is a different amount of
+# work from labelling the two longest rallies exhaustively. Scoring a part-labelled clip as
+# though the whole of it were labelled reports a precision that is simply wrong: every correct
+# hit outside the labelled part arrives as a false positive.
+
+
+def test_predictions_outside_the_labelled_spans_are_not_false_positives():
+    from badminton_poc.truth import score_hit_detection
+    contacts = [{"frame": 100, "hitter": "near"}, {"frame": 160, "hitter": "far"}]
+    spans = [{"start_frame": 50, "end_frame": 200}]
+    out = score_hit_detection([100, 160, 900], contacts, fps=60.0, spans=spans)
+    assert out["true_positives"] == 2
+    assert out["false_positives"] == 0
+    assert out["predictions_outside_labelled_spans"] == 1
+
+
+def test_a_prediction_inside_the_labelled_spans_is_still_a_false_positive():
+    """The point is scope, not amnesty."""
+    from badminton_poc.truth import score_hit_detection
+    contacts = [{"frame": 100, "hitter": "near"}]
+    spans = [{"start_frame": 50, "end_frame": 200}]
+    out = score_hit_detection([100, 150], contacts, fps=60.0, spans=spans)
+    assert out["true_positives"] == 1
+    assert out["false_positives"] == 1
+    assert out["predictions_outside_labelled_spans"] == 0
+
+
+def test_no_spans_means_the_whole_clip_was_labelled():
+    from badminton_poc.truth import score_hit_detection
+    contacts = [{"frame": 100, "hitter": "near"}]
+    out = score_hit_detection([100, 900], contacts, fps=60.0)
+    assert out["false_positives"] == 1
+    assert out["predictions_outside_labelled_spans"] == 0
+
+
+def test_a_contact_outside_the_labelled_spans_is_refused():
+    """A file that declares what it has labelled and then labels something else is telling two
+    different stories, and the scorer cannot know which one is true."""
+    from badminton_poc.truth import evaluate_against_truth
+    truth = _truth_with([{"frame": 100, "hitter": "near", "notes": ""},
+                         {"frame": 900, "hitter": "far", "notes": ""}])
+    truth["labelled_contact_spans"] = [{"start_frame": 50, "end_frame": 200}]
+    with pytest.raises(ValueError) as exc:
+        evaluate_against_truth({"rallies": [], "summary": {}, "events": [],
+                                "config": {"fps": 60.0}}, truth, [])
+    assert "900" in str(exc.value)
+
+
+def test_the_baseline_records_what_it_was_scored_over():
+    from badminton_poc.truth import evaluate_against_truth
+    truth = _truth_with([{"frame": 100, "hitter": "near", "notes": ""}])
+    truth["labelled_contact_spans"] = [{"start_frame": 50, "end_frame": 200}]
+    out = evaluate_against_truth({"rallies": [], "summary": {}, "events": [],
+                                  "config": {"fps": 60.0}}, truth, [])
+    assert out["hit_detection"]["labelled_contact_spans"] == [{"start_frame": 50, "end_frame": 200}]
+    assert out["hit_detection"]["labelled_seconds"] == pytest.approx(151 / 60.0, abs=0.01)
