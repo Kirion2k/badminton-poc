@@ -242,6 +242,23 @@ class PlayerConfig:
     static_track_handoff_heights: float = 1.0
     """How close a new track must appear to a vanished mobile track to inherit its mobility,
     in box heights. Spatial, or every new id in the frame inherits a player's mobility."""
+    mobility_yield_seconds: float = 20.0
+    """A slot prefers a candidate that has moved like a player within this many seconds to one
+    that has not, however well the stale one scores.
+
+    Mobility is granted permanently, and a per-window motion test applied across thousands of
+    frames will eventually grant it to anything: clip 5's seated line judge was promoted by a
+    single posture shift at frame 1271 and was then eligible for the rest of the clip. Being
+    eligible was enough, because continuity and proximity are worth 2.3 points that an
+    incumbent never has to earn again -- he took the near slot at frame 2580 and held it for
+    2048 frames, beating the real player 3.19 to 1.05 on every one of them, and the second half
+    of that clip reported no rallies at all.
+
+    The horizon separates the two populations by measurement rather than by taste. Real players
+    stay motionless for a while between rallies -- the longest measured is 8.90 s, clip 2's far
+    player over 534 frames -- while that judge read as moving on 45 of 4628 frames and was
+    quiet for 37 s at the moment he took the slot and 98.5 s afterwards. Seconds, not frames:
+    a frame count would judge a 60 fps clip and a 34 fps clip by different standards."""
     identity_transfer_px_per_frame: float = 30.0
     """How far a slot will accept its identity jumping, per frame since it last saw its track.
 

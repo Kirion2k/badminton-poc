@@ -165,8 +165,15 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "players":
         from .players import extract_players
+        from .videoprep import effective_fps, probe
 
-        print(json.dumps(extract_players(args.video, args.output, config.court, config.players), indent=2))
+        # The standalone stage has no metadata.json to read the working frame rate out of, and
+        # mobility_yield_seconds is in seconds, so ask the video itself rather than assume.
+        fps = config.target_fps or effective_fps(probe(args.video))
+        print(json.dumps(
+            extract_players(args.video, args.output, config.court, config.players, fps=fps),
+            indent=2,
+        ))
         return 0
 
     if args.command == "shuttle":

@@ -91,7 +91,7 @@ def test_filter_rejects_foreground_and_offcourt_and_tiny():
         box(0.32, 0.47, 0.10),    # neighbouring court: foot outside polygon
         box(0.60, 0.60, 0.03),    # noise: too small
     ]
-    kept, rejected = CandidateFilter(COURT, cfg, W, H).split(candidates)
+    kept, rejected = CandidateFilter(COURT, cfg, W, H, fps=60.0).split(candidates)
     assert len(kept) == 1
     assert sorted(r["reason"] for r in rejected) == [
         "foot_outside_court", "too_large_foreground", "too_small",
@@ -103,7 +103,7 @@ def test_filter_rejects_a_track_that_never_moves():
     """The far slot locked onto a detection with 0.0 px positional spread over 1348 frames,
     because identity continuity rewards a detection that never breaks."""
     cfg = PlayerConfig(static_track_min_observations=5, static_track_min_travel_heights=0.35)
-    flt = CandidateFilter(COURT, cfg, W, H)
+    flt = CandidateFilter(COURT, cfg, W, H, fps=60.0)
     reasons = []
     for _ in range(12):
         kept, rejected = flt.split([box(0.728, 0.485, 0.16, track_id=7)])
@@ -116,7 +116,7 @@ def test_filter_rejects_a_track_that_never_moves():
 def test_filter_keeps_a_track_that_has_ever_moved_even_when_it_stops():
     """A player standing still between rallies must not be discarded."""
     cfg = PlayerConfig(static_track_min_observations=5, static_track_min_travel_heights=0.35)
-    flt = CandidateFilter(COURT, cfg, W, H)
+    flt = CandidateFilter(COURT, cfg, W, H, fps=60.0)
     for x in (0.50, 0.55, 0.60, 0.62, 0.58, 0.52):
         flt.split([box(x, 0.72, 0.30, track_id=3)])
     assert 3 in flt.mobile
@@ -127,7 +127,7 @@ def test_filter_keeps_a_track_that_has_ever_moved_even_when_it_stops():
 
 def test_filter_never_rejects_an_untracked_detection_as_static():
     cfg = PlayerConfig(static_track_min_observations=2, static_track_min_travel_heights=0.35)
-    flt = CandidateFilter(COURT, cfg, W, H)
+    flt = CandidateFilter(COURT, cfg, W, H, fps=60.0)
     for _ in range(10):
         kept, rejected = flt.split([box(0.575, 0.72, 0.30, track_id=None)])
     assert len(kept) == 1 and not rejected
@@ -151,7 +151,7 @@ def test_a_small_far_player_is_not_called_static_for_moving_few_pixels():
     move a third of the near player's pixels for the same court distance, so an absolute
     threshold judges the two ends of the court by different standards."""
     cfg = PlayerConfig(static_track_min_observations=5, static_track_min_travel_heights=0.35)
-    flt = CandidateFilter(COURT, cfg, W, H)
+    flt = CandidateFilter(COURT, cfg, W, H, fps=60.0)
     # 0.10 frame-heights tall = 88 px; moving 0.0184 normalized x = 35.4 px = 0.40 heights.
     for x in (0.600, 0.606, 0.612, 0.6184, 0.612, 0.600):
         flt.split([box(x, 0.52, 0.10, track_id=5)])
@@ -164,7 +164,7 @@ def test_a_small_far_player_is_not_called_static_for_moving_few_pixels():
 def test_an_umpire_sized_wobble_is_still_static_at_the_same_scale():
     """The other half of the same threshold: the umpire moved 0.067 body-heights all clip."""
     cfg = PlayerConfig(static_track_min_observations=5, static_track_min_travel_heights=0.35)
-    flt = CandidateFilter(COURT, cfg, W, H)
+    flt = CandidateFilter(COURT, cfg, W, H, fps=60.0)
     for x in (0.728, 0.7283, 0.7286, 0.728):
         flt.split([box(x, 0.485, 0.10, track_id=123)])
     for _ in range(10):
@@ -178,7 +178,7 @@ def test_mobility_survives_a_bytetrack_id_break():
     let track 168 -- 143 px of real movement -- be rejected as static for 78 frames in a row
     after an id break left it standing still for its first observations under the new id."""
     cfg = PlayerConfig(static_track_min_observations=5, static_track_min_travel_heights=0.35)
-    flt = CandidateFilter(COURT, cfg, W, H)
+    flt = CandidateFilter(COURT, cfg, W, H, fps=60.0)
     for x in (0.600, 0.620, 0.640, 0.660, 0.640, 0.620):
         flt.split([box(x, 0.52, 0.15, track_id=168)])
     assert 168 in flt.mobile
@@ -193,7 +193,7 @@ def test_mobility_survives_a_bytetrack_id_break():
 def test_mobility_is_not_inherited_by_a_track_somewhere_else():
     """Handoff must be spatial, or every new id in the frame inherits a player's mobility."""
     cfg = PlayerConfig(static_track_min_observations=5, static_track_min_travel_heights=0.35)
-    flt = CandidateFilter(COURT, cfg, W, H)
+    flt = CandidateFilter(COURT, cfg, W, H, fps=60.0)
     for x in (0.600, 0.620, 0.640, 0.660, 0.640, 0.620):
         flt.split([box(x, 0.52, 0.15, track_id=168)])
     for _ in range(10):
@@ -266,7 +266,7 @@ def test_a_slow_creep_over_many_frames_is_still_static():
     eventually, because a lifetime extent only ever grows. A player moves that far in a
     fraction of a second; furniture never does, however long you watch it."""
     cfg = PlayerConfig(static_track_min_observations=5, static_track_min_travel_heights=0.12)
-    flt = CandidateFilter(COURT, cfg, W, H)
+    flt = CandidateFilter(COURT, cfg, W, H, fps=60.0)
     for step in range(60):                      # 1 px per frame: 60 px of lifetime drift
         kept, rejected = flt.split([box(0.700 + step / W, 0.485, 0.10, track_id=42)])
     assert 42 not in flt.mobile
@@ -489,3 +489,97 @@ def test_features_are_none_when_the_player_is_absent():
 
     out = swing_features({f: {"frame": f, "near": None} for f in range(13)}, 6, "near", fps=60.0)
     assert out["peak_wrist_speed"] is None
+
+
+# --- regression from clip 5: the near slot held a seated line judge for 2048 frames ---
+# Track 3 is a line judge sitting in a chair at the right sideline, correctly rejected as
+# static for 992 frames. He then took the near slot at frame 2580 and held it to the end of
+# the clip, beating the real player -- track 4, confidence 0.938, proven mobile, standing on
+# court -- by 3.19 to 1.05 on every frame, because continuity and proximity are worth 2.3
+# points that an incumbent never has to earn again.
+
+
+def judge_box(foot_y, height, conf, track_id=3):
+    """Track 3 of clip 5 at its measured position: centre x 1452, 127 px tall when whole."""
+    return Candidate(bbox=(1452.0 - 25.0, foot_y - height, 1452.0 + 25.0, foot_y),
+                     conf=conf, track_id=track_id, keypoints=[])
+
+
+def test_a_box_that_loses_its_legs_has_not_moved():
+    """The measured sequence at frames 992-996. The pose model lost the judge's legs -- box
+    height 125.1 -> 86.4 px, confidence 0.78 -> 0.42 -- so the foot point, being the bottom
+    edge of the box, climbed 43 px up his body while the box top moved 0.3 px, from 481.7 to
+    481.6. That excursion cleared the 15.2 px threshold and mobility is permanent, so one
+    flicker of a bad detection bought a seated official lifetime eligibility."""
+    cfg = PlayerConfig(static_track_min_observations=5, static_track_min_travel_heights=0.12)
+    flt = CandidateFilter(COURT, cfg, W, H, fps=60.0)
+    for _ in range(10):
+        flt.split([judge_box(610.1, 127.3, 0.91)])
+    assert 3 not in flt.mobile               # correctly static while the box is whole
+
+    for foot_y, height, conf in ((606.8, 125.1, 0.78), (586.8, 104.9, 0.71),
+                                 (578.8, 96.8, 0.71), (571.2, 89.5, 0.55),
+                                 (568.0, 86.4, 0.42)):
+        flt.split([judge_box(foot_y, height, conf)])
+    assert 3 not in flt.mobile
+
+
+def test_a_player_running_towards_the_camera_still_counts_as_moving():
+    """The other half of it. A near player running from the far service line to the net grows
+    from 0.16 to 0.30 of frame height and their foot travels 210 px -- a real box-height change
+    with real movement under it, which must still read as mobile."""
+    cfg = PlayerConfig(static_track_min_observations=5, static_track_min_travel_heights=0.12)
+    flt = CandidateFilter(COURT, cfg, W, H, fps=60.0)
+    for foot_n, height_n in ((0.70, 0.16), (0.76, 0.20), (0.82, 0.24), (0.88, 0.27),
+                             (0.94, 0.30), (0.94, 0.30)):
+        flt.split([box(0.575, foot_n, height_n, track_id=88)])
+    assert 88 in flt.mobile
+
+
+def test_a_stale_slot_yields_to_someone_who_is_actually_moving():
+    """The 2048 frames. Once the judge held the near slot, continuity (1.5) and proximity (0.8)
+    were 2.3 points he never had to earn again, so the real player -- track 4, confidence 0.938,
+    proven mobile, standing on court -- lost 1.05 to 3.19 on every frame to the end of the clip.
+    An incumbent that has not moved within the yield horizon must not outrank one that has."""
+    cfg = PlayerConfig(mobility_yield_seconds=20.0)
+    near_slot, far_slot = fresh()
+    judge = box(0.757, 0.689, 0.145, conf=0.90, track_id=3)
+    player = box(0.544, 0.802, 0.265, conf=0.938, track_id=4)
+
+    near, _ = select_players([judge], near_slot, far_slot, court=COURT, width=W, height=H,
+                             diagonal=2113.0, forget_after=15, mobile={3, 4}, recent={3})
+    assert near["track_id"] == 3          # nobody else is there; he may hold it
+
+    near, _ = select_players([judge, player], near_slot, far_slot, court=COURT, width=W,
+                             height=H, diagonal=2113.0, forget_after=15, mobile={3, 4},
+                             recent={4})
+    assert near["track_id"] == 4
+    assert near["selection"]["recently_mobile"] is True
+
+
+def test_a_player_waiting_to_serve_does_not_lose_their_slot_to_a_passer_by():
+    """The other half. Real players measured motionless for up to 8.90 seconds -- clip 2's far
+    player, 534 frames at 60 fps -- so a player who is merely standing still is still recent,
+    and keeps the slot against an official walking behind them."""
+    cfg = PlayerConfig(mobility_yield_seconds=20.0)
+    near_slot, far_slot = fresh()
+    server = box(0.500, 0.800, 0.265, conf=0.92, track_id=11)
+    walker = box(0.700, 0.760, 0.240, conf=0.95, track_id=12)
+
+    near, _ = select_players([server], near_slot, far_slot, court=COURT, width=W, height=H,
+                             diagonal=2113.0, forget_after=15, mobile={11}, recent={11})
+    assert near["track_id"] == 11
+    near, _ = select_players([server, walker], near_slot, far_slot, court=COURT, width=W,
+                             height=H, diagonal=2113.0, forget_after=15, mobile={11, 12},
+                             recent={11, 12})
+    assert near["track_id"] == 11
+
+
+def test_mobility_recency_is_measured_in_seconds_not_frames():
+    """A horizon in frames judges a 60 fps clip and a 34 fps clip by different standards, which
+    is the same mistake an absolute pixel threshold made across the two ends of the court."""
+    cfg = PlayerConfig(mobility_yield_seconds=20.0)
+    fast = CandidateFilter(COURT, cfg, W, H, fps=60.0)
+    slow = CandidateFilter(COURT, cfg, W, H, fps=30.0)
+    assert fast.yield_frames == 1200
+    assert slow.yield_frames == 600

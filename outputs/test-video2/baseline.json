@@ -116,7 +116,7 @@
         "frames": 3288,
         "median_detection_confidence": 0.822,
         "median_movement_body_heights_per_s": 0.484,
-        "lateral_range_body_heights": 4.883
+        "lateral_range_body_heights": 4.887
       },
       "warnings": [],
       "note": "Measured over labelled rally frames. Empty warnings mean both slots behave like players; they do not mean the coverage figure is high."

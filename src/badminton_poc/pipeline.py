@@ -90,7 +90,9 @@ def run(
 
     if "players" in stages:
         started = time.time()
-        stats = extract_players(paths.work_video, paths.players, config.court, config.players)
+        stats = extract_players(
+            paths.work_video, paths.players, config.court, config.players, fps=fps
+        )
         stats["seconds"] = round(time.time() - started, 1)
         report["stages"]["players"] = stats
 

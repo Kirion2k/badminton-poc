@@ -1057,3 +1057,99 @@ would pass it, and yt-irish is one clip agreeing rather than evidence it catches
 lowest genuine confidence measured so far is yt-ccaa's far player at 0.64, against 0.24 for the
 officials, so the confidence threshold has roughly one and a half times the margin the movement
 one does.
+
+### A line judge held the near slot for 2048 frames, and half of clip 5 disappeared
+
+Clip 5 was picked up as the third clip to label, and it is not a marginal recording: a
+tournament match, camera fixed behind the near baseline, both players plainly visible, far
+player 126 px tall. The pipeline reported 95.0% near coverage, 89.4% far, no plausibility
+warnings, and three rallies.
+
+All three rallies sit in the first 56 seconds. From frame 2580 to the end -- 2048 frames, 44%
+of the clip -- the near slot held a **seated line judge in a chair on the red surround** while
+the real player stood on court in front of him. Nothing in the output said so.
+
+| frames | what the near slot held |
+|---|---|
+| 0-43 | the judge, before he had been seen often enough to be judged static |
+| 44-1270 | nobody: he is correctly rejected as `static_track` |
+| 1271-2579 | the real player; the judge is eligible again but loses |
+| 2580-4627 | the judge, for 2048 consecutive frames |
+
+**Why nothing said so.** Slot plausibility is measured over *detected* rallies, and no rally is
+detected in the span where the slot is wrong -- because the slot being wrong is what stops
+rallies being detected. A failure that suppresses rally detection is invisible to a check that
+only looks inside rallies. Coverage, meanwhile, counted the judge as a tracked player on every
+one of those frames and reported near coverage of 100% during rallies.
+
+The cost, measured: 32 of 41 hits dropped as unattributed, 40 of 52 events orphaned by the rally
+gates, and no rallies at all after frame 2467 in a span holding 812 frames of moving shuttle --
+39.6% of it, against 51.8% before the lock.
+
+**Two defects hold the lock shut.**
+
+*The foot point moves when the box does.* Mobility was measured from the foot point, which is
+the bottom edge of the box, so it travels whenever the model loses the legs. Over frames
+993-996 the judge's box collapsed from 125 to 86 px and his confidence from 0.78 to 0.42, so his
+foot point climbed 43 px up his body while the box top moved 0.3 px, 481.7 to 481.6. That
+cleared the 15.8 px threshold and mobility is permanent, so one flicker of a bad detection
+bought a seated official lifetime eligibility. Mobility is now measured at the top of the box.
+Heads do not fall off, and a player who really moves moves their head too.
+
+That alone does not fix it: it moved the promotion from frame 993 to 1271, where a genuine
+shift in his chair crossed the threshold instead. **A per-window motion test applied across
+thousands of frames will eventually promote anything**, and promotion is for life.
+
+*An incumbent never has to re-earn its slot.* Continuity (1.5) and proximity (0.8) are 2.3
+points the occupant gets for free, against at most 1.0 for a stranger however well detected. At
+frame 3600 the judge beat the real player -- track 4, confidence 0.938, proven mobile, standing
+on court -- by 3.19 to 1.05, and beat him identically on every frame to the end of the clip.
+Once a slot is wrong it stays wrong.
+
+So the eligibility ladder gains a rung. `mobile` says a track moved once; `recent` says it is
+still moving like a player, and a slot prefers a recent candidate to a stale one. A preference,
+not a gate: with nobody recent on that side the stale candidate still fills the slot, and the
+pick is recorded as `recently_mobile: false` next to `proven_mobile`.
+
+**The horizon is 20 seconds, and both populations it separates were measured.**
+
+| track | longest stretch reading as motionless |
+|---|---|
+| clip 2 near player | 7.38 s |
+| clip 2 far player | 8.90 s |
+| clip 3 near / far player | 3.36 s / 2.79 s |
+| clip 5 near player | 3.05 s |
+| clip 5's line judge | quiet 37 s when he took the slot, 98.5 s afterwards |
+
+He reads as moving on 45 of 4628 frames, in two runs of 18 and 26 frames around a single
+posture shift. Any horizon between roughly 10 and 35 seconds separates the two; 20 s is 2.2x
+above the longest genuine stillness measured. In seconds rather than frames, because a frame
+count judges a 60 fps clip and a 34 fps clip by different standards -- the same mistake an
+absolute pixel threshold made across the two ends of the court.
+
+**What changed.**
+
+| | before | after |
+|---|---|---|
+| clip 5 rallies | 3 | 8 |
+| clip 5 hits | 52 | 83 |
+| clip 5 frames inside a detected rally | 1258 | 2030 |
+| clip 5 near slot, frames 2580-4627 | judge 2048 | player 2025, judge 2 |
+| clip 2 precision / recall / F1 / hitter / coverage | 0.8235 / 0.9492 / 0.8819 / 0.9245 / 0.9286 | unchanged |
+| clip 3 `baseline.json` | | byte-identical |
+
+The five recovered rallies fall at 2646-2681, 3008-3110, 3203-3325, 3506-3862 and 4400-4552,
+which are the spans where the raw shuttle track was already moving before any of this was
+changed. That is corroboration from a file the fix does not touch.
+
+**What it does not establish.** Clip 5 still has no labels, so 8 rallies and 83 hits are counts,
+not accuracy. The far slot also lost 81 frames to the first fix, of median box height 85 px
+against 138 px for the frames it kept, sitting motionless at (0.577, 0.593) -- the line-judge
+depth band this clip's config warns about, in one case holding the far slot for 36 frames inside
+a detected rally. They look like officials rather than players, which makes the coverage figure
+more honest rather than worse, but no label says so yet.
+
+The blind spot in the plausibility check is also still there. It measures inside detected
+rallies, so it still cannot see a slot failure that prevents rallies from being detected. What
+changed is that this particular failure no longer happens, not that it would be reported if it
+did.

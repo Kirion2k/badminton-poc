@@ -53,6 +53,16 @@ class Candidate:
         return ((x1 + x2) / 2.0, y2)
 
     @property
+    def head(self) -> tuple[float, float]:
+        """Top-centre of the box, which is where this track is for the purpose of judging
+        whether it moves. The foot point is the bottom edge, so it travels whenever the model
+        loses the legs even though nobody has gone anywhere: on clip 5 a seated line judge's
+        box collapsed from 125 to 86 px over four frames and his foot point climbed 43 px up
+        his body while this point moved 0.3 px."""
+        x1, y1, x2, _ = self.bbox
+        return ((x1 + x2) / 2.0, y1)
+
+    @property
     def height(self) -> float:
         return max(0.0, self.bbox[3] - self.bbox[1])
 
@@ -322,6 +332,7 @@ def select_players(
     diagonal: float,
     forget_after: int,
     mobile: set[int] | None = None,
+    recent: set[int] | None = None,
     net_hysteresis: float = 0.0,
     identity_transfer_px_per_frame: float = 0.0,
 ) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
@@ -339,6 +350,14 @@ def select_players(
     is genuinely motionless and indistinguishable from a bag on motion evidence alone. An
     unproven pick is recorded as ``proven_mobile: false`` rather than withheld, so downstream
     can see what it is resting on.
+
+    ``recent`` is the subset of those still moving like a player, and it is preferred in turn,
+    because proven mobility is permanent and a slot never re-examines its occupant: continuity
+    and proximity are worth 2.3 points that an incumbent does not have to earn again, so a
+    seated line judge who twitched once at frame 1271 of clip 5 took the near slot at 2580 and
+    held it for 2048 frames against a moving, on-court, more confident player. Preference
+    again, not a gate -- with nobody recent on that side the stale candidate still fills the
+    slot, and the pick is recorded as ``recently_mobile: false``.
     """
     owner: dict[int, str] = {}
     for slot_state, name in ((near_slot, "near"), (far_slot, "far")):
@@ -369,6 +388,9 @@ def select_players(
         if mobile is not None:
             proven = [c for c in pool if c.track_id is None or c.track_id in mobile]
             eligible = proven or pool
+        if recent is not None:
+            active = [c for c in eligible if c.track_id is None or c.track_id in recent]
+            eligible = active or eligible
         scored = [(*_score(c, slot_state, diagonal), c) for c in eligible]
         scored.sort(key=lambda item: item[0], reverse=True)
         total, terms, best = scored[0]
@@ -410,6 +432,7 @@ def select_players(
                 "pool_size": len(pool),
                 "eligible_size": len(eligible),
                 "proven_mobile": mobile is not None and best.track_id in mobile,
+                "recently_mobile": recent is not None and best.track_id in recent,
             },
         }
     return chosen["near"], chosen["far"]
@@ -430,11 +453,21 @@ class CandidateFilter:
     never discarded.
     """
 
-    def __init__(self, court: CourtROI, cfg: PlayerConfig, width: int, height: int) -> None:
+    def __init__(
+        self,
+        court: CourtROI,
+        cfg: PlayerConfig,
+        width: int,
+        height: int,
+        *,
+        fps: float,
+    ) -> None:
         self.court = court
         self.cfg = cfg
         self.width = width
         self.height = height
+        self.fps = fps
+        self.yield_frames = round(cfg.mobility_yield_seconds * fps)
         self._window: dict[int, deque[tuple[float, float]]] = {}
         self._max_height: dict[int, float] = {}
         self._seen: dict[int, int] = {}
@@ -442,7 +475,21 @@ class CandidateFilter:
         self._last_foot: dict[int, tuple[float, float]] = {}
         self._frame = -1
         self.mobile: set[int] = set()
+        self._last_moving: dict[int, int] = {}
         self.handoffs: dict[int, dict[str, Any]] = {}
+
+    @property
+    def recently_mobile(self) -> set[int]:
+        """Tracks that have moved like a player within the yield horizon.
+
+        ``mobile`` says a track moved once; this says it is still behaving like a player. A
+        slot prefers these, so an occupant that has gone quiet for good cannot hold a slot
+        against someone who is playing. See ``mobility_yield_seconds``."""
+        return {
+            track_id
+            for track_id, frame in self._last_moving.items()
+            if self._frame - frame <= self.yield_frames
+        }
 
     def _limit_px(self, track_id: int) -> float:
         return self.cfg.static_track_min_travel_heights * self._max_height.get(track_id, 0.0)
@@ -468,6 +515,7 @@ class CandidateFilter:
                 best = (distance, other)
         if best is not None:
             self.mobile.add(track_id)
+            self._last_moving[track_id] = self._last_moving.get(best[1], self._frame)
             self.handoffs[track_id] = {
                 "inherited_from": best[1],
                 "distance_px": round(best[0], 1),
@@ -475,7 +523,7 @@ class CandidateFilter:
             }
 
     def _travel(self, candidate: Candidate) -> float | None:
-        """How far this track's foot point has ranged over its most recent observations.
+        """How far this track has ranged over its most recent observations.
 
         A sliding window, not the track's whole life: a lifetime extent only ever grows, so a
         static detection's per-frame jitter accumulates until it crosses any fixed threshold
@@ -483,24 +531,32 @@ class CandidateFilter:
         fraction of a second, so recent motion separates the two by an order of magnitude
         whatever the clip length.
 
+        Measured at the top of the box rather than at the foot point. The foot point is the
+        bottom edge, so it moves whenever the detection changes size, and a box that loses its
+        legs reads as a person who moved: clip 5's seated line judge was promoted to mobile by
+        a four-frame collapse from 125 to 86 px, and because mobility is permanent he stayed
+        eligible and took the near slot 1587 frames later for the rest of the clip. Heads do
+        not fall off, and a player who really moves moves their head too.
+
         Returns None while the track has too few observations to judge.
         """
         track_id = candidate.track_id
         if track_id is None:
             return None
         fx, fy = candidate.foot
+        anchor = candidate.head
         self._max_height[track_id] = max(self._max_height.get(track_id, 0.0), candidate.height)
         window = self._window.get(track_id)
         if window is None:
             self._inherit_mobility(track_id, (fx, fy), candidate.height)
             self._window[track_id] = deque(
-                [(fx, fy)], maxlen=self.cfg.static_track_min_observations
+                [anchor], maxlen=self.cfg.static_track_min_observations
             )
             self._seen[track_id] = 1
             self._last_seen[track_id] = self._frame
             self._last_foot[track_id] = (fx, fy)
             return None
-        window.append((fx, fy))
+        window.append(anchor)
         self._seen[track_id] = self._seen[track_id] + 1
         self._last_seen[track_id] = self._frame
         self._last_foot[track_id] = (fx, fy)
@@ -510,6 +566,7 @@ class CandidateFilter:
         )
         if travel >= self._limit_px(track_id):
             self.mobile.add(track_id)
+            self._last_moving[track_id] = self._frame
         if self._seen[track_id] < self.cfg.static_track_min_observations:
             return None
         return travel
@@ -565,6 +622,8 @@ def iter_player_frames(
     video: str | Path,
     court: CourtROI,
     cfg: PlayerConfig,
+    *,
+    fps: float,
 ) -> Iterator[dict[str, Any]]:
     """Run pose tracking and yield one record per frame. Importing Ultralytics is deferred so
     that the parsing/analysis test suite never needs torch installed."""
@@ -607,7 +666,7 @@ def iter_player_frames(
                 )
 
         if candidate_filter is None:
-            candidate_filter = CandidateFilter(court, cfg, width, height)
+            candidate_filter = CandidateFilter(court, cfg, width, height, fps=fps)
         kept, rejected = candidate_filter.split(raw)
         near, far = select_players(
             kept,
@@ -619,6 +678,7 @@ def iter_player_frames(
             diagonal=math.hypot(width, height),
             forget_after=cfg.identity_smoothing_frames,
             mobile=candidate_filter.mobile,
+            recent=candidate_filter.recently_mobile,
             net_hysteresis=cfg.net_hysteresis_frac,
             identity_transfer_px_per_frame=cfg.identity_transfer_px_per_frame,
         )
@@ -634,6 +694,7 @@ def iter_player_frames(
                 "net_delta": round(court.net_delta(candidate.foot[0] / width,
                                                    candidate.foot[1] / height), 4),
                 "proven_mobile": candidate.track_id in candidate_filter.mobile,
+                "recently_mobile": candidate.track_id in candidate_filter.recently_mobile,
             }
             for candidate in kept
             if candidate.track_id is None or candidate.track_id not in chosen_ids
@@ -657,6 +718,7 @@ def extract_players(
     court: CourtROI,
     cfg: PlayerConfig,
     *,
+    fps: float,
     progress_every: int = 200,
 ) -> dict[str, Any]:
     output = Path(output_jsonl)
@@ -668,7 +730,7 @@ def extract_players(
     far_only = 0
     neither = 0
     with output.open("w", encoding="utf-8") as handle:
-        for record in iter_player_frames(video, court, cfg):
+        for record in iter_player_frames(video, court, cfg, fps=fps):
             handle.write(json.dumps(record) + "\n")
             frames += 1
             has_near = record["near"] is not None
