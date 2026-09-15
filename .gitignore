@@ -20,6 +20,7 @@ outputs/*
 outputs/*/*
 !outputs/*/ground_truth.json
 !outputs/*/truth.json
+!outputs/*/labels.tsv
 !outputs/*/baseline.json
 !outputs/*/evaluation.json
 # Milestone 2 keeps its labelling one level deeper. Same reasoning: the shot labels cost hours

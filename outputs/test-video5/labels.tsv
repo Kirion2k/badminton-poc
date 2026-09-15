@@ -1,0 +1,21 @@
+# Hand labels for test-video5. Blank lines and lines starting with # are ignored.
+# Frame numbers are the ones burned into label-rally-A.mp4 and label-rally-B.mp4.
+#
+# ONE LINE PER RACKET CONTACT:
+#     c  <frame>  <near|far|?>   [optional note]
+#
+#   frame   the frame where the racket meets the shuttle. Within 3 or 4 frames is fine;
+#           the scorer matches a prediction to a contact within 0.2 s.
+#   near    the player in the foreground, light green shirt, "T. OBAYASHI JAPAN".
+#   far     the player beyond the net, dark navy.
+#   ?       you could not tell who hit it. Use this freely -- it is scored for detection
+#           but left out of the hitter figure, which is better than a guess.
+#
+# ONE LINE PER RALLY, only if you disagree with the spans below:
+#     r  <start_frame>  <end_frame>
+#
+# Rally A runs 1674-2462 and rally B runs 3501-3884. Label every contact you can see
+# inside them, including serves, and including any contact where the shuttle is barely
+# touched. If you are unsure whether something was a contact at all, add it with a note
+# saying so -- it is easier for me to discount a doubtful row than to find a missing one.
+
