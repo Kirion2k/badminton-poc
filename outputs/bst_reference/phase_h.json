@@ -1,0 +1,2863 @@
+{
+ "_what": "Phase H: pretrained BST against hand-labelled contacts. No training, no fine-tuning, no threshold fitting.",
+ "checkpoint": "bst_0_JnB_bone_between_2_hits_with_max_limits_seq_100_merged_2.pt",
+ "architecture": "BST_0",
+ "mapping_version": "broad-v2",
+ "shots_scored": 48,
+ "shots_without_a_label_skipped": 0,
+ "headline_excludes_serve": true,
+ "serve_note": "Serve is the first contact of a rally and derivable from rally structure, so it is scored separately rather than counted as evidence the visual classifier works.",
+ "overall_including_serve": {
+  "n": 48,
+  "accuracy": 0.7292,
+  "balanced_accuracy": 0.6548,
+  "macro_f1": 0.6807,
+  "top2_accuracy": 0.8958,
+  "per_class": {
+   "clear": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "support": 7,
+    "predicted": 7
+   },
+   "drive": {
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "support": 3,
+    "predicted": 2
+   },
+   "drop": {
+    "precision": 0.5,
+    "recall": 0.5,
+    "f1": 0.5,
+    "support": 2,
+    "predicted": 2
+   },
+   "lift": {
+    "precision": 1.0,
+    "recall": 0.5,
+    "f1": 0.6667,
+    "support": 12,
+    "predicted": 6
+   },
+   "net": {
+    "precision": 0.7692,
+    "recall": 0.8333,
+    "f1": 0.8,
+    "support": 12,
+    "predicted": 13
+   },
+   "other": {
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "support": 0,
+    "predicted": 6
+   },
+   "serve": {
+    "precision": 1.0,
+    "recall": 0.75,
+    "f1": 0.8571,
+    "support": 4,
+    "predicted": 3
+   },
+   "smash": {
+    "precision": 0.8889,
+    "recall": 1.0,
+    "f1": 0.9412,
+    "support": 8,
+    "predicted": 9
+   }
+  },
+  "confusion_pairs": {
+   "lift -> other": 5,
+   "net -> drive": 2,
+   "serve -> net": 1,
+   "lift -> net": 1,
+   "drive -> drop": 1,
+   "drop -> net": 1,
+   "drive -> smash": 1,
+   "drive -> other": 1
+  }
+ },
+ "overall": {
+  "n": 44,
+  "accuracy": 0.7273,
+  "balanced_accuracy": 0.6389,
+  "macro_f1": 0.6569,
+  "top2_accuracy": 0.8864,
+  "per_class": {
+   "clear": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "support": 7,
+    "predicted": 7
+   },
+   "drive": {
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "support": 3,
+    "predicted": 2
+   },
+   "drop": {
+    "precision": 0.5,
+    "recall": 0.5,
+    "f1": 0.5,
+    "support": 2,
+    "predicted": 2
+   },
+   "lift": {
+    "precision": 1.0,
+    "recall": 0.5,
+    "f1": 0.6667,
+    "support": 12,
+    "predicted": 6
+   },
+   "net": {
+    "precision": 0.8333,
+    "recall": 0.8333,
+    "f1": 0.8333,
+    "support": 12,
+    "predicted": 12
+   },
+   "other": {
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "support": 0,
+    "predicted": 6
+   },
+   "smash": {
+    "precision": 0.8889,
+    "recall": 1.0,
+    "f1": 0.9412,
+    "support": 8,
+    "predicted": 9
+   }
+  },
+  "confusion_pairs": {
+   "lift -> other": 5,
+   "net -> drive": 2,
+   "lift -> net": 1,
+   "drive -> drop": 1,
+   "drop -> net": 1,
+   "drive -> smash": 1,
+   "drive -> other": 1
+  }
+ },
+ "by_clip": {
+  "test-video3": {
+   "n": 8,
+   "accuracy": 0.625,
+   "balanced_accuracy": 0.7083,
+   "macro_f1": 0.75,
+   "top2_accuracy": 0.875,
+   "per_class": {
+    "clear": {
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0,
+     "support": 1,
+     "predicted": 1
+    },
+    "drive": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 0,
+     "predicted": 1
+    },
+    "lift": {
+     "precision": 1.0,
+     "recall": 0.3333,
+     "f1": 0.5,
+     "support": 3,
+     "predicted": 1
+    },
+    "net": {
+     "precision": 0.5,
+     "recall": 0.5,
+     "f1": 0.5,
+     "support": 2,
+     "predicted": 2
+    },
+    "other": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 0,
+     "predicted": 1
+    },
+    "smash": {
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0,
+     "support": 2,
+     "predicted": 2
+    }
+   },
+   "confusion_pairs": {
+    "lift -> other": 1,
+    "net -> drive": 1,
+    "lift -> net": 1
+   }
+  },
+  "test-video5": {
+   "n": 36,
+   "accuracy": 0.75,
+   "balanced_accuracy": 0.6593,
+   "macro_f1": 0.6729,
+   "top2_accuracy": 0.8889,
+   "per_class": {
+    "clear": {
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0,
+     "support": 6,
+     "predicted": 6
+    },
+    "drive": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 3,
+     "predicted": 1
+    },
+    "drop": {
+     "precision": 0.5,
+     "recall": 0.5,
+     "f1": 0.5,
+     "support": 2,
+     "predicted": 2
+    },
+    "lift": {
+     "precision": 1.0,
+     "recall": 0.5556,
+     "f1": 0.7143,
+     "support": 9,
+     "predicted": 5
+    },
+    "net": {
+     "precision": 0.9,
+     "recall": 0.9,
+     "f1": 0.9,
+     "support": 10,
+     "predicted": 10
+    },
+    "other": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 0,
+     "predicted": 5
+    },
+    "smash": {
+     "precision": 0.8571,
+     "recall": 1.0,
+     "f1": 0.9231,
+     "support": 6,
+     "predicted": 7
+    }
+   },
+   "confusion_pairs": {
+    "lift -> other": 4,
+    "drive -> drop": 1,
+    "drop -> net": 1,
+    "drive -> smash": 1,
+    "net -> drive": 1,
+    "drive -> other": 1
+   }
+  }
+ },
+ "by_hitter": {
+  "far": {
+   "n": 21,
+   "accuracy": 0.8095,
+   "balanced_accuracy": 0.675,
+   "macro_f1": 0.7206,
+   "top2_accuracy": 0.9524,
+   "per_class": {
+    "clear": {
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0,
+     "support": 3,
+     "predicted": 3
+    },
+    "drive": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 1,
+     "predicted": 1
+    },
+    "drop": {
+     "precision": 1.0,
+     "recall": 0.5,
+     "f1": 0.6667,
+     "support": 2,
+     "predicted": 1
+    },
+    "lift": {
+     "precision": 1.0,
+     "recall": 0.75,
+     "f1": 0.8571,
+     "support": 4,
+     "predicted": 3
+    },
+    "net": {
+     "precision": 0.8,
+     "recall": 0.8,
+     "f1": 0.8,
+     "support": 5,
+     "predicted": 5
+    },
+    "other": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 0,
+     "predicted": 2
+    },
+    "smash": {
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0,
+     "support": 6,
+     "predicted": 6
+    }
+   },
+   "confusion_pairs": {
+    "lift -> other": 1,
+    "drop -> net": 1,
+    "net -> drive": 1,
+    "drive -> other": 1
+   }
+  },
+  "near": {
+   "n": 23,
+   "accuracy": 0.6522,
+   "balanced_accuracy": 0.6464,
+   "macro_f1": 0.6405,
+   "top2_accuracy": 0.8261,
+   "per_class": {
+    "clear": {
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0,
+     "support": 4,
+     "predicted": 4
+    },
+    "drive": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 2,
+     "predicted": 1
+    },
+    "drop": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 0,
+     "predicted": 1
+    },
+    "lift": {
+     "precision": 1.0,
+     "recall": 0.375,
+     "f1": 0.5455,
+     "support": 8,
+     "predicted": 3
+    },
+    "net": {
+     "precision": 0.8571,
+     "recall": 0.8571,
+     "f1": 0.8571,
+     "support": 7,
+     "predicted": 7
+    },
+    "other": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 0,
+     "predicted": 4
+    },
+    "smash": {
+     "precision": 0.6667,
+     "recall": 1.0,
+     "f1": 0.8,
+     "support": 2,
+     "predicted": 3
+    }
+   },
+   "confusion_pairs": {
+    "lift -> other": 4,
+    "net -> drive": 1,
+    "lift -> net": 1,
+    "drive -> drop": 1,
+    "drive -> smash": 1
+   }
+  }
+ },
+ "serve_only": {
+  "n": 4,
+  "accuracy": 0.75,
+  "balanced_accuracy": 0.75,
+  "macro_f1": 0.8571,
+  "top2_accuracy": 1.0,
+  "per_class": {
+   "net": {
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "support": 0,
+    "predicted": 1
+   },
+   "serve": {
+    "precision": 1.0,
+    "recall": 0.75,
+    "f1": 0.8571,
+    "support": 4,
+    "predicted": 3
+   }
+  },
+  "confusion_pairs": {
+   "serve -> net": 1
+  }
+ },
+ "baseline_overall": {
+  "n": 44,
+  "accuracy": 0.3409,
+  "balanced_accuracy": 0.2579,
+  "macro_f1": 0.2378,
+  "top2_accuracy": 0.3409,
+  "per_class": {
+   "clear": {
+    "precision": 0.5556,
+    "recall": 0.7143,
+    "f1": 0.625,
+    "support": 7,
+    "predicted": 9
+   },
+   "drive": {
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "support": 3,
+    "predicted": 1
+   },
+   "drop": {
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "support": 2,
+    "predicted": 1
+   },
+   "lift": {
+    "precision": 0.4211,
+    "recall": 0.6667,
+    "f1": 0.5161,
+    "support": 12,
+    "predicted": 19
+   },
+   "net": {
+    "precision": 1.0,
+    "recall": 0.1667,
+    "f1": 0.2857,
+    "support": 12,
+    "predicted": 2
+   },
+   "other": {
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "support": 0,
+    "predicted": 11
+   },
+   "serve": {
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "support": 0,
+    "predicted": 1
+   },
+   "smash": {
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "support": 8,
+    "predicted": 0
+   }
+  },
+  "confusion_pairs": {
+   "smash -> other": 8,
+   "net -> lift": 7,
+   "lift -> clear": 3,
+   "clear -> lift": 2,
+   "lift -> serve": 1,
+   "net -> drive": 1,
+   "drive -> drop": 1,
+   "net -> other": 1,
+   "drop -> lift": 1,
+   "drive -> other": 1,
+   "net -> clear": 1,
+   "drive -> lift": 1,
+   "drop -> other": 1
+  }
+ },
+ "baseline_by_clip": {
+  "test-video3": {
+   "n": 8,
+   "accuracy": 0.25,
+   "balanced_accuracy": 0.1667,
+   "macro_f1": 0.1429,
+   "top2_accuracy": 0.25,
+   "per_class": {
+    "clear": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 1,
+     "predicted": 0
+    },
+    "drive": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 0,
+     "predicted": 1
+    },
+    "lift": {
+     "precision": 0.5,
+     "recall": 0.6667,
+     "f1": 0.5714,
+     "support": 3,
+     "predicted": 4
+    },
+    "net": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 2,
+     "predicted": 0
+    },
+    "other": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 0,
+     "predicted": 2
+    },
+    "serve": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 0,
+     "predicted": 1
+    },
+    "smash": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 2,
+     "predicted": 0
+    }
+   },
+   "confusion_pairs": {
+    "smash -> other": 2,
+    "lift -> serve": 1,
+    "net -> drive": 1,
+    "clear -> lift": 1,
+    "net -> lift": 1
+   }
+  },
+  "test-video5": {
+   "n": 36,
+   "accuracy": 0.3611,
+   "balanced_accuracy": 0.2833,
+   "macro_f1": 0.25,
+   "top2_accuracy": 0.3611,
+   "per_class": {
+    "clear": {
+     "precision": 0.5556,
+     "recall": 0.8333,
+     "f1": 0.6667,
+     "support": 6,
+     "predicted": 9
+    },
+    "drive": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 3,
+     "predicted": 0
+    },
+    "drop": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 2,
+     "predicted": 1
+    },
+    "lift": {
+     "precision": 0.4,
+     "recall": 0.6667,
+     "f1": 0.5,
+     "support": 9,
+     "predicted": 15
+    },
+    "net": {
+     "precision": 1.0,
+     "recall": 0.2,
+     "f1": 0.3333,
+     "support": 10,
+     "predicted": 2
+    },
+    "other": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 0,
+     "predicted": 9
+    },
+    "smash": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 6,
+     "predicted": 0
+    }
+   },
+   "confusion_pairs": {
+    "smash -> other": 6,
+    "net -> lift": 6,
+    "lift -> clear": 3,
+    "drive -> drop": 1,
+    "net -> other": 1,
+    "clear -> lift": 1,
+    "drop -> lift": 1,
+    "drive -> other": 1,
+    "net -> clear": 1,
+    "drive -> lift": 1,
+    "drop -> other": 1
+   }
+  }
+ },
+ "baseline_note": "Phase J: hand-written badminton geometry, no learning. Its top-2 column is meaningless -- the rules make one hard decision -- and is reported only so the table lines up.",
+ "milestone1_hitter_agreement": 0.9792,
+ "predictions": [
+  {
+   "clip": "test-video3",
+   "shot_id": 0,
+   "rally": 1,
+   "hit_frame": 9,
+   "hitter": "near",
+   "true": "lift",
+   "pred": "other",
+   "top2": [
+    "other",
+    "lift"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Top_\u6bba\u7403",
+   "upstream_score": 0.2173,
+   "upstream_top3": [
+    {
+     "class": "Top_\u6bba\u7403",
+     "score": 0.2173
+    },
+    {
+     "class": "\u672a\u77e5\u7403\u7a2e",
+     "score": 0.1367
+    },
+    {
+     "class": "Bottom_\u6311\u7403",
+     "score": 0.1119
+    }
+   ],
+   "slot_agrees_with_milestone1": false,
+   "broad_scores": {
+    "other": 0.3656,
+    "lift": 0.1993,
+    "net": 0.1701,
+    "serve": 0.103,
+    "drive": 0.0592,
+    "smash": 0.0574,
+    "clear": 0.0244,
+    "drop": 0.021
+   },
+   "baseline_pred": "serve",
+   "baseline_rule": "first contact of the rally",
+   "window_seconds": 1.656,
+   "hitter_joint_coverage": 0.827,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video3",
+   "shot_id": 1,
+   "rally": 1,
+   "hit_frame": 82,
+   "hitter": "far",
+   "true": "smash",
+   "pred": "smash",
+   "top2": [
+    "smash",
+    "drop"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Top_\u6bba\u7403",
+   "upstream_score": 0.7602,
+   "upstream_top3": [
+    {
+     "class": "Top_\u6bba\u7403",
+     "score": 0.7602
+    },
+    {
+     "class": "Top_\u5207\u7403",
+     "score": 0.0886
+    },
+    {
+     "class": "Top_\u5e73\u7403",
+     "score": 0.0457
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "smash": 0.7876,
+    "drop": 0.0918,
+    "drive": 0.0473,
+    "other": 0.0315,
+    "net": 0.0229,
+    "clear": 0.0095,
+    "serve": 0.0061,
+    "lift": 0.0033
+   },
+   "baseline_pred": "other",
+   "baseline_rule": "no rule matched",
+   "window_seconds": 1.96,
+   "hitter_joint_coverage": 0.831,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video3",
+   "shot_id": 2,
+   "rally": 1,
+   "hit_frame": 109,
+   "hitter": "near",
+   "true": "net",
+   "pred": "drive",
+   "top2": [
+    "drive",
+    "net"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Bottom_\u5e73\u7403",
+   "upstream_score": 0.3869,
+   "upstream_top3": [
+    {
+     "class": "Bottom_\u5e73\u7403",
+     "score": 0.3869
+    },
+    {
+     "class": "Bottom_\u64cb\u5c0f\u7403",
+     "score": 0.199
+    },
+    {
+     "class": "Bottom_\u52fe\u7403",
+     "score": 0.1374
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "drive": 0.4073,
+    "net": 0.3755,
+    "other": 0.1328,
+    "smash": 0.0329,
+    "lift": 0.0261,
+    "drop": 0.0111,
+    "serve": 0.0077,
+    "clear": 0.0067
+   },
+   "baseline_pred": "drive",
+   "baseline_rule": "flat and fast",
+   "window_seconds": 0.98,
+   "hitter_joint_coverage": 0.807,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video3",
+   "shot_id": 3,
+   "rally": 2,
+   "hit_frame": 765,
+   "hitter": "far",
+   "true": "serve",
+   "pred": "net",
+   "top2": [
+    "net",
+    "serve"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Top_\u653e\u5c0f\u7403",
+   "upstream_score": 0.3791,
+   "upstream_top3": [
+    {
+     "class": "Top_\u653e\u5c0f\u7403",
+     "score": 0.3791
+    },
+    {
+     "class": "Top_\u767c\u77ed\u7403",
+     "score": 0.2523
+    },
+    {
+     "class": "\u672a\u77e5\u7403\u7a2e",
+     "score": 0.1293
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "net": 0.4429,
+    "serve": 0.317,
+    "other": 0.1873,
+    "lift": 0.0168,
+    "drive": 0.0107,
+    "drop": 0.0103,
+    "clear": 0.0087,
+    "smash": 0.0063
+   },
+   "baseline_pred": "serve",
+   "baseline_rule": "first contact of the rally",
+   "window_seconds": 1.555,
+   "hitter_joint_coverage": 0.942,
+   "shuttle_coverage": 0.717
+  },
+  {
+   "clip": "test-video3",
+   "shot_id": 4,
+   "rally": 2,
+   "hit_frame": 811,
+   "hitter": "near",
+   "true": "lift",
+   "pred": "lift",
+   "top2": [
+    "lift",
+    "other"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Bottom_\u6311\u7403",
+   "upstream_score": 0.5521,
+   "upstream_top3": [
+    {
+     "class": "Bottom_\u6311\u7403",
+     "score": 0.5521
+    },
+    {
+     "class": "Bottom_\u63a8\u7403",
+     "score": 0.3747
+    },
+    {
+     "class": "\u672a\u77e5\u7403\u7a2e",
+     "score": 0.0215
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "lift": 0.5648,
+    "other": 0.4077,
+    "serve": 0.0161,
+    "net": 0.0047,
+    "drop": 0.0018,
+    "drive": 0.0018,
+    "clear": 0.0016,
+    "smash": 0.0015
+   },
+   "baseline_pred": "lift",
+   "baseline_rule": "struck upward",
+   "window_seconds": 2.281,
+   "hitter_joint_coverage": 0.788,
+   "shuttle_coverage": 0.956
+  },
+  {
+   "clip": "test-video3",
+   "shot_id": 5,
+   "rally": 2,
+   "hit_frame": 884,
+   "hitter": "far",
+   "true": "clear",
+   "pred": "clear",
+   "top2": [
+    "clear",
+    "serve"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Top_\u9577\u7403",
+   "upstream_score": 0.8868,
+   "upstream_top3": [
+    {
+     "class": "Top_\u9577\u7403",
+     "score": 0.8868
+    },
+    {
+     "class": "Top_\u767c\u9577\u7403",
+     "score": 0.0245
+    },
+    {
+     "class": "Top_\u6311\u7403",
+     "score": 0.0105
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "clear": 0.9288,
+    "serve": 0.0286,
+    "net": 0.0155,
+    "lift": 0.011,
+    "other": 0.0104,
+    "smash": 0.003,
+    "drop": 0.0015,
+    "drive": 0.0013
+   },
+   "baseline_pred": "lift",
+   "baseline_rule": "struck upward",
+   "window_seconds": 2.788,
+   "hitter_joint_coverage": 0.925,
+   "shuttle_coverage": 0.663
+  },
+  {
+   "clip": "test-video3",
+   "shot_id": 6,
+   "rally": 2,
+   "hit_frame": 960,
+   "hitter": "near",
+   "true": "smash",
+   "pred": "smash",
+   "top2": [
+    "smash",
+    "drop"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Bottom_\u6bba\u7403",
+   "upstream_score": 0.6303,
+   "upstream_top3": [
+    {
+     "class": "Bottom_\u6bba\u7403",
+     "score": 0.6303
+    },
+    {
+     "class": "Bottom_\u5207\u7403",
+     "score": 0.2694
+    },
+    {
+     "class": "\u672a\u77e5\u7403\u7a2e",
+     "score": 0.0263
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "smash": 0.6649,
+    "drop": 0.2841,
+    "other": 0.0317,
+    "serve": 0.0054,
+    "net": 0.0054,
+    "clear": 0.0038,
+    "lift": 0.0031,
+    "drive": 0.0015
+   },
+   "baseline_pred": "other",
+   "baseline_rule": "no rule matched",
+   "window_seconds": 1.808,
+   "hitter_joint_coverage": 0.798,
+   "shuttle_coverage": 0.537
+  },
+  {
+   "clip": "test-video3",
+   "shot_id": 7,
+   "rally": 3,
+   "hit_frame": 1570,
+   "hitter": "near",
+   "true": "serve",
+   "pred": "serve",
+   "top2": [
+    "serve",
+    "other"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Bottom_\u767c\u77ed\u7403",
+   "upstream_score": 0.8011,
+   "upstream_top3": [
+    {
+     "class": "Bottom_\u767c\u77ed\u7403",
+     "score": 0.8011
+    },
+    {
+     "class": "\u672a\u77e5\u7403\u7a2e",
+     "score": 0.1035
+    },
+    {
+     "class": "Bottom_\u767c\u9577\u7403",
+     "score": 0.0183
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "serve": 0.8591,
+    "other": 0.1191,
+    "net": 0.0078,
+    "drop": 0.0036,
+    "drive": 0.0035,
+    "clear": 0.0025,
+    "smash": 0.0023,
+    "lift": 0.0022
+   },
+   "baseline_pred": "serve",
+   "baseline_rule": "first contact of the rally",
+   "window_seconds": 1.639,
+   "hitter_joint_coverage": 0.759,
+   "shuttle_coverage": 0.776
+  },
+  {
+   "clip": "test-video3",
+   "shot_id": 8,
+   "rally": 3,
+   "hit_frame": 1621,
+   "hitter": "far",
+   "true": "net",
+   "pred": "net",
+   "top2": [
+    "net",
+    "other"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Top_\u653e\u5c0f\u7403",
+   "upstream_score": 0.3133,
+   "upstream_top3": [
+    {
+     "class": "Top_\u653e\u5c0f\u7403",
+     "score": 0.3133
+    },
+    {
+     "class": "Top_\u63a8\u7403",
+     "score": 0.11
+    },
+    {
+     "class": "Top_\u6311\u7403",
+     "score": 0.1023
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "net": 0.4383,
+    "other": 0.2309,
+    "lift": 0.1386,
+    "serve": 0.0717,
+    "smash": 0.0427,
+    "drive": 0.0405,
+    "drop": 0.0227,
+    "clear": 0.0145
+   },
+   "baseline_pred": "lift",
+   "baseline_rule": "struck upward",
+   "window_seconds": 2.011,
+   "hitter_joint_coverage": 0.988,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video3",
+   "shot_id": 9,
+   "rally": 3,
+   "hit_frame": 1673,
+   "hitter": "near",
+   "true": "lift",
+   "pred": "net",
+   "top2": [
+    "net",
+    "other"
+   ],
+   "top2_hit": false,
+   "upstream_prediction": "Bottom_\u653e\u5c0f\u7403",
+   "upstream_score": 0.2276,
+   "upstream_top3": [
+    {
+     "class": "Bottom_\u653e\u5c0f\u7403",
+     "score": 0.2276
+    },
+    {
+     "class": "Bottom_\u63a8\u7403",
+     "score": 0.1874
+    },
+    {
+     "class": "Bottom_\u6311\u7403",
+     "score": 0.1791
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "net": 0.2814,
+    "other": 0.2761,
+    "lift": 0.1982,
+    "drop": 0.0783,
+    "clear": 0.0588,
+    "drive": 0.0576,
+    "smash": 0.0273,
+    "serve": 0.0223
+   },
+   "baseline_pred": "lift",
+   "baseline_rule": "struck upward",
+   "window_seconds": 1.403,
+   "hitter_joint_coverage": 0.835,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 0,
+   "rally": 2,
+   "hit_frame": 1674,
+   "hitter": "near",
+   "true": "serve",
+   "pred": "serve",
+   "top2": [
+    "serve",
+    "other"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Bottom_\u767c\u77ed\u7403",
+   "upstream_score": 0.7519,
+   "upstream_top3": [
+    {
+     "class": "Bottom_\u767c\u77ed\u7403",
+     "score": 0.7519
+    },
+    {
+     "class": "\u672a\u77e5\u7403\u7a2e",
+     "score": 0.1627
+    },
+    {
+     "class": "Bottom_\u767c\u9577\u7403",
+     "score": 0.0138
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "serve": 0.7958,
+    "other": 0.1749,
+    "drop": 0.0088,
+    "net": 0.0077,
+    "drive": 0.0042,
+    "smash": 0.0034,
+    "lift": 0.0033,
+    "clear": 0.0019
+   },
+   "baseline_pred": "serve",
+   "baseline_rule": "first contact of the rally",
+   "window_seconds": 1.481,
+   "hitter_joint_coverage": 0.803,
+   "shuttle_coverage": 0.818
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 1,
+   "rally": 2,
+   "hit_frame": 1698,
+   "hitter": "far",
+   "true": "lift",
+   "pred": "other",
+   "top2": [
+    "other",
+    "lift"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Top_\u6311\u7403",
+   "upstream_score": 0.3989,
+   "upstream_top3": [
+    {
+     "class": "Top_\u6311\u7403",
+     "score": 0.3989
+    },
+    {
+     "class": "Top_\u63a8\u7403",
+     "score": 0.3751
+    },
+    {
+     "class": "\u672a\u77e5\u7403\u7a2e",
+     "score": 0.023
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "other": 0.4451,
+    "lift": 0.4363,
+    "net": 0.034,
+    "serve": 0.0258,
+    "drop": 0.0185,
+    "drive": 0.0165,
+    "smash": 0.012,
+    "clear": 0.0117
+   },
+   "baseline_pred": "lift",
+   "baseline_rule": "struck upward from the forecourt and lands deep",
+   "window_seconds": 2.103,
+   "hitter_joint_coverage": 0.999,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 2,
+   "rally": 2,
+   "hit_frame": 1736,
+   "hitter": "near",
+   "true": "drive",
+   "pred": "drop",
+   "top2": [
+    "drop",
+    "smash"
+   ],
+   "top2_hit": false,
+   "upstream_prediction": "Bottom_\u5207\u7403",
+   "upstream_score": 0.8969,
+   "upstream_top3": [
+    {
+     "class": "Bottom_\u5207\u7403",
+     "score": 0.8969
+    },
+    {
+     "class": "Bottom_\u6bba\u7403",
+     "score": 0.0455
+    },
+    {
+     "class": "Bottom_\u5e73\u7403",
+     "score": 0.0121
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "drop": 0.9159,
+    "smash": 0.0464,
+    "drive": 0.0123,
+    "net": 0.009,
+    "other": 0.007,
+    "serve": 0.0038,
+    "clear": 0.003,
+    "lift": 0.0025
+   },
+   "baseline_pred": "drop",
+   "baseline_rule": "struck downward and lands short",
+   "window_seconds": 2.103,
+   "hitter_joint_coverage": 0.82,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 3,
+   "rally": 2,
+   "hit_frame": 1760,
+   "hitter": "far",
+   "true": "net",
+   "pred": "net",
+   "top2": [
+    "net",
+    "other"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Top_\u52fe\u7403",
+   "upstream_score": 0.5913,
+   "upstream_top3": [
+    {
+     "class": "Top_\u52fe\u7403",
+     "score": 0.5913
+    },
+    {
+     "class": "Top_\u64cb\u5c0f\u7403",
+     "score": 0.1867
+    },
+    {
+     "class": "Top_\u653e\u5c0f\u7403",
+     "score": 0.0583
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "net": 0.8748,
+    "other": 0.0668,
+    "drive": 0.023,
+    "smash": 0.0136,
+    "drop": 0.0089,
+    "serve": 0.0061,
+    "clear": 0.0048,
+    "lift": 0.002
+   },
+   "baseline_pred": "other",
+   "baseline_rule": "no rule matched",
+   "window_seconds": 1.629,
+   "hitter_joint_coverage": 0.966,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 4,
+   "rally": 2,
+   "hit_frame": 1782,
+   "hitter": "near",
+   "true": "lift",
+   "pred": "lift",
+   "top2": [
+    "lift",
+    "other"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Bottom_\u6311\u7403",
+   "upstream_score": 0.9419,
+   "upstream_top3": [
+    {
+     "class": "Bottom_\u6311\u7403",
+     "score": 0.9419
+    },
+    {
+     "class": "Bottom_\u63a8\u7403",
+     "score": 0.0131
+    },
+    {
+     "class": "\u672a\u77e5\u7403\u7a2e",
+     "score": 0.0047
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "lift": 0.9592,
+    "other": 0.021,
+    "net": 0.0072,
+    "serve": 0.004,
+    "clear": 0.0038,
+    "smash": 0.0019,
+    "drive": 0.0019,
+    "drop": 0.0012
+   },
+   "baseline_pred": "clear",
+   "baseline_rule": "struck upward and lands deep",
+   "window_seconds": 2.429,
+   "hitter_joint_coverage": 0.81,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 5,
+   "rally": 2,
+   "hit_frame": 1835,
+   "hitter": "far",
+   "true": "smash",
+   "pred": "smash",
+   "top2": [
+    "smash",
+    "drop"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Top_\u6bba\u7403",
+   "upstream_score": 0.7676,
+   "upstream_top3": [
+    {
+     "class": "Top_\u6bba\u7403",
+     "score": 0.7676
+    },
+    {
+     "class": "Top_\u5207\u7403",
+     "score": 0.0824
+    },
+    {
+     "class": "Bottom_\u6bba\u7403",
+     "score": 0.0119
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "smash": 0.8316,
+    "drop": 0.0893,
+    "net": 0.0214,
+    "other": 0.0194,
+    "clear": 0.0125,
+    "serve": 0.0107,
+    "drive": 0.0097,
+    "lift": 0.0054
+   },
+   "baseline_pred": "other",
+   "baseline_rule": "no rule matched",
+   "window_seconds": 2.252,
+   "hitter_joint_coverage": 0.978,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 6,
+   "rally": 2,
+   "hit_frame": 1851,
+   "hitter": "near",
+   "true": "net",
+   "pred": "net",
+   "top2": [
+    "net",
+    "drive"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Bottom_\u52fe\u7403",
+   "upstream_score": 0.6667,
+   "upstream_top3": [
+    {
+     "class": "Bottom_\u52fe\u7403",
+     "score": 0.6667
+    },
+    {
+     "class": "Bottom_\u64cb\u5c0f\u7403",
+     "score": 0.1817
+    },
+    {
+     "class": "Bottom_\u5e73\u7403",
+     "score": 0.0546
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "net": 0.8984,
+    "drive": 0.0562,
+    "other": 0.0132,
+    "lift": 0.0092,
+    "drop": 0.0072,
+    "smash": 0.0061,
+    "serve": 0.0057,
+    "clear": 0.004
+   },
+   "baseline_pred": "lift",
+   "baseline_rule": "struck upward",
+   "window_seconds": 1.896,
+   "hitter_joint_coverage": 0.803,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 7,
+   "rally": 2,
+   "hit_frame": 1890,
+   "hitter": "far",
+   "true": "lift",
+   "pred": "lift",
+   "top2": [
+    "lift",
+    "other"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Top_\u6311\u7403",
+   "upstream_score": 0.3971,
+   "upstream_top3": [
+    {
+     "class": "Top_\u6311\u7403",
+     "score": 0.3971
+    },
+    {
+     "class": "Top_\u63a8\u7403",
+     "score": 0.084
+    },
+    {
+     "class": "Bottom_\u5e73\u7403",
+     "score": 0.0839
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "lift": 0.5803,
+    "other": 0.2028,
+    "clear": 0.0585,
+    "drive": 0.0465,
+    "net": 0.0419,
+    "smash": 0.0382,
+    "serve": 0.0173,
+    "drop": 0.0145
+   },
+   "baseline_pred": "clear",
+   "baseline_rule": "struck upward and lands deep",
+   "window_seconds": 2.252,
+   "hitter_joint_coverage": 0.631,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 8,
+   "rally": 2,
+   "hit_frame": 1918,
+   "hitter": "near",
+   "true": "clear",
+   "pred": "clear",
+   "top2": [
+    "clear",
+    "lift"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Bottom_\u9577\u7403",
+   "upstream_score": 0.9204,
+   "upstream_top3": [
+    {
+     "class": "Bottom_\u9577\u7403",
+     "score": 0.9204
+    },
+    {
+     "class": "Bottom_\u6311\u7403",
+     "score": 0.0235
+    },
+    {
+     "class": "Bottom_\u63a8\u7403",
+     "score": 0.0086
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "clear": 0.9414,
+    "lift": 0.024,
+    "other": 0.0144,
+    "drive": 0.0069,
+    "net": 0.0059,
+    "serve": 0.0052,
+    "drop": 0.0016,
+    "smash": 0.0007
+   },
+   "baseline_pred": "lift",
+   "baseline_rule": "struck upward",
+   "window_seconds": 2.577,
+   "hitter_joint_coverage": 0.84,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 9,
+   "rally": 2,
+   "hit_frame": 1968,
+   "hitter": "far",
+   "true": "smash",
+   "pred": "smash",
+   "top2": [
+    "smash",
+    "drive"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Top_\u6bba\u7403",
+   "upstream_score": 0.8672,
+   "upstream_top3": [
+    {
+     "class": "Top_\u6bba\u7403",
+     "score": 0.8672
+    },
+    {
+     "class": "Top_\u5e73\u7403",
+     "score": 0.0191
+    },
+    {
+     "class": "Top_\u5207\u7403",
+     "score": 0.0135
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "smash": 0.929,
+    "drive": 0.0205,
+    "drop": 0.0145,
+    "net": 0.0114,
+    "serve": 0.0099,
+    "other": 0.0091,
+    "clear": 0.003,
+    "lift": 0.0025
+   },
+   "baseline_pred": "other",
+   "baseline_rule": "no rule matched",
+   "window_seconds": 2.192,
+   "hitter_joint_coverage": 0.872,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 10,
+   "rally": 2,
+   "hit_frame": 1983,
+   "hitter": "near",
+   "true": "lift",
+   "pred": "lift",
+   "top2": [
+    "lift",
+    "drive"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Bottom_\u6311\u7403",
+   "upstream_score": 0.6292,
+   "upstream_top3": [
+    {
+     "class": "Bottom_\u6311\u7403",
+     "score": 0.6292
+    },
+    {
+     "class": "Bottom_\u5e73\u7403",
+     "score": 0.2722
+    },
+    {
+     "class": "Bottom_\u64cb\u5c0f\u7403",
+     "score": 0.0416
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "lift": 0.641,
+    "drive": 0.2773,
+    "net": 0.0468,
+    "other": 0.021,
+    "clear": 0.0061,
+    "serve": 0.0042,
+    "smash": 0.0028,
+    "drop": 0.0008
+   },
+   "baseline_pred": "lift",
+   "baseline_rule": "struck upward",
+   "window_seconds": 1.689,
+   "hitter_joint_coverage": 0.834,
+   "shuttle_coverage": 0.92
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 11,
+   "rally": 2,
+   "hit_frame": 2016,
+   "hitter": "far",
+   "true": "smash",
+   "pred": "smash",
+   "top2": [
+    "smash",
+    "drop"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Top_\u6bba\u7403",
+   "upstream_score": 0.9169,
+   "upstream_top3": [
+    {
+     "class": "Top_\u6bba\u7403",
+     "score": 0.9169
+    },
+    {
+     "class": "Top_\u5207\u7403",
+     "score": 0.0344
+    },
+    {
+     "class": "Bottom_\u5e73\u7403",
+     "score": 0.0044
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "smash": 0.9421,
+    "drop": 0.0353,
+    "net": 0.0074,
+    "other": 0.0047,
+    "serve": 0.0038,
+    "drive": 0.0036,
+    "lift": 0.0016,
+    "clear": 0.0014
+   },
+   "baseline_pred": "other",
+   "baseline_rule": "no rule matched",
+   "window_seconds": 1.718,
+   "hitter_joint_coverage": 0.89,
+   "shuttle_coverage": 0.941
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 12,
+   "rally": 2,
+   "hit_frame": 2032,
+   "hitter": "near",
+   "true": "net",
+   "pred": "net",
+   "top2": [
+    "net",
+    "drive"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Bottom_\u64cb\u5c0f\u7403",
+   "upstream_score": 0.8544,
+   "upstream_top3": [
+    {
+     "class": "Bottom_\u64cb\u5c0f\u7403",
+     "score": 0.8544
+    },
+    {
+     "class": "Bottom_\u653e\u5c0f\u7403",
+     "score": 0.0929
+    },
+    {
+     "class": "Bottom_\u52fe\u7403",
+     "score": 0.0108
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "net": 0.9768,
+    "drive": 0.0076,
+    "drop": 0.0044,
+    "other": 0.0033,
+    "smash": 0.0026,
+    "serve": 0.0024,
+    "clear": 0.0018,
+    "lift": 0.0011
+   },
+   "baseline_pred": "lift",
+   "baseline_rule": "struck upward",
+   "window_seconds": 1.6,
+   "hitter_joint_coverage": 0.815,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 13,
+   "rally": 2,
+   "hit_frame": 2061,
+   "hitter": "far",
+   "true": "net",
+   "pred": "net",
+   "top2": [
+    "net",
+    "other"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Top_\u52fe\u7403",
+   "upstream_score": 0.8541,
+   "upstream_top3": [
+    {
+     "class": "Top_\u52fe\u7403",
+     "score": 0.8541
+    },
+    {
+     "class": "Top_\u653e\u5c0f\u7403",
+     "score": 0.1026
+    },
+    {
+     "class": "Top_\u64cb\u5c0f\u7403",
+     "score": 0.0041
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "net": 0.9794,
+    "other": 0.0095,
+    "lift": 0.0023,
+    "clear": 0.0022,
+    "serve": 0.0021,
+    "smash": 0.0019,
+    "drive": 0.0018,
+    "drop": 0.0007
+   },
+   "baseline_pred": "lift",
+   "baseline_rule": "struck upward",
+   "window_seconds": 1.985,
+   "hitter_joint_coverage": 0.967,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 14,
+   "rally": 2,
+   "hit_frame": 2090,
+   "hitter": "near",
+   "true": "lift",
+   "pred": "other",
+   "top2": [
+    "other",
+    "net"
+   ],
+   "top2_hit": false,
+   "upstream_prediction": "Bottom_\u63a8\u7403",
+   "upstream_score": 0.3361,
+   "upstream_top3": [
+    {
+     "class": "Bottom_\u63a8\u7403",
+     "score": 0.3361
+    },
+    {
+     "class": "Bottom_\u6311\u7403",
+     "score": 0.2376
+    },
+    {
+     "class": "Bottom_\u653e\u5c0f\u7403",
+     "score": 0.2306
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "other": 0.4077,
+    "net": 0.2754,
+    "lift": 0.2504,
+    "drive": 0.0412,
+    "serve": 0.01,
+    "smash": 0.0071,
+    "clear": 0.0042,
+    "drop": 0.0041
+   },
+   "baseline_pred": "lift",
+   "baseline_rule": "struck upward from the forecourt and lands deep",
+   "window_seconds": 1.866,
+   "hitter_joint_coverage": 0.8,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 15,
+   "rally": 2,
+   "hit_frame": 2115,
+   "hitter": "far",
+   "true": "drop",
+   "pred": "net",
+   "top2": [
+    "net",
+    "drop"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Top_\u5207\u7403",
+   "upstream_score": 0.2707,
+   "upstream_top3": [
+    {
+     "class": "Top_\u5207\u7403",
+     "score": 0.2707
+    },
+    {
+     "class": "Top_\u52fe\u7403",
+     "score": 0.2656
+    },
+    {
+     "class": "Top_\u64cb\u5c0f\u7403",
+     "score": 0.099
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "net": 0.4983,
+    "drop": 0.3119,
+    "serve": 0.0535,
+    "other": 0.0488,
+    "clear": 0.0292,
+    "lift": 0.0244,
+    "smash": 0.0224,
+    "drive": 0.0115
+   },
+   "baseline_pred": "lift",
+   "baseline_rule": "struck upward",
+   "window_seconds": 2.044,
+   "hitter_joint_coverage": 0.907,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 16,
+   "rally": 2,
+   "hit_frame": 2150,
+   "hitter": "near",
+   "true": "lift",
+   "pred": "other",
+   "top2": [
+    "other",
+    "lift"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Bottom_\u63a8\u7403",
+   "upstream_score": 0.7101,
+   "upstream_top3": [
+    {
+     "class": "Bottom_\u63a8\u7403",
+     "score": 0.7101
+    },
+    {
+     "class": "Bottom_\u6311\u7403",
+     "score": 0.2217
+    },
+    {
+     "class": "Bottom_\u64b2\u7403",
+     "score": 0.0112
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "other": 0.7497,
+    "lift": 0.2277,
+    "net": 0.007,
+    "serve": 0.0069,
+    "drive": 0.0028,
+    "clear": 0.0021,
+    "smash": 0.002,
+    "drop": 0.0017
+   },
+   "baseline_pred": "lift",
+   "baseline_rule": "struck upward from the forecourt and lands deep",
+   "window_seconds": 2.192,
+   "hitter_joint_coverage": 0.806,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 17,
+   "rally": 2,
+   "hit_frame": 2180,
+   "hitter": "far",
+   "true": "clear",
+   "pred": "clear",
+   "top2": [
+    "clear",
+    "net"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Top_\u9577\u7403",
+   "upstream_score": 0.8372,
+   "upstream_top3": [
+    {
+     "class": "Top_\u9577\u7403",
+     "score": 0.8372
+    },
+    {
+     "class": "Top_\u6311\u7403",
+     "score": 0.018
+    },
+    {
+     "class": "Bottom_\u63a8\u7403",
+     "score": 0.0172
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "clear": 0.894,
+    "net": 0.0199,
+    "lift": 0.0192,
+    "drop": 0.0173,
+    "other": 0.0158,
+    "smash": 0.0156,
+    "serve": 0.0109,
+    "drive": 0.0074
+   },
+   "baseline_pred": "clear",
+   "baseline_rule": "struck upward and lands deep",
+   "window_seconds": 2.311,
+   "hitter_joint_coverage": 0.98,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 18,
+   "rally": 2,
+   "hit_frame": 2219,
+   "hitter": "near",
+   "true": "drive",
+   "pred": "smash",
+   "top2": [
+    "smash",
+    "drop"
+   ],
+   "top2_hit": false,
+   "upstream_prediction": "Bottom_\u6bba\u7403",
+   "upstream_score": 0.8238,
+   "upstream_top3": [
+    {
+     "class": "Bottom_\u6bba\u7403",
+     "score": 0.8238
+    },
+    {
+     "class": "Bottom_\u5207\u7403",
+     "score": 0.0408
+    },
+    {
+     "class": "Bottom_\u5e73\u7403",
+     "score": 0.0227
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "smash": 0.8641,
+    "drop": 0.0427,
+    "other": 0.0302,
+    "drive": 0.0238,
+    "net": 0.0191,
+    "serve": 0.0106,
+    "lift": 0.0049,
+    "clear": 0.0047
+   },
+   "baseline_pred": "other",
+   "baseline_rule": "no rule matched",
+   "window_seconds": 1.926,
+   "hitter_joint_coverage": 0.824,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 19,
+   "rally": 2,
+   "hit_frame": 2236,
+   "hitter": "far",
+   "true": "net",
+   "pred": "drive",
+   "top2": [
+    "drive",
+    "net"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Top_\u5e73\u7403",
+   "upstream_score": 0.6005,
+   "upstream_top3": [
+    {
+     "class": "Top_\u5e73\u7403",
+     "score": 0.6005
+    },
+    {
+     "class": "Top_\u64cb\u5c0f\u7403",
+     "score": 0.0956
+    },
+    {
+     "class": "Top_\u63a8\u7403",
+     "score": 0.0768
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "drive": 0.6316,
+    "net": 0.1631,
+    "other": 0.1404,
+    "lift": 0.0191,
+    "smash": 0.0187,
+    "clear": 0.012,
+    "drop": 0.0097,
+    "serve": 0.0054
+   },
+   "baseline_pred": "clear",
+   "baseline_rule": "struck upward and lands deep",
+   "window_seconds": 1.452,
+   "hitter_joint_coverage": 0.791,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 20,
+   "rally": 2,
+   "hit_frame": 2259,
+   "hitter": "near",
+   "true": "net",
+   "pred": "net",
+   "top2": [
+    "net",
+    "drop"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Bottom_\u64cb\u5c0f\u7403",
+   "upstream_score": 0.5943,
+   "upstream_top3": [
+    {
+     "class": "Bottom_\u64cb\u5c0f\u7403",
+     "score": 0.5943
+    },
+    {
+     "class": "Bottom_\u653e\u5c0f\u7403",
+     "score": 0.2268
+    },
+    {
+     "class": "Bottom_\u5207\u7403",
+     "score": 0.057
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "net": 0.8651,
+    "drop": 0.0593,
+    "drive": 0.0318,
+    "other": 0.0157,
+    "smash": 0.0114,
+    "serve": 0.0062,
+    "clear": 0.0062,
+    "lift": 0.0043
+   },
+   "baseline_pred": "lift",
+   "baseline_rule": "struck upward",
+   "window_seconds": 1.718,
+   "hitter_joint_coverage": 0.83,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 21,
+   "rally": 2,
+   "hit_frame": 2285,
+   "hitter": "far",
+   "true": "lift",
+   "pred": "lift",
+   "top2": [
+    "lift",
+    "other"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Top_\u6311\u7403",
+   "upstream_score": 0.8355,
+   "upstream_top3": [
+    {
+     "class": "Top_\u6311\u7403",
+     "score": 0.8355
+    },
+    {
+     "class": "\u672a\u77e5\u7403\u7a2e",
+     "score": 0.0376
+    },
+    {
+     "class": "Top_\u9577\u7403",
+     "score": 0.0313
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "lift": 0.8892,
+    "other": 0.0455,
+    "clear": 0.0333,
+    "net": 0.0125,
+    "serve": 0.0096,
+    "drop": 0.004,
+    "smash": 0.0032,
+    "drive": 0.0027
+   },
+   "baseline_pred": "clear",
+   "baseline_rule": "struck upward and lands deep",
+   "window_seconds": 2.518,
+   "hitter_joint_coverage": 0.403,
+   "shuttle_coverage": 0.893
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 22,
+   "rally": 2,
+   "hit_frame": 2335,
+   "hitter": "near",
+   "true": "clear",
+   "pred": "clear",
+   "top2": [
+    "clear",
+    "other"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Bottom_\u9577\u7403",
+   "upstream_score": 0.8406,
+   "upstream_top3": [
+    {
+     "class": "Bottom_\u9577\u7403",
+     "score": 0.8406
+    },
+    {
+     "class": "Bottom_\u6bba\u7403",
+     "score": 0.0168
+    },
+    {
+     "class": "\u672a\u77e5\u7403\u7a2e",
+     "score": 0.0152
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "clear": 0.905,
+    "other": 0.0358,
+    "smash": 0.0181,
+    "serve": 0.0146,
+    "net": 0.0137,
+    "drop": 0.0052,
+    "lift": 0.0041,
+    "drive": 0.0034
+   },
+   "baseline_pred": "clear",
+   "baseline_rule": "struck upward and lands deep",
+   "window_seconds": 2.785,
+   "hitter_joint_coverage": 0.85,
+   "shuttle_coverage": 0.904
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 23,
+   "rally": 2,
+   "hit_frame": 2370,
+   "hitter": "far",
+   "true": "smash",
+   "pred": "smash",
+   "top2": [
+    "smash",
+    "drop"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Top_\u6bba\u7403",
+   "upstream_score": 0.8965,
+   "upstream_top3": [
+    {
+     "class": "Top_\u6bba\u7403",
+     "score": 0.8965
+    },
+    {
+     "class": "Top_\u5207\u7403",
+     "score": 0.0293
+    },
+    {
+     "class": "Top_\u5e73\u7403",
+     "score": 0.0111
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "smash": 0.9255,
+    "drop": 0.0303,
+    "drive": 0.0115,
+    "serve": 0.0106,
+    "net": 0.0106,
+    "other": 0.006,
+    "clear": 0.0039,
+    "lift": 0.0017
+   },
+   "baseline_pred": "other",
+   "baseline_rule": "no rule matched",
+   "window_seconds": 1.748,
+   "hitter_joint_coverage": 0.941,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 24,
+   "rally": 2,
+   "hit_frame": 2385,
+   "hitter": "near",
+   "true": "net",
+   "pred": "net",
+   "top2": [
+    "net",
+    "drive"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Bottom_\u52fe\u7403",
+   "upstream_score": 0.8815,
+   "upstream_top3": [
+    {
+     "class": "Bottom_\u52fe\u7403",
+     "score": 0.8815
+    },
+    {
+     "class": "Bottom_\u64cb\u5c0f\u7403",
+     "score": 0.031
+    },
+    {
+     "class": "Bottom_\u5e73\u7403",
+     "score": 0.0226
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "net": 0.9449,
+    "drive": 0.023,
+    "other": 0.0094,
+    "drop": 0.007,
+    "lift": 0.0053,
+    "serve": 0.0042,
+    "smash": 0.004,
+    "clear": 0.0023
+   },
+   "baseline_pred": "lift",
+   "baseline_rule": "struck upward",
+   "window_seconds": 1.718,
+   "hitter_joint_coverage": 0.819,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 25,
+   "rally": 2,
+   "hit_frame": 2419,
+   "hitter": "far",
+   "true": "lift",
+   "pred": "lift",
+   "top2": [
+    "lift",
+    "other"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Top_\u6311\u7403",
+   "upstream_score": 0.9364,
+   "upstream_top3": [
+    {
+     "class": "Top_\u6311\u7403",
+     "score": 0.9364
+    },
+    {
+     "class": "\u672a\u77e5\u7403\u7a2e",
+     "score": 0.0076
+    },
+    {
+     "class": "Bottom_\u9577\u7403",
+     "score": 0.0059
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "lift": 0.9704,
+    "other": 0.0144,
+    "net": 0.0059,
+    "serve": 0.0029,
+    "drop": 0.0019,
+    "drive": 0.0018,
+    "smash": 0.0016,
+    "clear": 0.0011
+   },
+   "baseline_pred": "lift",
+   "baseline_rule": "struck upward from the forecourt and lands deep",
+   "window_seconds": 2.163,
+   "hitter_joint_coverage": 0.995,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 26,
+   "rally": 2,
+   "hit_frame": 2449,
+   "hitter": "near",
+   "true": "smash",
+   "pred": "smash",
+   "top2": [
+    "smash",
+    "other"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Bottom_\u6bba\u7403",
+   "upstream_score": 0.9726,
+   "upstream_top3": [
+    {
+     "class": "Bottom_\u6bba\u7403",
+     "score": 0.9726
+    },
+    {
+     "class": "Bottom_\u64b2\u7403",
+     "score": 0.0056
+    },
+    {
+     "class": "Bottom_\u5207\u7403",
+     "score": 0.0049
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "smash": 0.9802,
+    "other": 0.0078,
+    "drop": 0.005,
+    "net": 0.0021,
+    "clear": 0.0019,
+    "serve": 0.0017,
+    "drive": 0.0008,
+    "lift": 0.0005
+   },
+   "baseline_pred": "other",
+   "baseline_rule": "no rule matched",
+   "window_seconds": 1.422,
+   "hitter_joint_coverage": 0.8,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 27,
+   "rally": 4,
+   "hit_frame": 3509,
+   "hitter": "far",
+   "true": "serve",
+   "pred": "serve",
+   "top2": [
+    "serve",
+    "other"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Top_\u767c\u77ed\u7403",
+   "upstream_score": 0.9289,
+   "upstream_top3": [
+    {
+     "class": "Top_\u767c\u77ed\u7403",
+     "score": 0.9289
+    },
+    {
+     "class": "\u672a\u77e5\u7403\u7a2e",
+     "score": 0.0382
+    },
+    {
+     "class": "Top_\u767c\u9577\u7403",
+     "score": 0.0069
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "serve": 0.9471,
+    "other": 0.042,
+    "net": 0.0046,
+    "drive": 0.0021,
+    "clear": 0.0012,
+    "lift": 0.0012,
+    "smash": 0.0011,
+    "drop": 0.0007
+   },
+   "baseline_pred": "serve",
+   "baseline_rule": "first contact of the rally",
+   "window_seconds": 1.57,
+   "hitter_joint_coverage": 0.962,
+   "shuttle_coverage": 0.851
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 28,
+   "rally": 4,
+   "hit_frame": 3536,
+   "hitter": "near",
+   "true": "net",
+   "pred": "net",
+   "top2": [
+    "net",
+    "other"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Bottom_\u653e\u5c0f\u7403",
+   "upstream_score": 0.8358,
+   "upstream_top3": [
+    {
+     "class": "Bottom_\u653e\u5c0f\u7403",
+     "score": 0.8358
+    },
+    {
+     "class": "\u672a\u77e5\u7403\u7a2e",
+     "score": 0.021
+    },
+    {
+     "class": "Bottom_\u6311\u7403",
+     "score": 0.0165
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "net": 0.8902,
+    "other": 0.036,
+    "lift": 0.0172,
+    "drop": 0.015,
+    "smash": 0.0146,
+    "serve": 0.0122,
+    "drive": 0.0091,
+    "clear": 0.0058
+   },
+   "baseline_pred": "net",
+   "baseline_rule": "played in the forecourt, stays in the forecourt, slow",
+   "window_seconds": 2.015,
+   "hitter_joint_coverage": 0.795,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 29,
+   "rally": 4,
+   "hit_frame": 3568,
+   "hitter": "far",
+   "true": "drive",
+   "pred": "other",
+   "top2": [
+    "other",
+    "lift"
+   ],
+   "top2_hit": false,
+   "upstream_prediction": "Top_\u63a8\u7403",
+   "upstream_score": 0.5214,
+   "upstream_top3": [
+    {
+     "class": "Top_\u63a8\u7403",
+     "score": 0.5214
+    },
+    {
+     "class": "Top_\u6311\u7403",
+     "score": 0.1422
+    },
+    {
+     "class": "Top_\u64b2\u7403",
+     "score": 0.05
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "other": 0.6587,
+    "lift": 0.1614,
+    "net": 0.0634,
+    "clear": 0.0322,
+    "serve": 0.0247,
+    "drop": 0.0223,
+    "drive": 0.0207,
+    "smash": 0.0166
+   },
+   "baseline_pred": "lift",
+   "baseline_rule": "struck upward from the forecourt and lands deep",
+   "window_seconds": 2.548,
+   "hitter_joint_coverage": 0.961,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 30,
+   "rally": 4,
+   "hit_frame": 3613,
+   "hitter": "near",
+   "true": "clear",
+   "pred": "clear",
+   "top2": [
+    "clear",
+    "other"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Bottom_\u9577\u7403",
+   "upstream_score": 0.9017,
+   "upstream_top3": [
+    {
+     "class": "Bottom_\u9577\u7403",
+     "score": 0.9017
+    },
+    {
+     "class": "Bottom_\u63a8\u7403",
+     "score": 0.0244
+    },
+    {
+     "class": "Bottom_\u5e73\u7403",
+     "score": 0.0195
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "clear": 0.9242,
+    "other": 0.0298,
+    "drive": 0.02,
+    "lift": 0.0148,
+    "net": 0.0051,
+    "serve": 0.0036,
+    "drop": 0.0016,
+    "smash": 0.0008
+   },
+   "baseline_pred": "clear",
+   "baseline_rule": "struck upward and lands deep",
+   "window_seconds": 2.992,
+   "hitter_joint_coverage": 0.859,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 31,
+   "rally": 4,
+   "hit_frame": 3660,
+   "hitter": "far",
+   "true": "clear",
+   "pred": "clear",
+   "top2": [
+    "clear",
+    "net"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Top_\u9577\u7403",
+   "upstream_score": 0.9141,
+   "upstream_top3": [
+    {
+     "class": "Top_\u9577\u7403",
+     "score": 0.9141
+    },
+    {
+     "class": "Bottom_\u63a8\u7403",
+     "score": 0.0099
+    },
+    {
+     "class": "Top_\u5207\u7403",
+     "score": 0.0064
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "clear": 0.9523,
+    "net": 0.0106,
+    "other": 0.0101,
+    "serve": 0.0073,
+    "drop": 0.0067,
+    "lift": 0.0057,
+    "smash": 0.0044,
+    "drive": 0.003
+   },
+   "baseline_pred": "clear",
+   "baseline_rule": "struck upward and lands deep",
+   "window_seconds": 2.785,
+   "hitter_joint_coverage": 0.943,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 32,
+   "rally": 4,
+   "hit_frame": 3698,
+   "hitter": "near",
+   "true": "clear",
+   "pred": "clear",
+   "top2": [
+    "clear",
+    "other"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Bottom_\u9577\u7403",
+   "upstream_score": 0.776,
+   "upstream_top3": [
+    {
+     "class": "Bottom_\u9577\u7403",
+     "score": 0.776
+    },
+    {
+     "class": "Top_\u6bba\u7403",
+     "score": 0.0282
+    },
+    {
+     "class": "Bottom_\u5e73\u7403",
+     "score": 0.0196
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "clear": 0.8597,
+    "other": 0.0377,
+    "net": 0.0226,
+    "drive": 0.0217,
+    "drop": 0.0188,
+    "serve": 0.0172,
+    "lift": 0.0126,
+    "smash": 0.0099
+   },
+   "baseline_pred": "clear",
+   "baseline_rule": "struck upward and lands deep",
+   "window_seconds": 2.311,
+   "hitter_joint_coverage": 0.831,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 33,
+   "rally": 4,
+   "hit_frame": 3729,
+   "hitter": "far",
+   "true": "smash",
+   "pred": "smash",
+   "top2": [
+    "smash",
+    "drop"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Top_\u6bba\u7403",
+   "upstream_score": 0.9098,
+   "upstream_top3": [
+    {
+     "class": "Top_\u6bba\u7403",
+     "score": 0.9098
+    },
+    {
+     "class": "Top_\u5207\u7403",
+     "score": 0.0203
+    },
+    {
+     "class": "Top_\u5e73\u7403",
+     "score": 0.0173
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "smash": 0.9341,
+    "drop": 0.0209,
+    "drive": 0.0177,
+    "net": 0.0104,
+    "other": 0.0068,
+    "serve": 0.0058,
+    "clear": 0.0029,
+    "lift": 0.0013
+   },
+   "baseline_pred": "other",
+   "baseline_rule": "no rule matched",
+   "window_seconds": 1.629,
+   "hitter_joint_coverage": 0.974,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 34,
+   "rally": 4,
+   "hit_frame": 3744,
+   "hitter": "near",
+   "true": "net",
+   "pred": "net",
+   "top2": [
+    "net",
+    "drive"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Bottom_\u64cb\u5c0f\u7403",
+   "upstream_score": 0.5414,
+   "upstream_top3": [
+    {
+     "class": "Bottom_\u64cb\u5c0f\u7403",
+     "score": 0.5414
+    },
+    {
+     "class": "Bottom_\u653e\u5c0f\u7403",
+     "score": 0.2266
+    },
+    {
+     "class": "Bottom_\u5e73\u7403",
+     "score": 0.1019
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "net": 0.8065,
+    "drive": 0.1059,
+    "smash": 0.0217,
+    "other": 0.021,
+    "lift": 0.0143,
+    "drop": 0.0134,
+    "serve": 0.0094,
+    "clear": 0.0078
+   },
+   "baseline_pred": "lift",
+   "baseline_rule": "struck upward",
+   "window_seconds": 1.6,
+   "hitter_joint_coverage": 0.825,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 35,
+   "rally": 4,
+   "hit_frame": 3774,
+   "hitter": "far",
+   "true": "net",
+   "pred": "net",
+   "top2": [
+    "net",
+    "other"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Top_\u653e\u5c0f\u7403",
+   "upstream_score": 0.9506,
+   "upstream_top3": [
+    {
+     "class": "Top_\u653e\u5c0f\u7403",
+     "score": 0.9506
+    },
+    {
+     "class": "Top_\u64cb\u5c0f\u7403",
+     "score": 0.009
+    },
+    {
+     "class": "Top_\u5207\u7403",
+     "score": 0.0036
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "net": 0.9811,
+    "other": 0.0049,
+    "drop": 0.0037,
+    "serve": 0.0031,
+    "smash": 0.0023,
+    "drive": 0.002,
+    "lift": 0.0016,
+    "clear": 0.0012
+   },
+   "baseline_pred": "net",
+   "baseline_rule": "played in the forecourt, stays in the forecourt, slow",
+   "window_seconds": 2.103,
+   "hitter_joint_coverage": 0.93,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 36,
+   "rally": 4,
+   "hit_frame": 3806,
+   "hitter": "near",
+   "true": "lift",
+   "pred": "other",
+   "top2": [
+    "other",
+    "lift"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Bottom_\u63a8\u7403",
+   "upstream_score": 0.6576,
+   "upstream_top3": [
+    {
+     "class": "Bottom_\u63a8\u7403",
+     "score": 0.6576
+    },
+    {
+     "class": "Bottom_\u6311\u7403",
+     "score": 0.2423
+    },
+    {
+     "class": "Bottom_\u653e\u5c0f\u7403",
+     "score": 0.0259
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "other": 0.689,
+    "lift": 0.2498,
+    "net": 0.0334,
+    "drive": 0.0128,
+    "serve": 0.0067,
+    "drop": 0.0036,
+    "smash": 0.0031,
+    "clear": 0.0014
+   },
+   "baseline_pred": "lift",
+   "baseline_rule": "struck upward from the forecourt and lands deep",
+   "window_seconds": 2.4,
+   "hitter_joint_coverage": 0.81,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video5",
+   "shot_id": 37,
+   "rally": 4,
+   "hit_frame": 3846,
+   "hitter": "far",
+   "true": "drop",
+   "pred": "drop",
+   "top2": [
+    "drop",
+    "smash"
+   ],
+   "top2_hit": true,
+   "upstream_prediction": "Top_\u5207\u7403",
+   "upstream_score": 0.5728,
+   "upstream_top3": [
+    {
+     "class": "Top_\u5207\u7403",
+     "score": 0.5728
+    },
+    {
+     "class": "Top_\u6bba\u7403",
+     "score": 0.2506
+    },
+    {
+     "class": "Top_\u653e\u5c0f\u7403",
+     "score": 0.0261
+    }
+   ],
+   "slot_agrees_with_milestone1": true,
+   "broad_scores": {
+    "drop": 0.6096,
+    "smash": 0.2667,
+    "net": 0.0535,
+    "drive": 0.0276,
+    "other": 0.0187,
+    "serve": 0.0119,
+    "clear": 0.006,
+    "lift": 0.006
+   },
+   "baseline_pred": "other",
+   "baseline_rule": "no rule matched",
+   "window_seconds": 1.718,
+   "hitter_joint_coverage": 0.865,
+   "shuttle_coverage": 1.0
+  }
+ ]
+}
