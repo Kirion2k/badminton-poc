@@ -57,3 +57,41 @@
 #     c 188 near smash
 #     k 940 near        returning the shuttle to the server
 #
+c 9 near lift
+c 82 far smash
+c 109 near net shot doesnt go over
+c 765 far serve
+c 811 near lift
+c 884 far clear backhand
+c 960 near smash 
+c 1570 near serve
+c 1621 far net
+c 1673 near lift
+
+# CORRECTION, 15 Sep 2026, agreed with the labeller.
+# The lines "c 1605 far net" and "c 1636 far smash" were two entries for one contact and
+# neither sat on it. The raw track descends steadily through 1605 with no reversal, turns
+# over at 1620-1623, and at 1637 loses two thirds of its speed across the turn, which is the
+# signature of an apex rather than a racket. Frames 1616-1627 show the far player lunging at
+# the net with the shuttle at his racket. Recorded as one contact at 1621, keeping the
+# labeller's hitter and shot type. Without this the rally read far, far in succession.
+
+# RALLY SPANS. Derived, not watched: the labeller recorded contacts, and these spans were
+# read off the raw shuttle track afterwards by one rule -- start at the serve contact, end
+# where the shuttle comes to rest. They are weaker evidence than the contacts above.
+#
+# rally 1 is truncated by the start of the clip: the first contact is at frame 9 and the
+#   rally was already in progress, so it starts at 0 as clip 2's first rally does. The
+#   shuttle is still at 124-132 after the net shot at 109 that did not go over.
+# rally 2 ends with the smash at 960. TrackNet loses the shuttle for five frames immediately
+#   after it, which is what a smash does to it, and the track is unreliable from about 1000;
+#   985 is the landing read from the descent at 968-996.
+# rally 3 ends with the lift at 1673, which rises to an apex at about 1705 and descends to
+#   y 0.83 -- the near court floor -- by 1776.
+#
+# The labeller reports that the remainder of the clip is a half-time break with no rallies,
+# which is why no span covers it.
+
+r 0 126 truncated by the clip start; first contact at frame 9
+r 765 985
+r 1570 1780

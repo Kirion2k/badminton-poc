@@ -2,106 +2,97 @@
   "_format": "badminton-poc/truth-v2",
   "clip": "test-video3",
   "fps": 59.17531005597808,
-  "labelled_contacts": 15,
-  "labelled_rallies": 4,
+  "labelled_contacts": 10,
+  "labelled_rallies": 3,
   "hit_detection": {
-    "true_positives": 10,
-    "false_positives": 1,
-    "false_negatives": 4,
-    "precision": 0.9091,
-    "recall": 0.7143,
-    "f1": 0.8,
-    "predicted": 11,
-    "labelled_contacts": 15,
-    "rally_shots": 14,
-    "out_of_rally_matched": 1,
+    "true_positives": 8,
+    "false_positives": 4,
+    "false_negatives": 2,
+    "precision": 0.6667,
+    "recall": 0.8,
+    "f1": 0.7273,
+    "predicted": 12,
+    "labelled_contacts": 10,
+    "rally_shots": 10,
+    "out_of_rally_matched": 0,
     "out_of_rally_missed": 0,
     "predictions_outside_labelled_spans": 0,
     "labelled_contact_spans": [],
     "labelled_seconds": null
   },
   "hitter_assignment": {
-    "matched_hits": 11,
-    "scored": 10,
-    "correct": 9,
+    "matched_hits": 8,
+    "scored": 8,
+    "correct": 7,
     "incorrect": 1,
     "unassigned": 0,
-    "accuracy": 0.9
+    "accuracy": 0.875
   },
   "rally_segmentation": {
-    "labelled_rallies": 4,
+    "labelled_rallies": 3,
     "predicted_rallies": 4,
-    "recovered": 4,
-    "accuracy": 1.0,
+    "recovered": 2,
+    "accuracy": 0.6666666666666666,
     "split": 0,
     "missed": 0,
-    "spurious": 0,
-    "median_start_error_s": 0.084,
-    "median_end_error_s": 0.127,
-    "median_abs_start_error_s": 0.194,
-    "median_abs_end_error_s": 0.177,
+    "spurious": 1,
+    "median_start_error_s": 0.152,
+    "median_end_error_s": 0.558,
+    "median_abs_start_error_s": 0.152,
+    "median_abs_end_error_s": 0.558,
     "tolerance_seconds": 1.0,
     "detail": [
       {
         "rally": 1,
         "true_start_frame": 0,
-        "true_end_frame": 158,
+        "true_end_frame": 126,
         "predicted_count": 1,
         "start_error_s": 0.22,
-        "end_error_s": 0.017,
+        "end_error_s": 0.558,
         "verdict": "recovered"
       },
       {
         "rally": 2,
-        "true_start_frame": 375,
-        "true_end_frame": 440,
+        "true_start_frame": 765,
+        "true_end_frame": 985,
         "predicted_count": 1,
-        "start_error_s": -0.98,
-        "end_error_s": 0.422,
-        "verdict": "recovered"
+        "start_error_s": 0.051,
+        "end_error_s": 1.42,
+        "verdict": "edges outside tolerance"
       },
       {
         "rally": 3,
-        "true_start_frame": 768,
-        "true_end_frame": 1055,
+        "true_start_frame": 1570,
+        "true_end_frame": 1780,
         "predicted_count": 1,
-        "start_error_s": 0.0,
-        "end_error_s": 0.237,
-        "verdict": "recovered"
-      },
-      {
-        "rally": 4,
-        "true_start_frame": 1569,
-        "true_end_frame": 1778,
-        "predicted_count": 1,
-        "start_error_s": 0.169,
-        "end_error_s": -0.118,
+        "start_error_s": 0.152,
+        "end_error_s": -0.152,
         "verdict": "recovered"
       }
     ]
   },
   "player_tracking": {
-    "active_play_frames": 723,
-    "both_players_frames": 711,
-    "both_players_fraction": 0.9834,
+    "active_play_frames": 559,
+    "both_players_frames": 547,
+    "both_players_fraction": 0.9785,
     "near_fraction": 1.0,
-    "far_fraction": 0.9834,
+    "far_fraction": 0.9785,
     "no_player_frames": 0,
     "near_identity_breaks": 0,
     "far_identity_breaks": 0,
     "identity_swaps": 0,
     "plausibility": {
       "near": {
-        "frames": 723,
+        "frames": 559,
         "median_detection_confidence": 0.92,
-        "median_movement_body_heights_per_s": 0.593,
-        "lateral_range_body_heights": 2.127
+        "median_movement_body_heights_per_s": 0.587,
+        "lateral_range_body_heights": 2.03
       },
       "far": {
-        "frames": 711,
-        "median_detection_confidence": 0.882,
+        "frames": 547,
+        "median_detection_confidence": 0.885,
         "median_movement_body_heights_per_s": 0.453,
-        "lateral_range_body_heights": 1.633
+        "lateral_range_body_heights": 1.634
       },
       "warnings": [],
       "note": "Measured over labelled rally frames. Empty warnings mean both slots behave like players; they do not mean the coverage figure is high."
@@ -109,6 +100,6 @@
     "coverage_trusted": true,
     "note": "Coverage says a slot was filled, not that it held the right person. A slot following a bystander reads as 100%; record those in tracking_failures. coverage_trusted is false when a slot does not behave like a player, which is how a coverage figure earned by tracking furniture announces itself, and null when there were too few frames to tell; the measurements behind it are in plausibility."
   },
-  "tracking_failures_recorded": 2,
+  "tracking_failures_recorded": 0,
   "caveat": "Scored against hand labels for this clip only. A configuration that has been tuned on this clip is not validated by it."
 }

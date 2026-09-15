@@ -17,7 +17,7 @@ def sha(path):
 head = subprocess.run(['git', 'rev-parse', 'HEAD'], capture_output=True, text=True).stdout.strip()
 
 clips = {}
-for clip, provenance in (('test-video2', 'human'), ('test-video3', 'model'), ('test-video5', 'human')):
+for clip, provenance in (('test-video2', 'human'), ('test-video3', 'human'), ('test-video5', 'human')):
     b = json.loads(Path(f'outputs/{clip}/baseline.json').read_text())
     truth = json.loads(Path(f'outputs/{clip}/truth.json').read_text())
     clips[clip] = {

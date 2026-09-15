@@ -1,8 +1,8 @@
 {
  "_what": "Milestone 1 frozen as an upstream dependency for Milestone 2. The detector settings below are the tuning surface of Milestone 1; tests/test_milestone1_frozen.py asserts they still hold these values, so retuning Milestone 1 fails the suite rather than passing unnoticed.",
- "_metrics_note": "Metrics are frozen only for clips whose labels are final. test-video3 still carries model-produced labels; when it is labelled by hand its metrics will move, and that is a change of labelling, not of the detector. Re-run the freeze script and record the new figures rather than tuning anything to reach them.",
- "version": "milestone-1/1.0",
- "frozen_at_commit": "218e15d3a44b91845a3326268bb402c012508cf2",
+ "_metrics_note": "Metrics are frozen for every clip: all three now carry hand labels. A figure moving because a detector setting changed is retuning and the test should fail. A figure moving because a labelling was revised is not -- re-run tools/freeze_milestone1.py and commit the new manifest with the labelling change, so the diff shows what moved and why.",
+ "version": "milestone-1/1.1",
+ "frozen_at_commit": "5f207199ebebe4e79bdba224f99fdfc45e70e1bf",
  "frozen_on": "2026-09-15",
  "detector_defaults": {
   "PlayerConfig": {
@@ -87,24 +87,24 @@
    "metrics_are_frozen": true
   },
   "test-video3": {
-   "label_provenance": "model",
+   "label_provenance": "human",
    "config_sha256_16": "c3d4dd7cfdf190a9",
-   "truth_sha256_16": "45eade69027b3857",
-   "labelled_contacts": 15,
-   "labelled_rallies": 4,
+   "truth_sha256_16": "1b33affe30677ed0",
+   "labelled_contacts": 10,
+   "labelled_rallies": 3,
    "metrics": {
-    "hit_precision": 0.9091,
-    "hit_recall": 0.7143,
-    "hit_f1": 0.8,
-    "hitter_accuracy": 0.9,
-    "hitter_scored": 10,
-    "rallies_recovered": 4,
-    "rallies_labelled": 4,
-    "rallies_spurious": 0,
-    "coverage": 0.9834,
+    "hit_precision": 0.6667,
+    "hit_recall": 0.8,
+    "hit_f1": 0.7273,
+    "hitter_accuracy": 0.875,
+    "hitter_scored": 8,
+    "rallies_recovered": 2,
+    "rallies_labelled": 3,
+    "rallies_spurious": 1,
+    "coverage": 0.9785,
     "coverage_trusted": true
    },
-   "metrics_are_frozen": false
+   "metrics_are_frozen": true
   },
   "test-video5": {
    "label_provenance": "human",
@@ -126,5 +126,6 @@
    },
    "metrics_are_frozen": true
   }
- }
+ },
+ "_changed_since_1_0": "test-video3 relabelled by hand on 2026-09-15, replacing model-produced labels. No detector setting changed; the 53 frozen knobs are identical to 1.0."
 }

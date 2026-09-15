@@ -1,146 +1,99 @@
 {
-  "_format": "badminton-poc/truth-v2",
-  "_instructions": "Watch annotated.mp4 and record what happened in the video, not what the pipeline said. contacts: one entry per real racket contact, with hitter 'near' or 'far'. rallies: one entry per rally actually played. Delete any contact you cannot see happen. Set labelled=true when finished. Nothing here should describe a detector. Frames are work.mp4 indices at 59.175 fps; this clip's play is all in the first 30 seconds.",
-  "clip": "test-video3",
-  "fps": 59.17531005597808,
-  "frame_reference": "outputs/<clip>/work.mp4; metadata.json holds the offset to source",
-  "labelled": true,
-  "contacts": [
-    {
-      "frame": 9,
-      "time_s": 0.152,
-      "hitter": "near",
-      "notes": "Clip opens mid-rally. Shuttle descends onto the near player, who lunges left and plays it at full stretch; the track reverses sharply here."
-    },
-    {
-      "frame": 82,
-      "time_s": 1.386,
-      "hitter": "far",
-      "notes": "Found by the shuttle's lateral speed jumping about ninefold (2px/frame to 18px/frame) with the far player 23px from the track. There is no image-Y reversal because the shuttle kept descending through the contact, which is why the detector missed it."
-    },
-    {
-      "frame": 109,
-      "time_s": 1.842,
-      "hitter": "near",
-      "notes": "Near player lunging right; shuttle reverses at his racket. Landed just over the net on the far side about frame 155 and the far player did not reach it, ending the rally."
-    },
-    {
-      "frame": 315,
-      "time_s": 5.323,
-      "hitter": "near",
-      "notes": "NOT a rally shot. Between points: the near player picks the shuttle off the floor around frame 305 and flicks it up to himself before serving. The far player is 240-420px away throughout and never plays it, so this cannot be the serve.",
-      "in_rally": false
-    },
-    {
-      "frame": 375,
-      "time_s": 6.337,
-      "hitter": "near",
-      "notes": "The serve of rally 2. Underarm from the net area; the shuttle travels to the far player from here."
-    },
-    {
-      "frame": 427,
-      "time_s": 7.216,
-      "hitter": "far",
-      "notes": "Far player jumps and plays an overhead. Both players walk within three frames, so this shot ended the point -- out or into the net. The tracker then sat on the far player, so where the shuttle finished was not observed."
-    },
-    {
-      "frame": 768,
-      "time_s": 12.978,
-      "hitter": "far",
-      "notes": "The serve of rally 3."
-    },
-    {
-      "frame": 813,
-      "time_s": 13.739,
-      "hitter": "near",
-      "notes": ""
-    },
-    {
-      "frame": 884,
-      "time_s": 14.939,
-      "hitter": "far",
-      "notes": ""
-    },
-    {
-      "frame": 971,
-      "time_s": 16.409,
-      "hitter": "near",
-      "notes": "Near player jumps to smash; confirmed on frames 955-975. The shuttle track is lost from 903 to 965 (tracker on (0,0)), so this frame is from the velocity recovery at 971 and is the least precise contact in this file -- treat it as +/- 8 frames."
-    },
-    {
-      "frame": 998,
-      "time_s": 16.865,
-      "hitter": "far",
-      "notes": "Last shot of rally 3. The shuttle arced back and landed near the net about frame 1050; the near player was within about 60px but left it."
-    },
-    {
-      "frame": 1569,
-      "time_s": 26.514,
-      "hitter": "near",
-      "notes": "The serve of rally 4."
-    },
-    {
-      "frame": 1621,
-      "time_s": 27.393,
-      "hitter": "far",
-      "notes": ""
-    },
-    {
-      "frame": 1672,
-      "time_s": 28.255,
-      "hitter": "near",
-      "notes": "Near player lunging to the net. Box distance favours the far player here (10px against 62px) because the two boxes overlap in projection at the net, but on frames only the near player is swinging."
-    },
-    {
-      "frame": 1735,
-      "time_s": 29.32,
-      "hitter": "far",
-      "notes": "Far player airborne, smashing. Won the point: the shuttle landed on the near court floor in front of the near player at frame 1774, who lunged and did not reach it."
-    }
-  ],
-  "_contacts_help": "[{\"frame\": 1234, \"hitter\": \"near\"|\"far\"|null, \"notes\": \"\"}] -- every racket contact in the clip, whether or not anything detected it.",
-  "rallies": [
-    {
-      "rally": 1,
-      "start_frame": 0,
-      "end_frame": 158,
-      "start_truncated": true,
-      "notes": "The clip opens with the shuttle already in flight onto the near player, so this rally began before the recording and 0 is the earliest frame claimable. Ends when the shuttle lands just over the net on the far side: the track flattens at (890,525) from about frame 155 and stays there, and on frames both players are standing still by 165."
-    },
-    {
-      "rally": 2,
-      "start_frame": 375,
-      "end_frame": 440,
-      "notes": "Serve to error, two shots. The near player collects the shuttle and knocks it up to himself at 315 (recorded as a contact with in_rally false), serves at 375, and the far player's overhead at 427 ends it. Both players are walking by 430. The end frame is the weakest number in this file: the tracker stayed on the far player after 427 instead of following the shuttle, so the landing was never seen and 440 is inferred from the players' behaviour."
-    },
-    {
-      "rally": 3,
-      "start_frame": 768,
-      "end_frame": 1055,
-      "notes": "Five shots. The shuttle track is lost between 903 and 965, where the near player's smash sits; that contact is recovered from velocity and frames rather than read off the track. Ends with the shuttle landing near the net about 1050 -- by 1058 it is lying on the floor and the near player is walking to collect it, picking it up at 1147."
-    },
-    {
-      "rally": 4,
-      "start_frame": 1569,
-      "end_frame": 1778,
-      "notes": "Four shots, ending with the far player's smash landing in front of the near player at 1774. The near player lunged and missed it, so 1774 is a landing and is not recorded as a contact."
-    }
-  ],
-  "_rallies_help": "[{\"rally\": 1, \"start_frame\": 83, \"end_frame\": 236, \"notes\": \"\"}] -- inclusive spans where a rally was in progress.",
-  "tracking_failures": [
-    {
-      "start_frame": 1790,
-      "end_frame": 4993,
-      "kind": "no play in frame",
-      "notes": "Play stops for good at frame 1790 -- 30.2s into an 85s clip. What follows is an interval: from about 2250 to 4900 the court is empty and officials stand around the far end, and either side of that the players collect shuttles and hand-throw them (the near player catches with both hands raised around 2030-2075). No racket contacts are recorded in any of it, so every hit the pipeline reports after 1790 is a genuine false positive. Both pose slots stay filled the whole time by stationary bystanders -- the far slot's box moves 1px between frames 2114 and 2182 -- so coverage measured over this stretch means nothing."
-    },
-    {
-      "start_frame": 4994,
-      "end_frame": 5030,
-      "kind": "not video of the match",
-      "notes": "The recording is a phone screen capture of a YouTube video, and the swipe that stopped it was captured: frames 4994-5030 are the iOS Control Centre. Frame 4994 is the first blurred one. This is what makes tools/screen_clip.py report 287px of camera drift and reject the clip; the court footage itself never moves more than 0.3px."
-    }
-  ],
-  "_tracking_failures_help": "Optional. [{\"start_frame\": 1918, \"end_frame\": 3291, \"kind\": \"...\", \"notes\": \"...\"}] -- stretches where the vision stack visibly followed the wrong thing. Not scored; kept so a known failure is not rediscovered twice.",
-  "_provenance": "MODEL-PRODUCED LABELS, not human ones. Written by Claude on 2026-09-14 by inspecting frames of work.mp4 together with the raw TrackNet shuttle CSV, not by watching the video at speed. Contact frames come from reversals and speed changes in the shuttle track, confirmed on zoomed frame strips; hitters come from which pose box the shuttle touches, overruled by the frames where the two disagree. Treat these as weaker evidence than clip 2's hand labels: the same model that tuned the pipeline produced them, so a systematic mistake here would read as agreement rather than as failure. Every contact carries a note saying what it was read from, and the uncertain ones say so."
+ "_format": "badminton-poc/truth-v2",
+ "_instructions": "Watch annotated.mp4 and record what happened in the video, not what the pipeline said. contacts: one entry per real racket contact, with hitter 'near' or 'far'. rallies: one entry per rally actually played. Delete any contact you cannot see happen. Set labelled=true when finished. Nothing here should describe a detector.",
+ "clip": "test-video3",
+ "fps": 59.17531005597808,
+ "frame_reference": "outputs/<clip>/work.mp4; metadata.json holds the offset to source",
+ "labelled": true,
+ "contacts": [
+  {
+   "frame": 9,
+   "hitter": "near",
+   "notes": "lift",
+   "shot_type": "lift"
+  },
+  {
+   "frame": 82,
+   "hitter": "far",
+   "notes": "smash",
+   "shot_type": "smash"
+  },
+  {
+   "frame": 109,
+   "hitter": "near",
+   "notes": "net shot doesnt go over",
+   "shot_type": "net"
+  },
+  {
+   "frame": 765,
+   "hitter": "far",
+   "notes": "serve",
+   "shot_type": "serve"
+  },
+  {
+   "frame": 811,
+   "hitter": "near",
+   "notes": "lift",
+   "shot_type": "lift"
+  },
+  {
+   "frame": 884,
+   "hitter": "far",
+   "notes": "clear backhand",
+   "shot_type": "clear"
+  },
+  {
+   "frame": 960,
+   "hitter": "near",
+   "notes": "smash",
+   "shot_type": "smash"
+  },
+  {
+   "frame": 1570,
+   "hitter": "near",
+   "notes": "serve",
+   "shot_type": "serve"
+  },
+  {
+   "frame": 1621,
+   "hitter": "far",
+   "notes": "net",
+   "shot_type": "net"
+  },
+  {
+   "frame": 1673,
+   "hitter": "near",
+   "notes": "lift",
+   "shot_type": "lift"
+  }
+ ],
+ "_contacts_help": "[{\"frame\": 1234, \"hitter\": \"near\"|\"far\"|null, \"in_rally\": true, \"notes\": \"\"}] -- every racket contact in the clip, whether or not anything detected it. Set in_rally=false for a contact that is not a rally shot: handing the shuttle back to the server, a knock-up between points. Those are real, but they do not belong in a rally timeline, so they are scored as neither hits nor misses.",
+ "rallies": [
+  {
+   "rally": 1,
+   "start_frame": 0,
+   "end_frame": 126,
+   "notes": "truncated by the clip start; first contact at frame 9"
+  },
+  {
+   "rally": 2,
+   "start_frame": 765,
+   "end_frame": 985,
+   "notes": ""
+  },
+  {
+   "rally": 3,
+   "start_frame": 1570,
+   "end_frame": 1780,
+   "notes": ""
+  }
+ ],
+ "_rallies_help": "[{\"rally\": 1, \"start_frame\": 83, \"end_frame\": 236, \"notes\": \"\"}] -- inclusive spans where a rally was in progress.",
+ "labelled_contact_spans": [],
+ "_labelled_contact_spans_help": "Optional. [{\"start_frame\": 1674, \"end_frame\": 2467, \"notes\": \"\"}] -- the spans in which *every* racket contact has been recorded. Leave it empty when the whole clip has been gone through, which is what an empty list means. Outside these spans the contact list is known to be incomplete, so a predicted hit there is not evidence of anything and is counted in neither column. Rallies are scored over the whole clip either way: this scopes contacts, not rallies.",
+ "tracking_failures": [],
+ "_tracking_failures_help": "Optional. [{\"start_frame\": 1918, \"end_frame\": 3291, \"kind\": \"...\", \"notes\": \"...\"}] -- stretches where the vision stack visibly followed the wrong thing. Not scored; kept so a known failure is not rediscovered twice.",
+ "_provenance": "HAND LABELS for the contacts, written by the project owner on 2026-09-15 from label-part-A.mp4 and label-part-B.mp4 -- the working video with frame numbers burned on and no pipeline output drawn on it -- and recorded as one line per contact in labels.tsv, which is kept beside this file as the primary record. Ten contacts across three rallies; the labeller reports the rest of the clip is a half-time break with no play. One correction was agreed after labelling: two entries at 1605 and 1636 were one contact and neither sat on it, so they are recorded as a single contact at 1621 keeping the labeller's hitter and shot type. The reasoning is in labels.tsv.",
+ "_rally_span_provenance": "DERIVED, not watched. The labeller recorded contacts; the spans were read off the raw shuttle track afterwards by one rule -- start at the serve contact, end where the shuttle comes to rest. Weaker evidence than the contacts, and the rally-boundary figure should be read with that in front of it.",
+ "_supersedes": "Model-produced labels for this clip, written by Claude on 2026-09-14 and kept at git dcf527f. They claimed 15 contacts and 4 rallies against the 10 contacts and 3 rallies found by hand."
 }
