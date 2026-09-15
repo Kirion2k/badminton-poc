@@ -1,0 +1,130 @@
+{
+ "_what": "Milestone 1 frozen as an upstream dependency for Milestone 2. The detector settings below are the tuning surface of Milestone 1; tests/test_milestone1_frozen.py asserts they still hold these values, so retuning Milestone 1 fails the suite rather than passing unnoticed.",
+ "_metrics_note": "Metrics are frozen only for clips whose labels are final. test-video3 still carries model-produced labels; when it is labelled by hand its metrics will move, and that is a change of labelling, not of the detector. Re-run the freeze script and record the new figures rather than tuning anything to reach them.",
+ "version": "milestone-1/1.0",
+ "frozen_at_commit": "218e15d3a44b91845a3326268bb402c012508cf2",
+ "frozen_on": "2026-09-15",
+ "detector_defaults": {
+  "PlayerConfig": {
+   "model": "yolo11m-pose.pt",
+   "imgsz": 1280,
+   "conf": 0.25,
+   "iou": 0.5,
+   "tracker": "bytetrack.yaml",
+   "min_box_height_frac": 0.02,
+   "max_box_height_frac": 0.62,
+   "identity_smoothing_frames": 15,
+   "static_track_min_travel_heights": 0.12,
+   "static_track_min_observations": 45,
+   "static_track_handoff_frames": 15,
+   "static_track_handoff_heights": 1.0,
+   "mobility_yield_seconds": 20.0,
+   "identity_transfer_px_per_frame": 30.0,
+   "net_hysteresis_frac": 0.01
+  },
+  "AnalysisConfig": {
+   "event_source": "tracknet",
+   "require_hitter": false,
+   "require_both_players": false,
+   "hit_search_radius_frames": 4,
+   "assignment_margin_px": 40.0,
+   "max_assignment_distance_frac": 0.35,
+   "max_contact_distance_body_heights": 0.9,
+   "rally_gap_seconds": 2.5,
+   "min_hits_per_rally": 2,
+   "trailing_swing_trim": 0.0,
+   "rally_end_at_last_hit": false,
+   "min_swing_speed": 0.0,
+   "play_gate_min_speed_px": 0.0,
+   "play_gate_smooth_seconds": 0.25,
+   "play_gate_bridge_seconds": 1.5,
+   "play_gate_min_span_seconds": 1.0,
+   "min_hit_confidence": 0.0,
+   "min_hit_interval_seconds": 0.3,
+   "min_landing_interval_seconds": 0.75,
+   "shuttle_absent_seconds": 1.0
+  },
+  "FlightConfig": {
+   "reference_width": 1920,
+   "fit_window_seconds": 0.12,
+   "max_fit_residual_px": 2.5,
+   "min_flight_speed_px_s": 150.0,
+   "min_flight_seconds": 0.1,
+   "max_link_gap_seconds": 1.8,
+   "min_turn_degrees": 60.0,
+   "rest_window_seconds": 0.2,
+   "rest_tolerance_px": 8.0,
+   "min_rest_seconds": 0.25,
+   "fixed_point_min_runs": 3,
+   "fixed_point_tolerance_px": 12.0,
+   "min_serve_quiet_seconds": 1.0,
+   "min_hits_per_rally": 2,
+   "promote_continuation_within_body_heights": 0.9,
+   "gravity_apex_max_speed_ratio": 1.0,
+   "gravity_apex_window_seconds": 0.135,
+   "contact_frame_rule": "exit"
+  }
+ },
+ "clips": {
+  "test-video2": {
+   "label_provenance": "human",
+   "config_sha256_16": "2b9278418e61e997",
+   "truth_sha256_16": "4fc9d6f311ff17e6",
+   "labelled_contacts": 61,
+   "labelled_rallies": 6,
+   "metrics": {
+    "hit_precision": 0.8852,
+    "hit_recall": 0.9153,
+    "hit_f1": 0.9,
+    "hitter_accuracy": 0.9245,
+    "hitter_scored": 53,
+    "rallies_recovered": 6,
+    "rallies_labelled": 6,
+    "rallies_spurious": 0,
+    "coverage": 0.9286,
+    "coverage_trusted": true
+   },
+   "metrics_are_frozen": true
+  },
+  "test-video3": {
+   "label_provenance": "model",
+   "config_sha256_16": "c3d4dd7cfdf190a9",
+   "truth_sha256_16": "45eade69027b3857",
+   "labelled_contacts": 15,
+   "labelled_rallies": 4,
+   "metrics": {
+    "hit_precision": 0.9091,
+    "hit_recall": 0.7143,
+    "hit_f1": 0.8,
+    "hitter_accuracy": 0.9,
+    "hitter_scored": 10,
+    "rallies_recovered": 4,
+    "rallies_labelled": 4,
+    "rallies_spurious": 0,
+    "coverage": 0.9834,
+    "coverage_trusted": true
+   },
+   "metrics_are_frozen": false
+  },
+  "test-video5": {
+   "label_provenance": "human",
+   "config_sha256_16": "ed56e0fdd0243811",
+   "truth_sha256_16": "ef014c7067f416bd",
+   "labelled_contacts": 38,
+   "labelled_rallies": 5,
+   "metrics": {
+    "hit_precision": 0.8718,
+    "hit_recall": 0.8947,
+    "hit_f1": 0.8831,
+    "hitter_accuracy": 0.9,
+    "hitter_scored": 30,
+    "rallies_recovered": 5,
+    "rallies_labelled": 5,
+    "rallies_spurious": 2,
+    "coverage": 0.9044,
+    "coverage_trusted": true
+   },
+   "metrics_are_frozen": true
+  }
+ }
+}
