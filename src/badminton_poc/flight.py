@@ -492,6 +492,47 @@ def _turn_degrees(
     return math.degrees(math.acos(max(-1.0, min(1.0, cosine))))
 
 
+def _gravity_apex(
+    positions: dict[int, tuple[float, float]],
+    exit_frame: int,
+    entry_frame: int,
+    *,
+    span: int,
+    max_speed_ratio: float,
+) -> bool:
+    """Is this join the top of an arc rather than the end of a racket?
+
+    A lift and a clear turn the shuttle over at the top of their flight, and a detector reading
+    curvature sees the same reversal there that it sees at a contact. Energy separates them. A
+    racket adds it: the shuttle leaves faster than it arrived, or it leaves in a direction
+    gravity could not have sent it. Gravity removes it: the shuttle is at its slowest at the
+    top, and it can only turn a rising shuttle into a falling one, never the reverse.
+
+    So both conditions have to hold -- rising in, falling out, and no faster leaving than
+    arriving. The speed condition is what protects a smash taken at the top of the bounce, which
+    turns over the same way and leaves three times quicker.
+    """
+    before = [f for f in range(exit_frame - span, exit_frame + 1) if f in positions]
+    after = [f for f in range(entry_frame, entry_frame + span + 1) if f in positions]
+    if len(before) < 2 or len(after) < 2:
+        return False
+    v0 = (
+        (positions[before[-1]][0] - positions[before[0]][0]) / (before[-1] - before[0]),
+        (positions[before[-1]][1] - positions[before[0]][1]) / (before[-1] - before[0]),
+    )
+    v1 = (
+        (positions[after[-1]][0] - positions[after[0]][0]) / (after[-1] - after[0]),
+        (positions[after[-1]][1] - positions[after[0]][1]) / (after[-1] - after[0]),
+    )
+    # y grows downward, so a negative vy is a rising shuttle.
+    if not (v0[1] < 0 < v1[1]):
+        return False
+    n0, n1 = math.hypot(*v0), math.hypot(*v1)
+    if n0 < 1e-6:
+        return False
+    return n1 / n0 < max_speed_ratio
+
+
 def segment_flight(
     ball: BallTrack,
     fps: float,
@@ -596,6 +637,15 @@ def segment_flight(
                 links.append(Link(index, index + 1, gap, turn, "contact_by_reach", hit_frame))
                 continue
             links.append(Link(index, index + 1, gap, turn, "continuation", None))
+            continue
+        if cfg.gravity_apex_max_speed_ratio > 0 and _gravity_apex(
+            positions, exit_frame, entry_frame,
+            span=max(2, int(round(cfg.gravity_apex_window_seconds * fps))),
+            max_speed_ratio=cfg.gravity_apex_max_speed_ratio,
+        ):
+            # Rising in, falling out, and no quicker for it: gravity turned the shuttle over at
+            # the top of a lift, and no racket was involved.
+            links.append(Link(index, index + 1, gap, turn, "gravity_apex", None))
             continue
         links.append(Link(index, index + 1, gap, turn, "contact", hit_frame))
 

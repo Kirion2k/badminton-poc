@@ -413,3 +413,55 @@ def test_a_track_stolen_by_the_next_court_reports_where_the_jumps_land():
     assert q["verdict"] == "suspect"
     assert q["jump_offset_from_median_x_px"] > 0
     assert "shuttle_polygon" in q["why"]
+
+
+# --- the top of a lift is not a racket ---
+# A lift and a clear turn the shuttle over at the top of its arc, and a detector that reads
+# curvature sees the same 180 degrees there that it sees at a racket. The difference is energy:
+# a racket adds it and gravity does not, so at an apex the shuttle is at its slowest and leaves
+# no faster than it arrived. Measured on the two labelled clips, the rule flags 2 of clip 2's
+# 12 false positives and 1 of clip 3's 8, and none of their 67 true hits.
+
+
+def _apex_positions():
+    """A shuttle lifted high, turning over at the top.
+
+    Rising at 25.6 px/frame on the way up and falling at 15.6 on the way down: a shuttle sheds
+    speed to drag on the way up and is at its slowest at the top, which is why the measured
+    ratio across a real apex ran 0.37 to 0.79 on clip 5 rather than the 1.0 a drag-free parabola
+    would give.
+    """
+    out = {}
+    for i, f in enumerate(range(100, 110)):
+        out[f] = (400.0 + 20.0 * i, 600.0 - 16.0 * i)
+    for i, f in enumerate(range(110, 121)):
+        out[f] = (600.0 + 12.0 * i, 440.0 + 10.0 * i)
+    return out
+
+
+def _smash_positions():
+    """Arrives rising, leaves falling, and leaves three times faster: a racket did that."""
+    out = {}
+    for i, f in enumerate(range(100, 111)):
+        out[f] = (400.0 + 10.0 * i, 400.0 - 10.0 * i)
+    for i, f in enumerate(range(111, 121)):
+        out[f] = (500.0 + 30.0 * i, 300.0 + 30.0 * i)
+    return out
+
+
+def test_the_top_of_an_arc_is_not_a_contact():
+    from badminton_poc.flight import _gravity_apex
+    assert _gravity_apex(_apex_positions(), 109, 111, span=8, max_speed_ratio=1.0) is True
+
+
+def test_a_shot_that_gains_speed_across_the_turn_is_a_contact():
+    from badminton_poc.flight import _gravity_apex
+    assert _gravity_apex(_smash_positions(), 109, 111, span=8, max_speed_ratio=1.0) is False
+
+
+def test_a_turn_from_falling_to_rising_is_never_an_apex():
+    """Gravity cannot turn a falling shuttle upward, whatever the speeds are."""
+    from badminton_poc.flight import _gravity_apex
+    rising = {f: (400.0 + 10.0 * i, 400.0 + 25.0 * i) for i, f in enumerate(range(100, 111))}
+    rising.update({f: (500.0 + 10.0 * i, 650.0 - 5.0 * i) for i, f in enumerate(range(111, 121))})
+    assert _gravity_apex(rising, 109, 111, span=8, max_speed_ratio=1.0) is False

@@ -870,6 +870,8 @@ clip 3 against model-produced labels. Hit detection does not: its precision is 0
 
 **Player tracking and rally boundaries look like properties of the pipeline. Hit-detection
 precision looks like a property of clip 2.** It was tuned there and does not survive the move.
+*(Superseded: most of that gap was the detector firing at the top of a lift. See "The top of a
+lift is not a racket" at the end of this file -- clip 3's precision is 0.9091 now.)*
 Clip 1 is a poor clip -- occlusion alone costs it ten points of far-player coverage, so it cannot
 pass the tracking criterion however good the code is -- and is kept as a regression clip, not an
 acceptance one.
@@ -1153,3 +1155,57 @@ The blind spot in the plausibility check is also still there. It measures inside
 rallies, so it still cannot see a slot failure that prevents rallies from being detected. What
 changed is that this particular failure no longer happens, not that it would be reported if it
 did.
+
+### The top of a lift is not a racket, and it was a third of the false positives
+
+Clip 3's hit precision of 0.56 was the honest headline of this project: the detector was tuned
+on clip 2 and did not survive the move to a second recording. It survives now, and what was
+wrong was not tuning.
+
+A racket and gravity both reverse the shuttle. At the top of a lift or a clear the shuttle
+rises, slows, stops and falls, and a detector reading curvature sees the same 180 degrees there
+that it sees at the end of somebody's racket. **Energy separates them.** A racket adds it: the
+shuttle leaves faster than it arrived, or leaves in a direction gravity could not have sent it.
+Gravity removes it: at the top of the arc the shuttle is at its slowest, and gravity can only
+turn a rising shuttle into a falling one, never the reverse.
+
+So a join is discarded when *both* hold -- rising in, falling out, and no faster leaving than
+arriving. Both are needed. A smash taken at the top of the bounce turns over exactly the same
+way; it leaves three times quicker, and the speed condition is what keeps it.
+
+| | before | after |
+|---|---|---|
+| clip 2 precision / recall / F1 | 0.8235 / 0.9492 / 0.8819 | **0.8852** / 0.9153 / **0.9000** |
+| clip 3 precision / recall / F1 | 0.5556 / 0.7143 / 0.6250 | **0.9091** / 0.7143 / **0.8000** |
+| clip 3 spurious rallies | 1 | **0** |
+| clip 2 hitter accuracy | 0.9245 | 0.9245 |
+| clip 3 hitter accuracy | 0.90 | 0.90 |
+| rally boundaries | 6 of 6, 4 of 4 | unchanged |
+| coverage | 0.9286, 0.9834 | unchanged |
+
+On clip 3 it is free: ten joins discarded, all ten of them false positives, no real contact
+touched and the invented rally at 2017-2122 gone with them. On clip 2 it discards ten joins to
+remove eight false positives and costs two real contacts, which is a trade the F1 says yes to
+and which should still be described rather than counted.
+
+**What the two cost contacts are.** Truth 1743 is labelled with no hitter at all -- the labeller
+could not tell who played it -- and it is a lift so high the shuttle leaves the top of the
+frame, so the turnover in the track sits at the frame edge. Truth 7227 is a near-player lift
+whose labelled frame sits at the top of the arc rather than at the racket, a few frames after
+the strike. Both are cases where the recorded contact frame is at or near an apex, which is
+exactly where this rule looks. **The class it can genuinely lose is a soft contact played at the
+top of a trajectory**, and clip 5 shows one: the far player's net reply at 1851, verified by eye,
+is discarded.
+
+**Where it came from, and a second opinion.** It came out of labelling clip 5 by hand, because
+`contact_sheet.py` draws the raw track either side of a candidate and an apex stops looking like
+a contact the moment you can see its shape. Twenty-four candidates in clip 5's longest rally were
+then adjudicated frame by frame, before this rule existed. It keeps 16 of the 17 contacts that
+labelling confirmed and discards 4 of the 7 it rejected -- agreement between a physical rule and
+a human reading of the video, which is not the same as agreement between a detector and itself.
+
+**What it does not establish.** Two labelled clips and eighteen false positives is what this
+rests on, and one of those clips carries model-produced labels. Clip 5 is still unlabelled, so
+its drop from 83 predicted hits to 65 and from 8 rallies to 7 is a count, not an accuracy. The
+three false positives that survive on clip 5's rally 3 -- 1828, 1891 and 2114, all rejected by
+eye -- are not apexes and are not addressed by any of this.

@@ -462,6 +462,28 @@ class FlightConfig:
     `AnalysisConfig.max_contact_distance_body_heights` for the same reasons.
 
     Set to 0 to disable and judge joins on turn angle alone."""
+    gravity_apex_max_speed_ratio: float = 1.0
+    """Below this ratio of outgoing to incoming speed, a join that turns the shuttle from rising
+    to falling is the top of an arc rather than a racket.
+
+    A lift and a clear reverse the shuttle as sharply as a contact does, and curvature cannot
+    tell them apart. Energy can: a racket adds it, gravity does not. Both conditions are
+    required, because a smash taken at the top of the bounce turns over the same way -- it just
+    leaves three times faster.
+
+    Measured against the two labelled clips at this setting: it discards 2 of clip 2's 12 false
+    positives and 1 of clip 3's 8, and none of their 67 true hits. Free on the evidence
+    available, and small; the number of false positives it was checked against is three.
+
+    Zero disables it."""
+    gravity_apex_window_seconds: float = 0.135
+    """How much flight either side of the join the apex test measures its speeds over.
+
+    In seconds rather than frames: it was validated at 8 frames on two 60 fps clips, and a frame
+    count would measure a third of a second on a 30 fps recording and an eighth on a 60 fps one.
+    Shorter than this and the test sees no turn at all -- at the 3-frame span the turn angle
+    uses, it flags nothing on either labelled clip, because a shuttle near the top of its arc
+    barely moves."""
     contact_frame_rule: str = "exit"
     """Where in the gap between two flight segments to place the contact.
 
