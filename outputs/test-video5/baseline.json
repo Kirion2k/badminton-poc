@@ -2,43 +2,41 @@
   "_format": "badminton-poc/truth-v2",
   "clip": "test-video5",
   "fps": 33.754346904573154,
-  "labelled_contacts": 35,
+  "labelled_contacts": 38,
   "labelled_rallies": 7,
   "hit_detection": {
-    "true_positives": 30,
-    "false_positives": 9,
-    "false_negatives": 5,
-    "precision": 0.7692,
-    "recall": 0.8571,
-    "f1": 0.8108,
+    "true_positives": 34,
+    "false_positives": 5,
+    "false_negatives": 4,
+    "precision": 0.8718,
+    "recall": 0.8947,
+    "f1": 0.8831,
     "predicted": 39,
-    "labelled_contacts": 35,
-    "rally_shots": 35,
+    "labelled_contacts": 38,
+    "rally_shots": 38,
     "out_of_rally_matched": 0,
     "out_of_rally_missed": 0,
     "predictions_outside_labelled_spans": 26,
     "labelled_contact_spans": [
       {
-        "start_frame": 1667,
-        "end_frame": 2465,
-        "notes": "rally 2. 36 candidates adjudicated frame by frame; the sequence alternates with no parity break and no gap longer than one exchange."
+        "start_frame": 1674,
+        "end_frame": 2462
       },
       {
         "start_frame": 3501,
-        "end_frame": 3884,
-        "notes": "rally 6. 21 candidates adjudicated; two corrections were needed to make it alternate, both recorded in the contact notes at 3588 and 3772."
+        "end_frame": 3884
       }
     ],
-    "labelled_seconds": 35.047,
+    "labelled_seconds": 34.751,
     "scope_note": "Precision and recall cover only the labelled_contact_spans. Predicted hits outside them are counted in predictions_outside_labelled_spans and scored as neither, because the contact list there is incomplete by declaration."
   },
   "hitter_assignment": {
-    "matched_hits": 30,
-    "scored": 19,
-    "correct": 17,
-    "incorrect": 2,
-    "unassigned": 5,
-    "accuracy": 0.8947
+    "matched_hits": 34,
+    "scored": 30,
+    "correct": 27,
+    "incorrect": 3,
+    "unassigned": 4,
+    "accuracy": 0.9
   },
   "rally_segmentation": {
     "labelled_rallies": 7,
@@ -148,6 +146,6 @@
     "coverage_trusted": true,
     "note": "Coverage says a slot was filled, not that it held the right person. A slot following a bystander reads as 100%; record those in tracking_failures. coverage_trusted is false when a slot does not behave like a player, which is how a coverage figure earned by tracking furniture announces itself, and null when there were too few frames to tell; the measurements behind it are in plausibility."
   },
-  "tracking_failures_recorded": 2,
+  "tracking_failures_recorded": 0,
   "caveat": "Scored against hand labels for this clip only. A configuration that has been tuned on this clip is not validated by it."
 }

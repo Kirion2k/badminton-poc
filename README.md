@@ -1212,6 +1212,10 @@ eye -- are not apexes and are not addressed by any of this.
 
 ### Clip 5, labelled in parts, and the first clip where rally boundaries fail
 
+*The figures in this section were later re-measured against hand labels and are superseded. See
+"What a hand labelling was worth" at the end of this file. The rally-boundary finding stands
+unchanged; the hit and hitter figures do not.*
+
 Clip 5 is a third labelled recording, and the first labelled by parts: its two longest rallies
 have every contact adjudicated, and the rest of the clip has rallies but not contacts. That is
 what `labelled_contact_spans` is for, and why it exists.
@@ -1267,3 +1271,60 @@ They remain model-produced labels, and one clip in three of this project's label
 hand-labelled. `tools/contact_sheet.py` is what made them possible at all: 126 candidates were
 proposed by two instruments -- the flight detector and an independent turning-point read of the
 raw CSV -- which agreed on only 52 of them.
+
+### What a hand labelling was worth
+
+Clip 5's two labelled rallies were labelled a second time, by hand, by the project owner,
+watching the working video at a third speed with its frame numbers burned in and no pipeline
+output drawn on it. The model labelling for the same two spans had been written first and was
+not consulted. Comparing them measures the thing that every model-produced figure in this file
+rests on.
+
+| | model labels | hand labels |
+|---|---|---|
+| contacts found | 35 | 38 |
+| contacts with a hitter | 26 | 38 |
+| agreed with the other file | 29 | 29 |
+| missed | 9 | -- |
+| invented | 6 | -- |
+
+**As a labeller the model scores 0.829 precision and 0.763 recall on contacts, and 0.864 hitter
+accuracy over the 22 contacts it was willing to name.** It missed nine contacts, invented six,
+and named the wrong player three times. Roughly one contact in five and one hitter call in seven
+was wrong.
+
+**The direction of the error matters more than its size.** Scored against the model's labels the pipeline
+reads 0.769 precision and 0.811 F1; scored against the hand labels it reads 0.872 and 0.883.
+**Seven of the nine frames the model had recorded as detector false positives were real contacts
+that the model itself had missed** -- 1828, 1888, 2059, 2114, 2234, 2256 and 3726. The detector
+was right and the labelling was wrong, and a labelling that is wrong in that direction makes a
+working pipeline look broken.
+
+| clip 5, same run | vs model labels | vs hand labels |
+|---|---|---|
+| hit precision / recall / F1 | 0.7692 / 0.8571 / 0.8108 | **0.8718 / 0.8947 / 0.8831** |
+| hitter accuracy | 0.8947 over 19 scored | **0.9000 over 30 scored** |
+| rally boundaries | 4 of 7 | 4 of 7 |
+| coverage | 0.9016 | 0.9016 |
+
+Rally boundaries and coverage do not move: neither depends on the contact list. The
+rally-boundary failure and its cause -- a break in the shuttle track read as the end of a rally
+-- are unaffected by any of this and stand as recorded above.
+
+**Where the model went wrong is legible, and it is not where it expected.** In rally A it
+invented nothing at all but missed six contacts. In rally B it invented six and missed three. The
+two hitter calls it got wrong in rally A, at 1851 and 2089, were both produced by the same piece
+of reasoning: an unbroken flight arriving at a player whose identity is certain implies the other
+player struck it. That inference is sound only if the flight really is unbroken, and it was not
+-- the model had missed contacts at 1835 and 1890, either side of 1851. **A missing contact does
+not stay a missing contact; it propagates into a wrong hitter.** The parity argument that was
+used to find missing contacts also invented one, at 3588, which the hand labels do not contain.
+
+**What this does to the rest of the file.** Clip 3 is labelled entirely by the same method by the
+same model, and its figures -- 0.9091 precision, 0.7143 recall -- should be read as carrying an
+error bar of about this size until it too is labelled by hand. Its low recall is exactly the
+shape a labelling with invented contacts produces. Clip 2's hand labels are unaffected.
+
+The reverse also holds and is worth saying plainly: the hand labelling took well under an hour
+and moved three of this project's numbers, one of them by ten points. Nothing else available to
+this project buys that much.

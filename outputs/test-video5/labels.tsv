@@ -18,4 +18,42 @@
 # inside them, including serves, and including any contact where the shuttle is barely
 # touched. If you are unsure whether something was a contact at all, add it with a note
 # saying so -- it is easier for me to discount a doubtful row than to find a missing one.
+c 1674 near serve
+c 1698 far lift
+c 1736 near drive
+c 1760 far net
+c 1782 near lift
+c 1835 far smash
+c 1851 near net defensive smash
+c 1890 far lift 
+c 1918 near backhand clear
+c 1968 far smash
+c 1983 near lift defensive lift
+c 2016 far smash
+c 2032 near net defensive
+c 2061 far net cross-net shot
+c 2090 near lift drive lift shot 
+c 2115 far drop cross-drop
+c 2150 near lift
+c 2180 far clear
+c 2219 near drive
+c 2236 far net cross-net
+c 2259 near net 
+c 2285 far lift
+c 2335 near clear
+c 2370 far smash
+c 2385 near net cross-net shot
+c 2419 far lift
+c 2449 near smash
+c 3509 far serve
+c 3536 near net
+c 3568 far drive 
+c 3613 near clear backend late shot 
+c 3660 far clear crosscourt clear
+c 3698 near clear
+c 3729 far smash
+c 3744 near net
+c 3774 far net
+c 3806 near lift
+c 3846 far drop backhand drop
 

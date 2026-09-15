@@ -9,177 +9,192 @@
   {
    "frame": 1674,
    "hitter": "near",
-   "notes": "net lift: track descends to his racket and rises away, near player lunging in"
+   "notes": "serve"
   },
   {
-   "frame": 1700,
+   "frame": 1698,
    "hitter": "far",
-   "notes": "far player lunging at the net on the left; long descent into him, steep rise out"
+   "notes": "lift"
   },
   {
    "frame": 1736,
    "hitter": "near",
-   "notes": "near player's raised racket just under the marker; incoming from the right, out up-left"
+   "notes": "drive"
   },
   {
-   "frame": 1754,
-   "hitter": null,
-   "notes": "reversal above the net; which racket produced it is not visible, so no hitter is recorded"
+   "frame": 1760,
+   "hitter": "far",
+   "notes": "net"
   },
   {
    "frame": 1782,
    "hitter": "near",
-   "notes": "near player lunging low left, steep descent in and steep rise out"
+   "notes": "lift"
+  },
+  {
+   "frame": 1835,
+   "hitter": "far",
+   "notes": "smash"
   },
   {
    "frame": 1851,
-   "hitter": "far",
-   "notes": "far player at the net; the near player is at the back of his court, two metres away"
-  },
-  {
-   "frame": 1921,
    "hitter": "near",
-   "notes": "near player's arm fully extended, marker at the racket head"
+   "notes": "net defensive smash"
   },
   {
-   "frame": 1966,
+   "frame": 1890,
    "hitter": "far",
-   "notes": "far player's raised racket just under the marker; track descends in and rises out"
+   "notes": "lift"
+  },
+  {
+   "frame": 1918,
+   "hitter": "near",
+   "notes": "backhand clear"
+  },
+  {
+   "frame": 1968,
+   "hitter": "far",
+   "notes": "smash"
   },
   {
    "frame": 1983,
    "hitter": "near",
-   "notes": "near player lunging deep to the left front, racket extended at the marker"
+   "notes": "lift defensive lift"
   },
   {
-   "frame": 2015,
-   "hitter": null,
-   "notes": "descend-then-rise in the far court between two near contacts; no racket visible, hitter not recorded"
-  },
-  {
-   "frame": 2031,
-   "hitter": "near",
-   "notes": "near player lunging low left, marker at his racket, steep rise out"
-  },
-  {
-   "frame": 2089,
+   "frame": 2016,
    "hitter": "far",
-   "notes": "the shuttle flies unbroken from here to the near players racket at 2147, so it was struck from the other side"
+   "notes": "smash"
   },
   {
-   "frame": 2147,
+   "frame": 2032,
    "hitter": "near",
-   "notes": "one contact at the net; 2143 (pipeline) and 2150 (turn detector) are the same strike seen 7 frames apart"
+   "notes": "net defensive"
   },
   {
-   "frame": 2181,
+   "frame": 2061,
    "hitter": "far",
-   "notes": "far player at the net directly under the marker, arm raised"
+   "notes": "net cross-net shot"
+  },
+  {
+   "frame": 2090,
+   "hitter": "near",
+   "notes": "lift drive lift shot"
+  },
+  {
+   "frame": 2115,
+   "hitter": "far",
+   "notes": "drop cross-drop"
+  },
+  {
+   "frame": 2150,
+   "hitter": "near",
+   "notes": "lift"
+  },
+  {
+   "frame": 2180,
+   "hitter": "far",
+   "notes": "clear"
   },
   {
    "frame": 2219,
    "hitter": "near",
-   "notes": "horizontal track turns into a steep rise at the near player's raised racket"
+   "notes": "drive"
   },
   {
-   "frame": 2288,
+   "frame": 2236,
    "hitter": "far",
-   "notes": "same elimination as 2089: unbroken flight from here to the near players overhead at 2335"
+   "notes": "net cross-net"
+  },
+  {
+   "frame": 2259,
+   "hitter": "near",
+   "notes": "net"
+  },
+  {
+   "frame": 2285,
+   "hitter": "far",
+   "notes": "lift"
   },
   {
    "frame": 2335,
    "hitter": "near",
-   "notes": "near player playing an overhead, racket at the marker, descent in and rise out"
+   "notes": "clear"
   },
   {
    "frame": 2370,
-   "hitter": null,
-   "notes": "descend-then-rise, which gravity cannot produce, but no racket is visible at it"
+   "hitter": "far",
+   "notes": "smash"
   },
   {
-   "frame": 2384,
+   "frame": 2385,
    "hitter": "near",
-   "notes": "near player lunging left at the net, racket extended to the marker"
+   "notes": "net cross-net shot"
   },
   {
    "frame": 2419,
    "hitter": "far",
-   "notes": "far player lunging low at the net with the marker at him; the near player is across court"
+   "notes": "lift"
   },
   {
-   "frame": 2444,
+   "frame": 2449,
    "hitter": "near",
-   "notes": "near player's racket raised under the marker, track rising off it; the detector fires at 2448"
+   "notes": "smash"
   },
   {
-   "frame": 3505,
+   "frame": 3509,
    "hitter": "far",
-   "notes": "far player at the net with his racket at the marker at 3505-3509; track descends in, rises out"
+   "notes": "serve"
   },
   {
-   "frame": 3520,
-   "hitter": null,
-   "notes": "net exchange with both players at the tape; no racket clearly at the marker"
-  },
-  {
-   "frame": 3533,
-   "hitter": null,
-   "notes": "near player reaching at the tape but the far player is alongside him; hitter not recorded"
-  },
-  {
-   "frame": 3571,
+   "frame": 3536,
    "hitter": "near",
-   "notes": "near player lunging into it with the far player nowhere near the marker"
+   "notes": "net"
   },
   {
-   "frame": 3588,
+   "frame": 3568,
    "hitter": "far",
-   "notes": "3582 and 3596 are both apexes, which needs a strike between them; the far player is outside this crop but the geometry leaves nobody else"
+   "notes": "drive"
   },
   {
    "frame": 3613,
    "hitter": "near",
-   "notes": "near player lunging deep to his left front, racket extended to the marker"
+   "notes": "clear backend late shot"
   },
   {
-   "frame": 3648,
+   "frame": 3660,
    "hitter": "far",
-   "notes": "far player under the marker at the net with his racket raised; near player across court"
+   "notes": "clear crosscourt clear"
   },
   {
-   "frame": 3697,
+   "frame": 3698,
    "hitter": "near",
-   "notes": "steep descent into the near player's raised racket and a steep rise out"
+   "notes": "clear"
   },
   {
-   "frame": 3745,
-   "hitter": null,
-   "notes": "reversal at the net post with the near player lunging left into it and the far player alongside"
+   "frame": 3729,
+   "hitter": "far",
+   "notes": "smash"
   },
   {
-   "frame": 3757,
-   "hitter": null,
-   "notes": "reversal at the tape with the far player just under the marker; not separable from the near player's reach"
-  },
-  {
-   "frame": 3772,
-   "hitter": null,
-   "notes": "one strike seen twice: the candidates at 3769 and 3776 are 7 frames apart, inside the duplicate window"
-  },
-  {
-   "frame": 3788,
+   "frame": 3744,
    "hitter": "near",
-   "notes": "near player directly under the marker with his racket at it; far player further left"
+   "notes": "net"
+  },
+  {
+   "frame": 3774,
+   "hitter": "far",
+   "notes": "net"
   },
   {
    "frame": 3806,
-   "hitter": null,
-   "notes": "steep descent into a reversal with the near player lunging right and the far player alongside"
+   "hitter": "near",
+   "notes": "lift"
   },
   {
-   "frame": 3866,
-   "hitter": "near",
-   "notes": "tight reversal right at the near player's raised racket; far player behind the net"
+   "frame": 3846,
+   "hitter": "far",
+   "notes": "drop backhand drop"
   }
  ],
  "_contacts_help": "[{\"frame\": 1234, \"hitter\": \"near\"|\"far\"|null, \"in_rally\": true, \"notes\": \"\"}] -- every racket contact in the clip, whether or not anything detected it. Set in_rally=false for a contact that is not a rally shot: handing the shuttle back to the server, a knock-up between points. Those are real, but they do not belong in a rally timeline, so they are scored as neither hits nor misses.",
@@ -230,36 +245,22 @@
  "_rallies_help": "[{\"rally\": 1, \"start_frame\": 83, \"end_frame\": 236, \"notes\": \"\"}] -- inclusive spans where a rally was in progress.",
  "labelled_contact_spans": [
   {
-   "start_frame": 1667,
-   "end_frame": 2465,
-   "notes": "rally 2. 36 candidates adjudicated frame by frame; the sequence alternates with no parity break and no gap longer than one exchange."
+   "start_frame": 1674,
+   "end_frame": 2462
   },
   {
    "start_frame": 3501,
-   "end_frame": 3884,
-   "notes": "rally 6. 21 candidates adjudicated; two corrections were needed to make it alternate, both recorded in the contact notes at 3588 and 3772."
+   "end_frame": 3884
   }
  ],
  "_labelled_contact_spans_help": "Optional. [{\"start_frame\": 1674, \"end_frame\": 2467, \"notes\": \"\"}] -- the spans in which *every* racket contact has been recorded. Leave it empty when the whole clip has been gone through, which is what an empty list means. Outside these spans the contact list is known to be incomplete, so a predicted hit there is not evidence of anything and is counted in neither column. Rallies are scored over the whole clip either way: this scopes contacts, not rallies.",
- "tracking_failures": [
-  {
-   "start_frame": 978,
-   "end_frame": 1062,
-   "kind": "not play",
-   "notes": "The shuttle track moves for 2.5 s but no rally is being played: at 1020 a player is walking with a shuttle in his hand between points. Recorded so it is not mistaken for a missed rally."
-  },
-  {
-   "start_frame": 3935,
-   "end_frame": 4144,
-   "kind": "not play",
-   "notes": "Six seconds of moving shuttle track between points. At 3950, 4000 and 4110 both players are walking and one bends to pick a shuttle off the floor; the score sits at 4-10 throughout."
-  }
- ],
+ "tracking_failures": [],
  "_tracking_failures_help": "Optional. [{\"start_frame\": 1918, \"end_frame\": 3291, \"kind\": \"...\", \"notes\": \"...\"}] -- stretches where the vision stack visibly followed the wrong thing. Not scored; kept so a known failure is not rediscovered twice.",
- "_provenance": "MODEL-PRODUCED LABELS, not human ones. Written by Claude on 2026-09-15 by adjudicating candidate frames against the raw shuttle CSV and the video, using tools/contact_sheet.py, which tiles the frames around a candidate and draws the raw track either side of it. Candidates came from two instruments so that agreement between them meant something: the project's flight detector, and an independent turning-point read of the raw CSV. They proposed 126 candidates across the clip and agreed on only 52 of them. These labels are weaker evidence than clip 2's hand labels, and weaker in a specific way: a contact is visible in the shape of the track, but WHO played it often is not. The far player is about 130 px of dark kit and frequently stands at the net directly behind the near player. A hitter is recorded only where a racket is visibly at the marker, or where an unbroken flight into a player whose identity is certain leaves no alternative; where neither held, hitter is null and the contact is scored for detection but not for attribution. Alternation was NOT used to fill in a hitter, only to find places where a contact was missing or an attribution was wrong.",
+ "_provenance": "HAND LABELS. Made by the project owner on 2026-09-15 by watching label-rally-A.mp4 and label-rally-B.mp4 -- the working video at a third speed with its frame numbers burned in and no pipeline output drawn on it -- and written as one line per contact in labels.tsv, which is kept beside this file as the primary record. Every contact carries a hitter; none was left unattributed. The hitters alternate strictly across both spans, which is what singles requires and which no labelling produced here before had achieved.",
+ "_supersedes": "Model-produced labels for the same two spans, written by Claude on 2026-09-15 and kept at git f7e7a81. They were made without sight of these, and comparing the two measures how far model labelling can be trusted: contact precision 0.829 and recall 0.763, hitter accuracy 0.864 over the 22 contacts the model was willing to name. The model missed 9 contacts, invented 6, and named the wrong player 3 times. Seven of the nine frames it recorded as detector false positives were real contacts it had itself missed.",
  "_labelling_caveats": [
-  "Only the two spans in labelled_contact_spans were gone through exhaustively. Rallies are labelled across the whole clip; contacts are not.",
-  "The frame recorded for a contact is where the track reverses, which for a soft shot can sit a few frames after the racket. Clip 2 has the same property at its contacts 1743 and 7227.",
-  "Rally 2 contains one candidate at 2061 that was examined and rejected. It is the least certain call in the file: a dark figure stands at the marker but may be an official behind the net rather than the far player. Parity across 2031-2089 holds without it, which is the reason it was rejected."
+  "One weak anchor: before labelling began the labeller had been told the model found \"~35 contacts\". That is an anchor on the total, not on positions or hitters. The hand count came to 38.",
+  "The notes carry a shot type for most contacts -- serve, lift, drive, net, smash, clear, drop. Nothing in milestone 1 reads them; they are gold data for milestone 2 if it resumes.",
+  "Only the two spans in labelled_contact_spans are exhaustive. Rallies are labelled across the whole clip and were carried over unchanged from the earlier pass, where they rest on the scoreboard reading 3-7 at frames 200, 480, 900 and 960 and 3-8 by 1020."
  ]
 }
