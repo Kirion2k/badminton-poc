@@ -1,577 +1,265 @@
 {
-  "_format": "badminton-poc/truth-v2",
-  "_instructions": "Watch annotated.mp4 and record what happened in the video, not what the pipeline said. contacts: one entry per real racket contact, with hitter 'near' or 'far'. rallies: one entry per rally actually played. Delete any contact you cannot see happen. Set labelled=true when finished. Nothing here should describe a detector.",
-  "clip": "test-video5",
-  "fps": 33.754346904573154,
-  "frame_reference": "outputs/<clip>/work.mp4; metadata.json holds the offset to source",
-  "labelled": false,
-  "contacts": [
-    {
-      "frame": 215,
-      "time_s": 6.37,
-      "hitter": null,
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 251,
-      "time_s": 7.436,
-      "hitter": null,
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 285,
-      "time_s": 8.443,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 357,
-      "time_s": 10.576,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 369,
-      "time_s": 10.932,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 397,
-      "time_s": 11.761,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 426,
-      "time_s": 12.621,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 452,
-      "time_s": 13.391,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 532,
-      "time_s": 15.761,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 570,
-      "time_s": 16.887,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 609,
-      "time_s": 18.042,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 650,
-      "time_s": 19.257,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 679,
-      "time_s": 20.116,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 708,
-      "time_s": 20.975,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 745,
-      "time_s": 22.071,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 768,
-      "time_s": 22.753,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 796,
-      "time_s": 23.582,
-      "hitter": null,
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 1002,
-      "time_s": 29.685,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 1054,
-      "time_s": 31.226,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 1203,
-      "time_s": 35.64,
-      "hitter": null,
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 1289,
-      "time_s": 38.188,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 1674,
-      "time_s": 49.594,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 1700,
-      "time_s": 50.364,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 1753,
-      "time_s": 51.934,
-      "hitter": null,
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 1782,
-      "time_s": 52.793,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 1851,
-      "time_s": 54.837,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 1890,
-      "time_s": 55.993,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 1921,
-      "time_s": 56.911,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 1982,
-      "time_s": 58.718,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 2031,
-      "time_s": 60.17,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 2060,
-      "time_s": 61.029,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 2089,
-      "time_s": 61.888,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 2116,
-      "time_s": 62.688,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 2149,
-      "time_s": 63.666,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 2181,
-      "time_s": 64.614,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 2236,
-      "time_s": 66.243,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 2257,
-      "time_s": 66.865,
-      "hitter": null,
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 2287,
-      "time_s": 67.754,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 2335,
-      "time_s": 69.176,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 2384,
-      "time_s": 70.628,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 2418,
-      "time_s": 71.635,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 2479,
-      "time_s": 73.442,
-      "hitter": null,
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 2569,
-      "time_s": 76.109,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 2646,
-      "time_s": 78.39,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 2725,
-      "time_s": 80.73,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 3003,
-      "time_s": 88.966,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 3036,
-      "time_s": 89.944,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 3097,
-      "time_s": 91.751,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 3197,
-      "time_s": 94.714,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 3249,
-      "time_s": 96.254,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 3507,
-      "time_s": 103.898,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 3542,
-      "time_s": 104.935,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 3571,
-      "time_s": 105.794,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 3612,
-      "time_s": 107.008,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 3656,
-      "time_s": 108.312,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 3696,
-      "time_s": 109.497,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 3744,
-      "time_s": 110.919,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 3775,
-      "time_s": 111.837,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 3806,
-      "time_s": 112.756,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 3865,
-      "time_s": 114.504,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 3935,
-      "time_s": 116.578,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 3995,
-      "time_s": 118.355,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 4032,
-      "time_s": 119.451,
-      "hitter": "near",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 4114,
-      "time_s": 121.881,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 4136,
-      "time_s": 122.532,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 4401,
-      "time_s": 130.383,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 4428,
-      "time_s": 131.183,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 4460,
-      "time_s": 132.131,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 4489,
-      "time_s": 132.99,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 4508,
-      "time_s": 133.553,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 4526,
-      "time_s": 134.086,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "frame": 4543,
-      "time_s": 134.59,
-      "hitter": "far",
-      "reviewed": false,
-      "notes": ""
-    }
-  ],
-  "_contacts_help": "[{\"frame\": 1234, \"hitter\": \"near\"|\"far\"|null, \"notes\": \"\"}] -- every racket contact in the clip, whether or not anything detected it.",
-  "rallies": [
-    {
-      "rally": 1,
-      "start_frame": 215,
-      "end_frame": 865,
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "rally": 2,
-      "start_frame": 1002,
-      "end_frame": 1064,
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "rally": 3,
-      "start_frame": 1674,
-      "end_frame": 2505,
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "rally": 4,
-      "start_frame": 2569,
-      "end_frame": 2767,
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "rally": 5,
-      "start_frame": 3003,
-      "end_frame": 3120,
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "rally": 6,
-      "start_frame": 3197,
-      "end_frame": 3267,
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "rally": 7,
-      "start_frame": 3507,
-      "end_frame": 4146,
-      "reviewed": false,
-      "notes": ""
-    },
-    {
-      "rally": 8,
-      "start_frame": 4401,
-      "end_frame": 4564,
-      "reviewed": false,
-      "notes": ""
-    }
-  ],
-  "_rallies_help": "[{\"rally\": 1, \"start_frame\": 83, \"end_frame\": 236, \"notes\": \"\"}] -- inclusive spans where a rally was in progress.",
-  "tracking_failures": [],
-  "_tracking_failures_help": "Optional. [{\"start_frame\": 1918, \"end_frame\": 3291, \"kind\": \"...\", \"notes\": \"...\"}] -- stretches where the vision stack visibly followed the wrong thing. Not scored; kept so a known failure is not rediscovered twice.",
-  "_draft_warning": "Seeded from detector output as a place to start. Delete every row that is not a real racket contact, correct the hitters, add the contacts nothing detected, fix the rally spans, then set reviewed=true on what remains and labelled=true at the top."
+ "_format": "badminton-poc/truth-v2",
+ "_instructions": "Watch annotated.mp4 and record what happened in the video, not what the pipeline said. contacts: one entry per real racket contact, with hitter 'near' or 'far'. rallies: one entry per rally actually played. Delete any contact you cannot see happen. Set labelled=true when finished. Nothing here should describe a detector.",
+ "clip": "test-video5",
+ "fps": 33.754346904573154,
+ "frame_reference": "outputs/<clip>/work.mp4; metadata.json holds the offset to source",
+ "labelled": true,
+ "contacts": [
+  {
+   "frame": 1674,
+   "hitter": "near",
+   "notes": "net lift: track descends to his racket and rises away, near player lunging in"
+  },
+  {
+   "frame": 1700,
+   "hitter": "far",
+   "notes": "far player lunging at the net on the left; long descent into him, steep rise out"
+  },
+  {
+   "frame": 1736,
+   "hitter": "near",
+   "notes": "near player's raised racket just under the marker; incoming from the right, out up-left"
+  },
+  {
+   "frame": 1754,
+   "hitter": null,
+   "notes": "reversal above the net; which racket produced it is not visible, so no hitter is recorded"
+  },
+  {
+   "frame": 1782,
+   "hitter": "near",
+   "notes": "near player lunging low left, steep descent in and steep rise out"
+  },
+  {
+   "frame": 1851,
+   "hitter": "far",
+   "notes": "far player at the net; the near player is at the back of his court, two metres away"
+  },
+  {
+   "frame": 1921,
+   "hitter": "near",
+   "notes": "near player's arm fully extended, marker at the racket head"
+  },
+  {
+   "frame": 1966,
+   "hitter": "far",
+   "notes": "far player's raised racket just under the marker; track descends in and rises out"
+  },
+  {
+   "frame": 1983,
+   "hitter": "near",
+   "notes": "near player lunging deep to the left front, racket extended at the marker"
+  },
+  {
+   "frame": 2015,
+   "hitter": null,
+   "notes": "descend-then-rise in the far court between two near contacts; no racket visible, hitter not recorded"
+  },
+  {
+   "frame": 2031,
+   "hitter": "near",
+   "notes": "near player lunging low left, marker at his racket, steep rise out"
+  },
+  {
+   "frame": 2089,
+   "hitter": "far",
+   "notes": "the shuttle flies unbroken from here to the near players racket at 2147, so it was struck from the other side"
+  },
+  {
+   "frame": 2147,
+   "hitter": "near",
+   "notes": "one contact at the net; 2143 (pipeline) and 2150 (turn detector) are the same strike seen 7 frames apart"
+  },
+  {
+   "frame": 2181,
+   "hitter": "far",
+   "notes": "far player at the net directly under the marker, arm raised"
+  },
+  {
+   "frame": 2219,
+   "hitter": "near",
+   "notes": "horizontal track turns into a steep rise at the near player's raised racket"
+  },
+  {
+   "frame": 2288,
+   "hitter": "far",
+   "notes": "same elimination as 2089: unbroken flight from here to the near players overhead at 2335"
+  },
+  {
+   "frame": 2335,
+   "hitter": "near",
+   "notes": "near player playing an overhead, racket at the marker, descent in and rise out"
+  },
+  {
+   "frame": 2370,
+   "hitter": null,
+   "notes": "descend-then-rise, which gravity cannot produce, but no racket is visible at it"
+  },
+  {
+   "frame": 2384,
+   "hitter": "near",
+   "notes": "near player lunging left at the net, racket extended to the marker"
+  },
+  {
+   "frame": 2419,
+   "hitter": "far",
+   "notes": "far player lunging low at the net with the marker at him; the near player is across court"
+  },
+  {
+   "frame": 2444,
+   "hitter": "near",
+   "notes": "near player's racket raised under the marker, track rising off it; the detector fires at 2448"
+  },
+  {
+   "frame": 3505,
+   "hitter": "far",
+   "notes": "far player at the net with his racket at the marker at 3505-3509; track descends in, rises out"
+  },
+  {
+   "frame": 3520,
+   "hitter": null,
+   "notes": "net exchange with both players at the tape; no racket clearly at the marker"
+  },
+  {
+   "frame": 3533,
+   "hitter": null,
+   "notes": "near player reaching at the tape but the far player is alongside him; hitter not recorded"
+  },
+  {
+   "frame": 3571,
+   "hitter": "near",
+   "notes": "near player lunging into it with the far player nowhere near the marker"
+  },
+  {
+   "frame": 3588,
+   "hitter": "far",
+   "notes": "3582 and 3596 are both apexes, which needs a strike between them; the far player is outside this crop but the geometry leaves nobody else"
+  },
+  {
+   "frame": 3613,
+   "hitter": "near",
+   "notes": "near player lunging deep to his left front, racket extended to the marker"
+  },
+  {
+   "frame": 3648,
+   "hitter": "far",
+   "notes": "far player under the marker at the net with his racket raised; near player across court"
+  },
+  {
+   "frame": 3697,
+   "hitter": "near",
+   "notes": "steep descent into the near player's raised racket and a steep rise out"
+  },
+  {
+   "frame": 3745,
+   "hitter": null,
+   "notes": "reversal at the net post with the near player lunging left into it and the far player alongside"
+  },
+  {
+   "frame": 3757,
+   "hitter": null,
+   "notes": "reversal at the tape with the far player just under the marker; not separable from the near player's reach"
+  },
+  {
+   "frame": 3772,
+   "hitter": null,
+   "notes": "one strike seen twice: the candidates at 3769 and 3776 are 7 frames apart, inside the duplicate window"
+  },
+  {
+   "frame": 3788,
+   "hitter": "near",
+   "notes": "near player directly under the marker with his racket at it; far player further left"
+  },
+  {
+   "frame": 3806,
+   "hitter": null,
+   "notes": "steep descent into a reversal with the near player lunging right and the far player alongside"
+  },
+  {
+   "frame": 3866,
+   "hitter": "near",
+   "notes": "tight reversal right at the near player's raised racket; far player behind the net"
+  }
+ ],
+ "_contacts_help": "[{\"frame\": 1234, \"hitter\": \"near\"|\"far\"|null, \"in_rally\": true, \"notes\": \"\"}] -- every racket contact in the clip, whether or not anything detected it. Set in_rally=false for a contact that is not a rally shot: handing the shuttle back to the server, a knock-up between points. Those are real, but they do not belong in a rally timeline, so they are scored as neither hits nor misses.",
+ "rallies": [
+  {
+   "rally": 1,
+   "start_frame": 213,
+   "end_frame": 915,
+   "notes": "One rally, not three. The shuttle track breaks twice inside it -- invisible at 306-339 and 476-509, not stationary -- and the scoreboard reads 3-7 at frames 200, 480, 900 and 960 and 3-8 by 1020, so exactly one point is played across the whole stretch. Contacts not labelled."
+  },
+  {
+   "rally": 2,
+   "start_frame": 1674,
+   "end_frame": 2462,
+   "notes": "Contacts labelled. Serve at 1674; the shuttle is stationary from 2464, so the rally ends just before that."
+  },
+  {
+   "rally": 3,
+   "start_frame": 2562,
+   "end_frame": 2770,
+   "notes": "Contacts not labelled."
+  },
+  {
+   "rally": 4,
+   "start_frame": 2998,
+   "end_frame": 3145,
+   "notes": "Contacts not labelled."
+  },
+  {
+   "rally": 5,
+   "start_frame": 3191,
+   "end_frame": 3336,
+   "notes": "Contacts not labelled."
+  },
+  {
+   "rally": 6,
+   "start_frame": 3501,
+   "end_frame": 3884,
+   "notes": "Contacts labelled."
+  },
+  {
+   "rally": 7,
+   "start_frame": 4395,
+   "end_frame": 4555,
+   "notes": "Contacts not labelled."
+  }
+ ],
+ "_rallies_help": "[{\"rally\": 1, \"start_frame\": 83, \"end_frame\": 236, \"notes\": \"\"}] -- inclusive spans where a rally was in progress.",
+ "labelled_contact_spans": [
+  {
+   "start_frame": 1667,
+   "end_frame": 2465,
+   "notes": "rally 2. 36 candidates adjudicated frame by frame; the sequence alternates with no parity break and no gap longer than one exchange."
+  },
+  {
+   "start_frame": 3501,
+   "end_frame": 3884,
+   "notes": "rally 6. 21 candidates adjudicated; two corrections were needed to make it alternate, both recorded in the contact notes at 3588 and 3772."
+  }
+ ],
+ "_labelled_contact_spans_help": "Optional. [{\"start_frame\": 1674, \"end_frame\": 2467, \"notes\": \"\"}] -- the spans in which *every* racket contact has been recorded. Leave it empty when the whole clip has been gone through, which is what an empty list means. Outside these spans the contact list is known to be incomplete, so a predicted hit there is not evidence of anything and is counted in neither column. Rallies are scored over the whole clip either way: this scopes contacts, not rallies.",
+ "tracking_failures": [
+  {
+   "start_frame": 978,
+   "end_frame": 1062,
+   "kind": "not play",
+   "notes": "The shuttle track moves for 2.5 s but no rally is being played: at 1020 a player is walking with a shuttle in his hand between points. Recorded so it is not mistaken for a missed rally."
+  },
+  {
+   "start_frame": 3935,
+   "end_frame": 4144,
+   "kind": "not play",
+   "notes": "Six seconds of moving shuttle track between points. At 3950, 4000 and 4110 both players are walking and one bends to pick a shuttle off the floor; the score sits at 4-10 throughout."
+  }
+ ],
+ "_tracking_failures_help": "Optional. [{\"start_frame\": 1918, \"end_frame\": 3291, \"kind\": \"...\", \"notes\": \"...\"}] -- stretches where the vision stack visibly followed the wrong thing. Not scored; kept so a known failure is not rediscovered twice.",
+ "_provenance": "MODEL-PRODUCED LABELS, not human ones. Written by Claude on 2026-09-15 by adjudicating candidate frames against the raw shuttle CSV and the video, using tools/contact_sheet.py, which tiles the frames around a candidate and draws the raw track either side of it. Candidates came from two instruments so that agreement between them meant something: the project's flight detector, and an independent turning-point read of the raw CSV. They proposed 126 candidates across the clip and agreed on only 52 of them. These labels are weaker evidence than clip 2's hand labels, and weaker in a specific way: a contact is visible in the shape of the track, but WHO played it often is not. The far player is about 130 px of dark kit and frequently stands at the net directly behind the near player. A hitter is recorded only where a racket is visibly at the marker, or where an unbroken flight into a player whose identity is certain leaves no alternative; where neither held, hitter is null and the contact is scored for detection but not for attribution. Alternation was NOT used to fill in a hitter, only to find places where a contact was missing or an attribution was wrong.",
+ "_labelling_caveats": [
+  "Only the two spans in labelled_contact_spans were gone through exhaustively. Rallies are labelled across the whole clip; contacts are not.",
+  "The frame recorded for a contact is where the track reverses, which for a soft shot can sit a few frames after the racket. Clip 2 has the same property at its contacts 1743 and 7227.",
+  "Rally 2 contains one candidate at 2061 that was examined and rejected. It is the least certain call in the file: a dark figure stands at the marker but may be an official behind the net rather than the far player. Parity across 2031-2089 holds without it, which is the reason it was rejected."
+ ]
 }

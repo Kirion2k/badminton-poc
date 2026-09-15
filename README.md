@@ -1209,3 +1209,61 @@ rests on, and one of those clips carries model-produced labels. Clip 5 is still 
 its drop from 83 predicted hits to 65 and from 8 rallies to 7 is a count, not an accuracy. The
 three false positives that survive on clip 5's rally 3 -- 1828, 1891 and 2114, all rejected by
 eye -- are not apexes and are not addressed by any of this.
+
+### Clip 5, labelled in parts, and the first clip where rally boundaries fail
+
+Clip 5 is a third labelled recording, and the first labelled by parts: its two longest rallies
+have every contact adjudicated, and the rest of the clip has rallies but not contacts. That is
+what `labelled_contact_spans` is for, and why it exists.
+
+| | clip 2 | clip 3 | clip 5 |
+|---|---|---|---|
+| hit precision | 0.8852 | 0.9091 | 0.7692 |
+| hit recall | 0.9153 | 0.7143 | 0.8571 |
+| hit F1 | 0.9000 | 0.8000 | 0.8108 |
+| hitter accuracy | 0.9245 | 0.90 | 0.8947 |
+| rally boundaries | 6 of 6 | 4 of 4 | **4 of 7** |
+| two-player coverage | 0.9286 | 0.9834 | 0.9016 |
+
+Coverage passes on all three. Hitter assignment misses its 0.90 target on clip 5 by one
+judgement in nineteen. **Rally boundaries fail for the first time**: 0.571 against a 0.85
+target, and the three that fail do so for two different reasons.
+
+**A break in the shuttle track reads as the end of a rally.** The first rally runs from the
+serve at frame 213 to frame 915; the pipeline reports it starting at 513, nearly nine seconds
+late. The track goes *invisible* twice inside that rally -- frames 306-339 and 476-509 -- and
+the detector ends a rally at each break rather than linking across it. Nothing in the pipeline
+distinguishes "the tracker lost the shuttle" from "the shuttle stopped moving", and on this clip
+those two look identical.
+
+Establishing that it is one rally took the scoreboard rather than the video: it reads 3-7 at
+frames 200, 480, 900 and 960 and 3-8 by 1020, so exactly one point is played across the whole
+stretch. Three separate runs of moving shuttle, one point. The other two failures are the same
+shape in miniature -- rally 3's detected span is 2.5 s late and 2.6 s short.
+
+**The nine false positives inside the labelled spans are all frames rejected by eye**: 1828,
+1888, 2059, 2114, 2234, 2256, 2307, 2437 and 3726. Most sit at the top or the middle of a
+flight with no racket within reach. The five missed contacts are 1851, 3613, 3757, 3788 and
+3866; 1851 is the soft net reply the gravity-apex rule discards, which is the cost that rule was
+already known to carry.
+
+**What the labelling can and cannot support.** A contact is visible in the shape of the raw
+track -- it arrives falling and leaves rising, and an apex does the opposite. *Who played it*
+often is not: the far player is about 130 px of dark kit and spends much of both rallies at the
+net directly behind the near player. So a hitter is recorded only where a racket is visibly at
+the marker, or where an unbroken flight into a player whose identity is certain leaves no
+alternative. Nine of the 35 contacts carry no hitter at all, and the scorer leaves those out of
+the hitter denominator rather than guessing.
+
+Alternation was used as an instrument, not as a source of labels. In singles the hitters of a
+rally are a two-colouring, so one known hitter fixes every other by parity, and any second known
+hitter that disagrees is proof that something is wrong -- a mislabelled hitter, or a contact
+nobody recorded. It found three: a missing contact at 3588 between two apexes, one strike
+recorded twice at 3769 and 3776, and a rejected candidate at 2061 whose removal restores parity
+across 2031-2089. Both labelled spans alternate cleanly once those are fixed, which is the
+evidence offered that the spans are exhaustive.
+
+They remain model-produced labels, and one clip in three of this project's labelled set is now
+hand-labelled. `tools/contact_sheet.py` is what made them possible at all: 126 candidates were
+proposed by two instruments -- the flight detector and an independent turning-point read of the
+raw CSV -- which agreed on only 52 of them.
