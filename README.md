@@ -1013,6 +1013,35 @@ those missing frames sit in gaps of five frames or fewer, so interpolation would
 the far player falls out of the detection list entirely while background spectators a third her
 size come back at 0.75 confidence.
 
+### A second search, for club-hall footage (2026-09-16)
+
+Milestone 2 found BST reading 0.47 on the one club-hall clip against 0.63 and 0.75 on two
+tournament broadcasts, so the next recording has to be club footage. Four more clips were
+screened. None qualifies.
+
+| clip | what it is | why not |
+|---|---|---|
+| `vcESpUeecZk` (DK Way Copper MS final) | school sports hall, behind the baseline at head height | camera is operated: no stable window of 2 minutes anywhere in 32; 272 px sustained drift in the window pulled |
+| `6meyO5TIeho` (Alberta Series MS final) | multi-court club hall, 8.8 stable minutes | low diagonal view; the far side of the court leaves the frame |
+| `YeC9oHEzHM8` (Play Factory, Chennai) | wooden-floor club hall, stable for the whole 10 minutes | doubles: four players on court |
+| `00a3X-xbBQk` (Kerala sub-junior U13 GS final) | academy tournament | longest stable window 64 seconds |
+
+Worth keeping from it: DK Way's far player measured **218 px at 0.91 confidence**, the largest
+seen on any public clip, and it was discarded only because the screening rectangle's net line
+sits above where a far player's feet appear under a low camera. A low camera is not by itself
+disqualifying for the far player's size. It is disqualifying for occlusion and, in every case so
+far, it has come with a camera someone is holding.
+
+The pattern across eleven screened clips: **club footage on YouTube is filmed the way club
+players film** -- handheld or at head height, often doubles. The combination this pipeline needs
+(tripod, elevated, whole court, singles) is what a tournament broadcast provides, which is why the
+two clips that pass are both broadcasts. Recording a club match to the spec is likely faster than
+finding one.
+
+Screening a candidate without any GPU work: pull the whole video at 360p, phase-correlate a
+sample every two seconds against the previous one, and report the longest run in which no step
+exceeds 1% of frame width. That rejected three of these four in under a minute each.
+
 ### Coverage counts filled frames, not the right person
 
 Twice the pipeline has reported a passing coverage figure while a slot held someone who was not
