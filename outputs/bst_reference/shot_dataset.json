@@ -2,9 +2,9 @@
  "_what": "Phase G: the Milestone 2 dataset, built only from hand-verified racket contacts. No detector hits, no model-produced labels, no predictions.",
  "clips": {
   "test-video2": {
-   "shots_built": 58,
+   "shots_built": 60,
    "with_a_shot_type": 58,
-   "without_a_shot_type": 0,
+   "without_a_shot_type": 2,
    "excluded": 3,
    "by_class": {
     "lift": 18,
@@ -17,12 +17,12 @@
     "drive": 1
    },
    "by_hitter": {
-    "near": 30,
-    "far": 28
+    "near": 31,
+    "far": 29
    },
    "rallies": 6,
-   "median_window_seconds": 2.167,
-   "median_hitter_joint_coverage": 0.869,
+   "median_window_seconds": 2.15,
+   "median_hitter_joint_coverage": 0.863,
    "median_shuttle_coverage": 1.0
   },
   "test-video3": {
@@ -71,9 +71,9 @@
   }
  },
  "totals": {
-  "shots_built": 106,
+  "shots_built": 108,
   "with_a_shot_type": 106,
-  "without_a_shot_type": 0,
+  "without_a_shot_type": 2,
   "excluded": 3,
   "recordings_with_labels": 3
  },
@@ -88,8 +88,8 @@
   "uncertain": 2
  },
  "by_hitter": {
-  "near": 55,
-  "far": 51
+  "near": 54,
+  "far": 52
  },
  "class_balance": {
   "largest_class": [
@@ -351,7 +351,7 @@
    "rally": 3,
    "hit_frame": 1877,
    "hit_time_s": 31.291,
-   "hitter": "near",
+   "hitter": "far",
    "shot_type": "lift",
    "is_first_in_rally": false,
    "window_frames": [
@@ -360,7 +360,7 @@
    ],
    "window_seconds": 2.434,
    "samples_in_window": 73,
-   "hitter_joint_coverage": 0.84,
+   "hitter_joint_coverage": 0.745,
    "shuttle_coverage": 0.822
   },
   {
@@ -644,16 +644,34 @@
    "is_first_in_rally": false,
    "window_frames": [
     3935,
-    4085
+    4032
    ],
-   "window_seconds": 2.517,
-   "samples_in_window": 75,
-   "hitter_joint_coverage": 0.905,
+   "window_seconds": 1.634,
+   "samples_in_window": 49,
+   "hitter_joint_coverage": 0.903,
    "shuttle_coverage": 1.0
   },
   {
    "clip": "test-video2",
    "shot_id": 29,
+   "rally": 4,
+   "hit_frame": 4017,
+   "hit_time_s": 66.965,
+   "hitter": "near",
+   "shot_type": null,
+   "is_first_in_rally": false,
+   "window_frames": [
+    3980,
+    4110
+   ],
+   "window_seconds": 2.184,
+   "samples_in_window": 65,
+   "hitter_joint_coverage": 0.863,
+   "shuttle_coverage": 1.0
+  },
+  {
+   "clip": "test-video2",
+   "shot_id": 30,
    "rally": 4,
    "hit_frame": 4095,
    "hit_time_s": 68.266,
@@ -661,17 +679,17 @@
    "shot_type": "drop",
    "is_first_in_rally": false,
    "window_frames": [
-    4005,
+    4017,
     4166
    ],
-   "window_seconds": 2.701,
-   "samples_in_window": 81,
-   "hitter_joint_coverage": 0.865,
+   "window_seconds": 2.501,
+   "samples_in_window": 75,
+   "hitter_joint_coverage": 0.86,
    "shuttle_coverage": 1.0
   },
   {
    "clip": "test-video2",
-   "shot_id": 30,
+   "shot_id": 31,
    "rally": 4,
    "hit_frame": 4151,
    "hit_time_s": 69.199,
@@ -689,7 +707,7 @@
   },
   {
    "clip": "test-video2",
-   "shot_id": 31,
+   "shot_id": 32,
    "rally": 4,
    "hit_frame": 4238,
    "hit_time_s": 70.65,
@@ -698,16 +716,34 @@
    "is_first_in_rally": false,
    "window_frames": [
     4151,
-    4343
+    4331
    ],
-   "window_seconds": 3.217,
-   "samples_in_window": 96,
-   "hitter_joint_coverage": 0.947,
-   "shuttle_coverage": 0.708
+   "window_seconds": 3.017,
+   "samples_in_window": 90,
+   "hitter_joint_coverage": 0.944,
+   "shuttle_coverage": 0.689
   },
   {
    "clip": "test-video2",
-   "shot_id": 32,
+   "shot_id": 33,
+   "rally": 4,
+   "hit_frame": 4316,
+   "hit_time_s": 71.95,
+   "hitter": "near",
+   "shot_type": null,
+   "is_first_in_rally": false,
+   "window_frames": [
+    4238,
+    4363
+   ],
+   "window_seconds": 2.1,
+   "samples_in_window": 63,
+   "hitter_joint_coverage": 0.796,
+   "shuttle_coverage": 0.571
+  },
+  {
+   "clip": "test-video2",
+   "shot_id": 34,
    "rally": 4,
    "hit_frame": 4348,
    "hit_time_s": 72.483,
@@ -715,17 +751,17 @@
    "shot_type": "net",
    "is_first_in_rally": false,
    "window_frames": [
-    4258,
+    4316,
     4422
    ],
-   "window_seconds": 2.751,
-   "samples_in_window": 82,
-   "hitter_joint_coverage": 0.964,
-   "shuttle_coverage": 0.671
+   "window_seconds": 1.784,
+   "samples_in_window": 53,
+   "hitter_joint_coverage": 0.951,
+   "shuttle_coverage": 1.0
   },
   {
    "clip": "test-video2",
-   "shot_id": 33,
+   "shot_id": 35,
    "rally": 4,
    "hit_frame": 4407,
    "hit_time_s": 73.467,
@@ -743,7 +779,7 @@
   },
   {
    "clip": "test-video2",
-   "shot_id": 34,
+   "shot_id": 36,
    "rally": 4,
    "hit_frame": 4510,
    "hit_time_s": 75.184,
@@ -761,7 +797,7 @@
   },
   {
    "clip": "test-video2",
-   "shot_id": 35,
+   "shot_id": 37,
    "rally": 4,
    "hit_frame": 4556,
    "hit_time_s": 75.951,
@@ -779,7 +815,7 @@
   },
   {
    "clip": "test-video2",
-   "shot_id": 36,
+   "shot_id": 38,
    "rally": 4,
    "hit_frame": 4614,
    "hit_time_s": 76.918,
@@ -797,7 +833,7 @@
   },
   {
    "clip": "test-video2",
-   "shot_id": 37,
+   "shot_id": 39,
    "rally": 4,
    "hit_frame": 4704,
    "hit_time_s": 78.418,
@@ -815,7 +851,7 @@
   },
   {
    "clip": "test-video2",
-   "shot_id": 38,
+   "shot_id": 40,
    "rally": 4,
    "hit_frame": 4750,
    "hit_time_s": 79.185,
@@ -833,7 +869,7 @@
   },
   {
    "clip": "test-video2",
-   "shot_id": 39,
+   "shot_id": 41,
    "rally": 4,
    "hit_frame": 4814,
    "hit_time_s": 80.252,
@@ -851,7 +887,7 @@
   },
   {
    "clip": "test-video2",
-   "shot_id": 40,
+   "shot_id": 42,
    "rally": 4,
    "hit_frame": 4888,
    "hit_time_s": 81.485,
@@ -869,7 +905,7 @@
   },
   {
    "clip": "test-video2",
-   "shot_id": 41,
+   "shot_id": 43,
    "rally": 4,
    "hit_frame": 4936,
    "hit_time_s": 82.286,
@@ -887,7 +923,7 @@
   },
   {
    "clip": "test-video2",
-   "shot_id": 42,
+   "shot_id": 44,
    "rally": 4,
    "hit_frame": 5007,
    "hit_time_s": 83.469,
@@ -905,7 +941,7 @@
   },
   {
    "clip": "test-video2",
-   "shot_id": 43,
+   "shot_id": 45,
    "rally": 4,
    "hit_frame": 5060,
    "hit_time_s": 84.353,
@@ -923,7 +959,7 @@
   },
   {
    "clip": "test-video2",
-   "shot_id": 44,
+   "shot_id": 46,
    "rally": 4,
    "hit_frame": 5123,
    "hit_time_s": 85.403,
@@ -941,7 +977,7 @@
   },
   {
    "clip": "test-video2",
-   "shot_id": 45,
+   "shot_id": 47,
    "rally": 5,
    "hit_frame": 6171,
    "hit_time_s": 102.874,
@@ -959,7 +995,7 @@
   },
   {
    "clip": "test-video2",
-   "shot_id": 46,
+   "shot_id": 48,
    "rally": 5,
    "hit_frame": 6223,
    "hit_time_s": 103.741,
@@ -977,7 +1013,7 @@
   },
   {
    "clip": "test-video2",
-   "shot_id": 47,
+   "shot_id": 49,
    "rally": 5,
    "hit_frame": 6285,
    "hit_time_s": 104.774,
@@ -995,7 +1031,7 @@
   },
   {
    "clip": "test-video2",
-   "shot_id": 48,
+   "shot_id": 50,
    "rally": 5,
    "hit_frame": 6326,
    "hit_time_s": 105.458,
@@ -1013,7 +1049,7 @@
   },
   {
    "clip": "test-video2",
-   "shot_id": 49,
+   "shot_id": 51,
    "rally": 5,
    "hit_frame": 6355,
    "hit_time_s": 105.941,
@@ -1031,7 +1067,7 @@
   },
   {
    "clip": "test-video2",
-   "shot_id": 50,
+   "shot_id": 52,
    "rally": 6,
    "hit_frame": 7013,
    "hit_time_s": 116.91,
@@ -1049,7 +1085,7 @@
   },
   {
    "clip": "test-video2",
-   "shot_id": 51,
+   "shot_id": 53,
    "rally": 6,
    "hit_frame": 7057,
    "hit_time_s": 117.644,
@@ -1067,7 +1103,7 @@
   },
   {
    "clip": "test-video2",
-   "shot_id": 52,
+   "shot_id": 54,
    "rally": 6,
    "hit_frame": 7114,
    "hit_time_s": 118.594,
@@ -1085,7 +1121,7 @@
   },
   {
    "clip": "test-video2",
-   "shot_id": 53,
+   "shot_id": 55,
    "rally": 6,
    "hit_frame": 7196,
    "hit_time_s": 119.961,
@@ -1103,7 +1139,7 @@
   },
   {
    "clip": "test-video2",
-   "shot_id": 54,
+   "shot_id": 56,
    "rally": 6,
    "hit_frame": 7227,
    "hit_time_s": 120.478,
@@ -1121,7 +1157,7 @@
   },
   {
    "clip": "test-video2",
-   "shot_id": 55,
+   "shot_id": 57,
    "rally": 6,
    "hit_frame": 7248,
    "hit_time_s": 120.828,
@@ -1139,7 +1175,7 @@
   },
   {
    "clip": "test-video2",
-   "shot_id": 56,
+   "shot_id": 58,
    "rally": 6,
    "hit_frame": 7286,
    "hit_time_s": 121.461,
@@ -1157,7 +1193,7 @@
   },
   {
    "clip": "test-video2",
-   "shot_id": 57,
+   "shot_id": 59,
    "rally": 6,
    "hit_frame": 7314,
    "hit_time_s": 121.928,

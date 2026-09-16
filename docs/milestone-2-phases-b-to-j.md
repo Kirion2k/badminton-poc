@@ -339,3 +339,69 @@ labels are not what makes it low.
 - **Clip 2 has never been labelled blind.** Correcting four contacts is not the same as relabelling
   it the way clips 3 and 5 were, and the four that surfaced did so only because the owner happened
   to notice while doing something else.
+
+---
+
+## Phase K addendum: four of the six alternations resolved, and a second parked point found
+
+The six impossible alternations were put to the project owner as a labelling task. They asked
+whether it could be done from evidence already on disk. Four of the six could.
+
+**Important: these four are model-derived, not hand-given.** Every contact touched carries
+`hitter_source=model-derived-2026-09-16`, the revision entry says so, and neither added contact
+was given a shot type, because naming the stroke is the owner's call and Milestone 2 skips a
+contact that has none. **Clip 2 is now a mixed labelling** and that has to be stated wherever it
+is scored. Clips 3 and 5 remain entirely hand-given.
+
+| pair | verdict | evidence |
+|---|---|---|
+| 1801→1877, 1877→1931 | **1877 is far, not near** | at that frame the near player stands with the racket down and the far player is mid-strike |
+| 3980→4095 | **contact added at 4017, near** | shuttle descends to y=540 and reverses with dy −72, which gravity cannot do; frame shows the near player lunging |
+| 4238→4348 | **contact added at 4316, near** | near player's wrist peaks at 4315-4317 then falls; frame shows them airborne in full overhead extension |
+| 7196→7227, 7227→7248 | **unresolved, and why is the finding** | below |
+
+The run of three resolved to a single error, as its shape suggested: one wrong contact in the
+middle of three, not two independent mistakes.
+
+### The 7227/7248 pair exposed a second parked point
+
+TrackNet rests on a mark on the back wall at about (400, 175) in four stretches of 11 to 15
+frames: 4170-4180, 7216-7228, 7247-7261 and 7347-7360. **The labelled contacts at 7227 and 7248
+sit inside two of them.** What reads as a sharp direction reversal at those frames is the tracker
+jumping off a stationary object, not a racket.
+
+The fixed-point detector did not catch it. It found the large parked point at (918, 222), which
+holds 2340 frames across 14 runs — 35% of every visible frame in the clip — and stopped there.
+This one holds 59 frames across four runs and falls under the threshold. **A parked point does
+not have to be long-lived to put a false contact in the labels; it only has to be parked while
+something is being decided.**
+
+Three things agree that 7227 and 7248 are artefacts: the tracker is parked at both, the far
+player is untracked from 7228 to 7248, and the current pipeline emits no hit at either frame. The
+owner independently marked both `uncertain` when asked for a stroke — they could not name one
+because there was no stroke to name.
+
+**Neither label was changed anyway.** "The current detector does not produce this contact" is
+precisely the circular reasoning that put clip 2 in this state, and it cannot be the grounds for
+deleting a label. It is recorded in `tracking_failures` and left for a human. Two impossible
+alternations remain, both in this run.
+
+### What it changed, and what it did not
+
+| | before | after |
+|---|---|---|
+| impossible alternations | 6 | **2** |
+| hit precision / recall | 0.9016 / 0.8852 | 0.9016 / **0.9016** |
+| hitter accuracy | 0.9623 | **0.9811** |
+| BST agreement with our hitter | 0.9231 | **0.9519** |
+| **BST accuracy, three recordings** | **0.5895** | **0.5895** |
+| clip 2 accuracy | 0.4706 | **0.4706** |
+
+The Milestone 1 figures moved because the labelling changed, not because the detector did. 4316
+was a genuine missed hit the labels were hiding, and 4014 was being scored as a false positive
+against a contact that was really there.
+
+**The Milestone 2 headline did not move at all.** Clip 2 still reads 0.4706 after four label
+defects in it were repaired. That is the strongest evidence yet that its low score is a property
+of the recording rather than of its answer key, which is what the BST-corroboration split already
+suggested and what this now confirms from the other direction.

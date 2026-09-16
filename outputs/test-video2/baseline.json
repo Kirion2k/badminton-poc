@@ -2,47 +2,11 @@
   "_format": "badminton-poc/truth-v2",
   "clip": "test-video2",
   "fps": 59.986172678840134,
-  "labelled_contacts": 61,
+  "labelled_contacts": 63,
   "labelled_rallies": 6,
   "label_consistency": {
-    "impossible_alternations": 6,
+    "impossible_alternations": 2,
     "violations": [
-      {
-        "rally": 3,
-        "first_frame": 1801,
-        "second_frame": 1877,
-        "hitter": "near",
-        "gap_seconds": 1.2669586440677965,
-        "first_shot_type": "clear",
-        "second_shot_type": "lift"
-      },
-      {
-        "rally": 3,
-        "first_frame": 1877,
-        "second_frame": 1931,
-        "hitter": "near",
-        "gap_seconds": 0.9002074576271186,
-        "first_shot_type": "lift",
-        "second_shot_type": "clear"
-      },
-      {
-        "rally": 4,
-        "first_frame": 3980,
-        "second_frame": 4095,
-        "hitter": "far",
-        "gap_seconds": 1.9171084745762712,
-        "first_shot_type": "drop",
-        "second_shot_type": "drop"
-      },
-      {
-        "rally": 4,
-        "first_frame": 4238,
-        "second_frame": 4348,
-        "hitter": "far",
-        "gap_seconds": 1.8337559322033898,
-        "first_shot_type": "clear",
-        "second_shot_type": "net"
-      },
       {
         "rally": 6,
         "first_frame": 7196,
@@ -65,15 +29,15 @@
     "help": "Adjacent rally contacts credited to the same player. A singles rally alternates, so each one marks a wrong hitter, a contact that never happened, or a real contact nobody labelled. Derived from the rules of the sport, not from any detector, so it catches labels that were copied from detector output and confirmed."
   },
   "hit_detection": {
-    "true_positives": 54,
-    "false_positives": 7,
-    "false_negatives": 5,
-    "precision": 0.8852,
-    "recall": 0.9153,
-    "f1": 0.9,
+    "true_positives": 55,
+    "false_positives": 6,
+    "false_negatives": 6,
+    "precision": 0.9016,
+    "recall": 0.9016,
+    "f1": 0.9016,
     "predicted": 61,
-    "labelled_contacts": 61,
-    "rally_shots": 59,
+    "labelled_contacts": 63,
+    "rally_shots": 61,
     "out_of_rally_matched": 0,
     "out_of_rally_missed": 2,
     "predictions_outside_labelled_spans": 0,
@@ -81,12 +45,12 @@
     "labelled_seconds": null
   },
   "hitter_assignment": {
-    "matched_hits": 54,
+    "matched_hits": 55,
     "scored": 53,
-    "correct": 51,
-    "incorrect": 2,
-    "unassigned": 1,
-    "accuracy": 0.9623
+    "correct": 52,
+    "incorrect": 1,
+    "unassigned": 2,
+    "accuracy": 0.9811
   },
   "rally_segmentation": {
     "labelled_rallies": 6,
@@ -187,6 +151,6 @@
     "coverage_trusted": true,
     "note": "Coverage says a slot was filled, not that it held the right person. A slot following a bystander reads as 100%; record those in tracking_failures. coverage_trusted is false when a slot does not behave like a player, which is how a coverage figure earned by tracking furniture announces itself, and null when there were too few frames to tell; the measurements behind it are in plausibility."
   },
-  "tracking_failures_recorded": 0,
+  "tracking_failures_recorded": 1,
   "caveat": "Scored against hand labels for this clip only. A configuration that has been tuned on this clip is not validated by it."
 }

@@ -99,9 +99,10 @@
   },
   {
    "frame": 1877,
-   "hitter": "near",
-   "notes": "real hit you flagged as missed at frame 1886; now detected. CONFIRM true_hitter. model doesnt detect the far player for some reason and hence doesnt detect the shuttle being hit?",
-   "shot_type": "lift"
+   "hitter": "far",
+   "notes": "real hit you flagged as missed at frame 1886; now detected. CONFIRM true_hitter. model doesnt detect the far player for some reason and hence doesnt detect the shuttle being hit? Hitter corrected near -> far. At this frame the near player stands with the racket down and the far player has the arm raised, striking. Derived by Claude on 2026-09-16 from the shuttle track, pose keypoints and video frames, NOT given by the project owner. Provisional: confirm or remove.",
+   "shot_type": "lift",
+   "hitter_source": "model-derived-2026-09-16"
   },
   {
    "frame": 1931,
@@ -201,6 +202,12 @@
    "shot_type": "drop"
   },
   {
+   "frame": 4017,
+   "hitter": "near",
+   "notes": "The shuttle descends steadily to y=540 and reverses at 4018 with dy -72, which gravity cannot do; the frame shows the near player lunging with the racket extended. The pipeline emits an unassigned hit at 4014, scored as a false positive until now. Derived by Claude on 2026-09-16 from the shuttle track, pose keypoints and video frames, NOT given by the project owner. Provisional: confirm or remove.",
+   "hitter_source": "model-derived-2026-09-16"
+  },
+  {
    "frame": 4095,
    "hitter": "far",
    "notes": "",
@@ -217,6 +224,12 @@
    "hitter": "far",
    "notes": "",
    "shot_type": "clear"
+  },
+  {
+   "frame": 4316,
+   "hitter": "near",
+   "notes": "The near player's wrist rises to its apex at 4315-4317 then falls, the classic overhead swing; the frame shows the player airborne in full extension with the shuttle above the racket. The pipeline detects nothing here, so this was a genuine missed hit the labels were hiding. Derived by Claude on 2026-09-16 from the shuttle track, pose keypoints and video frames, NOT given by the project owner. Provisional: confirm or remove.",
+   "hitter_source": "model-derived-2026-09-16"
   },
   {
    "frame": 4348,
@@ -423,7 +436,14 @@
   }
  ],
  "_rallies_help": "[{\"rally\": 1, \"start_frame\": 83, \"end_frame\": 236, \"notes\": \"\"}] -- inclusive spans where a rally was in progress.",
- "tracking_failures": [],
+ "tracking_failures": [
+  {
+   "start_frame": 7216,
+   "end_frame": 7261,
+   "kind": "shuttle tracker parked on an undetected fixed object",
+   "notes": "TrackNet rests on a mark on the back wall at about (400, 175) in four stretches of 11-15 frames: 4170-4180, 7216-7228, 7247-7261, 7347-7360. The fixed-point detector found only the large parked point at (918, 222), which holds 2340 frames; this one holds 59 across four runs and falls under the threshold. The labelled contacts at 7227 and 7248 sit inside two of these stretches, the far player is untracked from 7228 to 7248, and the current pipeline emits no hit at either frame. That is consistent with both being detector artefacts the candidate-verdict migration confirmed, but it is not proof, so neither label was changed."
+  }
+ ],
  "_tracking_failures_help": "Optional. [{\"start_frame\": 1918, \"end_frame\": 3291, \"kind\": \"...\", \"notes\": \"...\"}] -- stretches where the vision stack visibly followed the wrong thing. Not scored; kept so a known failure is not rediscovered twice.",
  "migrated_from": {
   "format": "candidate verdicts (ground_truth.json)",
@@ -453,6 +473,14 @@
    "method": "Applied by frame to outputs/test-video2/truth.json. No detector, model or threshold was consulted. The alternation check (badminton_poc.truth.find_impossible_alternations) was run before and after: 13 impossible pairs before, 6 after.",
    "effect": "6 impossible pairs remain and are NOT fixed here, because the rule says the labelling is wrong somewhere in each pair without saying which contact is wrong, and some are likely to be real contacts nobody recorded rather than wrong hitters. They are listed in every evaluation under label_consistency until a human resolves them.",
    "context": "This clip's contacts were migrated from candidate verdicts, and its true_hitter agreed with detected_hitter on 60 of 61 real hits -- the signature of a pass that read the detector's answer and confirmed it. Clips 3 and 5 were re-labelled blind and carry zero impossible pairs; clip 2 carried thirteen. It has not had that treatment."
+  },
+  {
+   "date": "2026-09-16",
+   "what": "Hitter at 1877 corrected near -> far; contacts added at 4017 (near) and 4316 (near).",
+   "why": "Four of clip 2's six impossible alternations were resolvable from evidence already on disk. Two were one error: the run 1801/1877/1931 is three contacts credited to near, and 1877 is the wrong one. The other two were gaps of 1.9 and 1.8 seconds hiding a real contact each.",
+   "method": "Shuttle trajectory from tracknet/work_ball.csv for the reversals, wrist keypoints from players.jsonl for the swing apex, and video frames read directly for confirmation. Each conclusion was checked against a frame before being applied.",
+   "provenance": "DERIVED BY A MODEL, not by the project owner. Every contact touched here carries hitter_source=model-derived-2026-09-16 so it can be found and reverted, and neither added contact is given a shot type, because naming the stroke is the owner's call and Milestone 2 skips a contact that has none. Clips 3 and 5 remain entirely hand-labelled; this makes clip 2 a mixed labelling and that must be stated wherever it is scored.",
+   "effect": "Impossible alternations 6 -> 2. The remaining pair is 7196/7227/7248, left alone deliberately: see the tracking_failures entry."
   }
  ],
  "_shot_type_provenance": "Shot types hand-written by the project owner in outputs/test-video2/shot_labels.tsv, one line per contact, from preview clips that carry the frame, the rally and the hitter and no model output of any kind. Keyed to contacts Milestone 1's hand labels already confirmed; this pass added no contacts and moved no frames. Nothing in Milestone 1 reads the field."

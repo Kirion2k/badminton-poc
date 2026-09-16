@@ -3,7 +3,7 @@
  "_metrics_note": "All three clips now carry hand labels, so all three sets of metrics are frozen. A figure here moves only when the labelling changes, and that is a change of labelling, not of the detector: re-run the freeze script and record the new figures rather than tuning anything to reach them.",
  "_label_quality_note": "Not every hand labelling was produced the same way. Clips 3 and 5 were labelled blind from previews carrying no model output, and both hold zero impossible alternations. Clip 2's contacts were migrated from candidate verdicts whose true_hitter agreed with detected_hitter on 60 of 61 real hits, which is what confirming a detector looks like; it held thirteen impossible alternations, four were corrected on 2026-09-16 and six remain unresolved. Its metrics are the least trustworthy of the three and its impossible_alternations count is carried below so that is not forgotten.",
  "version": "milestone-1/1.1",
- "frozen_at_commit": "0ba17f38e30b4ae8195d35c07d8628919637b716",
+ "frozen_at_commit": "fca52bbf27581c517c7e1f030b0d4df49d08b3aa",
  "frozen_on": "2026-09-16",
  "detector_defaults": {
   "PlayerConfig": {
@@ -70,14 +70,14 @@
   "test-video2": {
    "label_provenance": "human",
    "config_sha256_16": "2b9278418e61e997",
-   "truth_sha256_16": "63d1c9f023fb8f6b",
-   "labelled_contacts": 61,
+   "truth_sha256_16": "a22176ba4604de28",
+   "labelled_contacts": 63,
    "labelled_rallies": 6,
    "metrics": {
-    "hit_precision": 0.8852,
-    "hit_recall": 0.9153,
-    "hit_f1": 0.9,
-    "hitter_accuracy": 0.9623,
+    "hit_precision": 0.9016,
+    "hit_recall": 0.9016,
+    "hit_f1": 0.9016,
+    "hitter_accuracy": 0.9811,
     "hitter_scored": 53,
     "rallies_recovered": 6,
     "rallies_labelled": 6,
@@ -86,7 +86,7 @@
     "coverage_trusted": true
    },
    "metrics_are_frozen": true,
-   "impossible_alternations": 6
+   "impossible_alternations": 2
   },
   "test-video3": {
    "label_provenance": "human",
