@@ -4,6 +4,66 @@
   "fps": 59.986172678840134,
   "labelled_contacts": 61,
   "labelled_rallies": 6,
+  "label_consistency": {
+    "impossible_alternations": 6,
+    "violations": [
+      {
+        "rally": 3,
+        "first_frame": 1801,
+        "second_frame": 1877,
+        "hitter": "near",
+        "gap_seconds": 1.2669586440677965,
+        "first_shot_type": "clear",
+        "second_shot_type": "lift"
+      },
+      {
+        "rally": 3,
+        "first_frame": 1877,
+        "second_frame": 1931,
+        "hitter": "near",
+        "gap_seconds": 0.9002074576271186,
+        "first_shot_type": "lift",
+        "second_shot_type": "clear"
+      },
+      {
+        "rally": 4,
+        "first_frame": 3980,
+        "second_frame": 4095,
+        "hitter": "far",
+        "gap_seconds": 1.9171084745762712,
+        "first_shot_type": "drop",
+        "second_shot_type": "drop"
+      },
+      {
+        "rally": 4,
+        "first_frame": 4238,
+        "second_frame": 4348,
+        "hitter": "far",
+        "gap_seconds": 1.8337559322033898,
+        "first_shot_type": "clear",
+        "second_shot_type": "net"
+      },
+      {
+        "rally": 6,
+        "first_frame": 7196,
+        "second_frame": 7227,
+        "hitter": "near",
+        "gap_seconds": 0.5167857627118644,
+        "first_shot_type": "lift",
+        "second_shot_type": "uncertain"
+      },
+      {
+        "rally": 6,
+        "first_frame": 7227,
+        "second_frame": 7248,
+        "hitter": "near",
+        "gap_seconds": 0.3500806779661017,
+        "first_shot_type": "uncertain",
+        "second_shot_type": "uncertain"
+      }
+    ],
+    "help": "Adjacent rally contacts credited to the same player. A singles rally alternates, so each one marks a wrong hitter, a contact that never happened, or a real contact nobody labelled. Derived from the rules of the sport, not from any detector, so it catches labels that were copied from detector output and confirmed."
+  },
   "hit_detection": {
     "true_positives": 54,
     "false_positives": 7,
@@ -23,10 +83,10 @@
   "hitter_assignment": {
     "matched_hits": 54,
     "scored": 53,
-    "correct": 49,
-    "incorrect": 4,
+    "correct": 51,
+    "incorrect": 2,
     "unassigned": 1,
-    "accuracy": 0.9245
+    "accuracy": 0.9623
   },
   "rally_segmentation": {
     "labelled_rallies": 6,

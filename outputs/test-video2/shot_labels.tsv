@@ -1,0 +1,190 @@
+# Shot types for test-video2. One line per contact. Lines starting with # are ignored.
+#
+# Milestone 1 already knows WHERE every contact is and WHO hit it -- those are your own
+# labels. This asks only WHAT stroke it was.
+#
+# One preview clip per contact is in outputs/test-video2/shots/previews/, named
+# shot<id>_r<rally>_f<frame>_<hitter>.mp4. Each runs from the previous contact to the next,
+# so you see the shuttle arrive and leave, and the one to name is marked with a red border
+# and the word CONTACT. Nothing on the video shows any prediction.
+#
+#     t  <frame>  <shot>   [note...]
+#
+# shot is one of: smash drop clear lift drive net serve other uncertain
+# Use uncertain freely. It is recorded and then left out of the scoring rather than guessed.
+#
+# The frame and hitter below are filled in already. Add the shot type after the frame.
+
+# shot   0  rally 1  near  preview shot000_r1_f83_near.mp4
+t 83 net
+
+# shot   1  rally 1  far   preview shot001_r1_f139_far.mp4
+t 139 lift
+
+# shot   2  rally 2  far   preview shot002_r2_f773_far.mp4
+t 773 serve
+
+# shot   3  rally 2  near  preview shot003_r2_f822_near.mp4
+t 822 lift
+
+# shot   4  rally 2  near  preview shot004_r2_f870_near.mp4
+t 870 drop shot should be from the far player not the near player
+
+# shot   5  rally 2  near  preview shot005_r2_f916_near.mp4
+t 916 lift
+
+# shot   6  rally 3  far   preview shot006_r3_f1502_far.mp4
+t 1502 serve
+
+# shot   7  rally 3  near  preview shot007_r3_f1549_near.mp4
+t 1549 lift
+
+# shot   8  rally 3  far   preview shot008_r3_f1622_far.mp4
+t 1622 drop shot was from the backend but shuttle dropped to the front of the court
+
+# shot   9  rally 3  near  preview shot009_r3_f1670_near.mp4
+t 1670 net
+
+# shot  10  rally 3  far   preview shot010_r3_f1717_far.mp4
+t 1717 lift
+
+# shot  11  rally 3  near  preview shot011_r3_f1801_near.mp4
+t 1801 clear
+
+# shot  12  rally 3  near  preview shot012_r3_f1877_near.mp4
+t 1877 lift
+
+# shot  13  rally 3  near  preview shot013_r3_f1931_near.mp4
+t 1931 clear
+
+# shot  14  rally 3  far   preview shot014_r3_f2006_far.mp4
+t 2006 clear
+
+# shot  15  rally 3  near  preview shot015_r3_f2077_near.mp4
+t 2077 smash
+
+# shot  16  rally 3  far   preview shot016_r3_f2120_far.mp4
+t 2120 lift
+
+# shot  17  rally 3  near  preview shot017_r3_f2194_near.mp4
+t 2194 smash
+
+# shot  18  rally 3  far   preview shot018_r3_f2217_far.mp4
+t 2217 lift
+
+# shot  19  rally 3  near  preview shot019_r3_f2292_near.mp4
+t 2292 clear
+
+# shot  20  rally 3  far   preview shot020_r3_f2388_far.mp4
+t 2388 clear
+
+# shot  21  rally 3  near  preview shot021_r3_f2452_near.mp4
+t 2452 clear
+
+# shot  22  rally 3  far   preview shot022_r3_f2540_far.mp4
+t 2540 drop
+
+# shot  23  rally 3  near  preview shot023_r3_f2597_near.mp4
+t 2597 lift 
+
+# shot  24  rally 3  near  preview shot024_r3_f2689_near.mp4
+t 2689 smash but this was from far 
+
+# shot  25  rally 4  near  preview shot025_r4_f3810_near.mp4
+t 3810 serve
+
+# shot  26  rally 4  far   preview shot026_r4_f3868_far.mp4
+t 3868 lift
+
+# shot  27  rally 4  near  preview shot027_r4_f3935_near.mp4
+t 3935 drop
+
+# shot  28  rally 4  far   preview shot028_r4_f3980_far.mp4
+t 3980 drop
+
+# shot  29  rally 4  far   preview shot029_r4_f4095_far.mp4
+t 4095 drop 
+
+# shot  30  rally 4  near  preview shot030_r4_f4151_near.mp4
+t 4151 lift
+
+# shot  31  rally 4  far   preview shot031_r4_f4238_far.mp4
+t 4238 clear
+
+# shot  32  rally 4  far   preview shot032_r4_f4348_far.mp4
+t 4348 net
+
+# shot  33  rally 4  near  preview shot033_r4_f4407_near.mp4
+t 4407 lift
+
+# shot  34  rally 4  near  preview shot034_r4_f4510_near.mp4
+t 4510 drop this should be hit by the far player
+
+# shot  35  rally 4  near  preview shot035_r4_f4556_near.mp4
+t 4556 net
+
+# shot  36  rally 4  far   preview shot036_r4_f4614_far.mp4
+t 4614 lift
+
+# shot  37  rally 4  near  preview shot037_r4_f4704_near.mp4
+t 4704 drop backend
+
+# shot  38  rally 4  far   preview shot038_r4_f4750_far.mp4
+t 4750 net
+
+# shot  39  rally 4  near  preview shot039_r4_f4814_near.mp4
+t 4814 lift
+
+# shot  40  rally 4  far   preview shot040_r4_f4888_far.mp4
+t 4888 drop
+
+# shot  41  rally 4  near  preview shot041_r4_f4936_near.mp4
+t 4936 lift 
+
+# shot  42  rally 4  far   preview shot042_r4_f5007_far.mp4
+t 5007 drop
+
+# shot  43  rally 4  far   preview shot043_r4_f5060_far.mp4
+t 5060 net but this was hit by the near player
+
+# shot  44  rally 4  far   preview shot044_r4_f5123_far.mp4
+t 5123 net
+
+# shot  45  rally 5  near  preview shot045_r5_f6171_near.mp4
+t 6171 serve
+
+# shot  46  rally 5  far   preview shot046_r5_f6223_far.mp4
+t 6223 lift
+
+# shot  47  rally 5  near  preview shot047_r5_f6285_near.mp4
+t 6285 drop backhand
+
+# shot  48  rally 5  far   preview shot048_r5_f6326_far.mp4
+t 6326 drive
+
+# shot  49  rally 5  near  preview shot049_r5_f6355_near.mp4
+t 6355 clear
+
+# shot  50  rally 6  far   preview shot050_r6_f7013_far.mp4
+t 7013 serve
+
+# shot  51  rally 6  near  preview shot051_r6_f7057_near.mp4
+t 7057 net
+
+# shot  52  rally 6  far   preview shot052_r6_f7114_far.mp4
+t 7114 net
+
+# shot  53  rally 6  near  preview shot053_r6_f7196_near.mp4
+t 7196 lift
+
+# shot  54  rally 6  near  preview shot054_r6_f7227_near.mp4
+t 7227 uncertain   written as "?" by the labeller
+
+# shot  55  rally 6  near  preview shot055_r6_f7248_near.mp4
+t 7248 uncertain   written as "?" by the labeller
+
+# shot  56  rally 6  far   preview shot056_r6_f7286_far.mp4
+t 7286 smash
+
+# shot  57  rally 6  near  preview shot057_r6_f7314_near.mp4
+t 7314 lift

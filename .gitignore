@@ -21,6 +21,9 @@ outputs/*/*
 !outputs/*/ground_truth.json
 !outputs/*/truth.json
 !outputs/*/labels.tsv
+# Shot types are written in their own sheet rather than labels.tsv, and carry the
+# labeller's notes -- including, on clip 2, four hitter corrections raised unprompted.
+!outputs/*/shot_labels.tsv
 !outputs/bst_reference/*.json
 !outputs/*/baseline.json
 !outputs/*/evaluation.json

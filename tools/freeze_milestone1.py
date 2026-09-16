@@ -3,6 +3,7 @@ import dataclasses, hashlib, json, subprocess, sys
 from pathlib import Path
 sys.path.insert(0, 'src')
 from badminton_poc.config import PlayerConfig, AnalysisConfig, FlightConfig
+from badminton_poc.truth import find_impossible_alternations
 
 def defaults(cls):
     out = {}
@@ -39,6 +40,10 @@ for clip, provenance in (('test-video2', 'human'), ('test-video3', 'human'), ('t
             'coverage_trusted': b['player_tracking']['coverage_trusted'],
         },
         'metrics_are_frozen': provenance == 'human',
+        # Carried per clip because it is the one label-quality figure that does not come from
+        # the detector, so a clip whose labels were confirmed rather than given cannot pass
+        # unremarked just because its accuracy reads well.
+        'impossible_alternations': len(find_impossible_alternations(truth)),
     }
 
 manifest = {
@@ -49,14 +54,23 @@ manifest = {
         'passing unnoticed.'
     ),
     '_metrics_note': (
-        'Metrics are frozen only for clips whose labels are final. test-video3 still carries '
-        'model-produced labels; when it is labelled by hand its metrics will move, and that is a '
-        'change of labelling, not of the detector. Re-run the freeze script and record the new '
-        'figures rather than tuning anything to reach them.'
+        'All three clips now carry hand labels, so all three sets of metrics are frozen. A '
+        'figure here moves only when the labelling changes, and that is a change of labelling, '
+        'not of the detector: re-run the freeze script and record the new figures rather than '
+        'tuning anything to reach them.'
     ),
-    'version': 'milestone-1/1.0',
+    '_label_quality_note': (
+        'Not every hand labelling was produced the same way. Clips 3 and 5 were labelled blind '
+        'from previews carrying no model output, and both hold zero impossible alternations. '
+        "Clip 2's contacts were migrated from candidate verdicts whose true_hitter agreed with "
+        'detected_hitter on 60 of 61 real hits, which is what confirming a detector looks like; '
+        'it held thirteen impossible alternations, four were corrected on 2026-09-16 and six '
+        'remain unresolved. Its metrics are the least trustworthy of the three and its '
+        'impossible_alternations count is carried below so that is not forgotten.'
+    ),
+    'version': 'milestone-1/1.1',
     'frozen_at_commit': head,
-    'frozen_on': '2026-09-15',
+    'frozen_on': '2026-09-16',
     'detector_defaults': {
         'PlayerConfig': defaults(PlayerConfig),
         'AnalysisConfig': defaults(AnalysisConfig),

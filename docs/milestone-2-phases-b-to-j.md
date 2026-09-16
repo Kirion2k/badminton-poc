@@ -4,9 +4,16 @@ Milestone 1 is frozen at tag `milestone-1-frozen`, manifest `milestone-1/1.1`, a
 retunes it. Every number below comes from `outputs/bst_reference/phase_h.json` and
 `shot_dataset.json`.
 
-**Headline: 0.7273 accuracy and 0.6569 macro F1 over 44 hand-labelled contacts, against 0.3409
-for a hand-written geometry baseline on the same shots.** Two of the four exploratory targets are
-met, two are missed narrowly, and the dataset is two recordings deep.
+> **Superseded on 2026-09-16 by Phase K.** Phases B-J were measured on two recordings. A third
+> was labelled, and accuracy fell from 0.7273 to **0.5895**. The per-phase findings below stand
+> as what those two clips showed; the headline does not. **Read Phase K at the end before
+> quoting any figure from this document.** Every two-recording number is left in place rather
+> than rewritten, because the gap between them and Phase K is the finding.
+
+**Two-recording headline, now superseded: 0.7273 accuracy and 0.6569 macro F1 over 44
+hand-labelled contacts, against 0.3409 for a hand-written geometry baseline on the same shots.**
+Two of the four exploratory targets are met, two are missed narrowly, and the dataset is two
+recordings deep.
 
 ---
 
@@ -184,3 +191,151 @@ shots wide and should not be quoted without the support beside them.
 **The near/far gap is unexplained.** 0.8095 far against 0.6522 near, on 21 and 23 shots. It could
 be perspective, it could be that the near player in clip 5 plays more of the classes that fail,
 or it could be noise at this sample size. Nothing here separates those.
+
+---
+
+# Phase K: the third recording, 2026-09-16
+
+Clip 2's 58 hand-verified contacts got shot types from the project owner, from previews carrying
+no model output. That takes Milestone 2 from two recordings to three, which the prior probe study
+named as the gating quantity.
+
+**Headline: accuracy falls from 0.7273 to 0.5895, and macro F1 from 0.6569 to 0.5395.** The
+two-recording figure did not survive contact with a third recording.
+
+| | two recordings | three recordings |
+|---|---|---|
+| shots scored | 44 | **95** |
+| accuracy | 0.7273 | **0.5895** |
+| balanced accuracy | 0.6389 | 0.5223 |
+| macro F1 | 0.6569 | 0.5395 |
+| top-2 accuracy | 0.8864 | 0.8211 |
+| geometry baseline | 0.3409 | 0.3579 |
+| BST − baseline | +0.3864 | **+0.2316** |
+
+BST still beats hand-written geometry by 23 points, so Phase J's answer survives. Nothing else
+about the Phase H headline does.
+
+| clip | accuracy | labelling |
+|---|---|---|
+| test-video5 | 0.750 | blind |
+| test-video3 | 0.625 | blind |
+| **test-video2** | **0.4706** | migrated, partly corrected |
+
+| class | precision | recall | F1 | support | F1 on two recordings |
+|---|---|---|---|---|---|
+| net | 0.739 | 0.809 | 0.773 | 21 | 0.833 |
+| clear | 0.706 | 0.800 | 0.750 | 15 | **1.000** |
+| smash | 0.643 | 0.750 | 0.692 | 12 | **0.941** |
+| lift | 0.933 | 0.467 | 0.622 | 30 | 0.667 |
+| drop | 0.571 | 0.308 | 0.400 | 13 | 0.500 |
+| drive | 0.000 | 0.000 | 0.000 | 4 | 0.000 |
+
+**The two classes that carried the Phase H headline are the two that fell furthest.** Clear went
+1.000 → 0.750 and smash 0.941 → 0.692. On clip 2 alone smash is 1 of 4 and clear 5 of 8, against
+8 of 8 and 7 of 7 on clips 3 and 5. A perfect score on seven examples was seven examples.
+
+Two classes did improve, both because they got examples rather than because the model changed:
+drop went from 2 supports to 13, and drive from 3 to 4 — still the only class under five, and
+still 0 of 4.
+
+## Why clip 2 is worse, and what it is not
+
+**It is not missing inputs.** Median shuttle coverage is 1.000 on all three clips and clip 2's
+median hitter-joint coverage is 0.865, the *highest* of the three. Phase I's finding that no
+error traces to missing pose or shuttle holds on the larger set.
+
+**It is not class mix.** Reweighting clip 2's per-class accuracies to the class mix of clips 3
+and 5 moves it from 0.471 to 0.491. Composition accounts for two points of a twenty-six point
+gap.
+
+**It is not the weak labels, and this one took work to rule out.** Clip 2's labels are the worst
+of the three (below), so the obvious reading is that the model is being marked against a bad
+answer key. BST's class names carry a side prefix, so every prediction is also an independent
+opinion about who hit. Restricting to the shots where BST's own opinion corroborates our hitter:
+
+| | accuracy | shots |
+|---|---|---|
+| clip 2, hitter corroborated by BST | 0.489 | 45 |
+| clips 3+5, hitter corroborated by BST | 0.744 | 43 |
+
+The gap survives the restriction almost untouched. **Clip 2 is genuinely harder for this model.**
+
+It is the same 1920-wide framing at 59.99 fps, closest of the three to clip 3's 59.18, while the
+best-scoring clip 5 is the 33.75 fps outlier. So it is not frame rate either. What is left is
+something about this recording — court angle, player style, lighting — that this write-up does
+not identify, and three recordings is not enough to say which.
+
+## The label-quality finding, which is separate and arrived first
+
+While labelling strokes the project owner disputed the **hitter** on four contacts, unprompted.
+Checking them exposed a defect in how clip 2 was labelled in the first place.
+
+Clip 2's contacts were migrated from candidate verdicts whose `true_hitter` equals
+`detected_hitter` on **60 of 61** real hits. That is the signature of a pass that read the
+detector's answer and confirmed it — the same failure the 15 September session found and fixed on
+clips 3 and 5 by relabelling them blind. Clip 2 never had that treatment.
+
+A new check makes this visible without consulting any model:
+`badminton_poc.truth.find_impossible_alternations`. A singles rally strictly alternates, so two
+adjacent contacts credited to one player is a labelling that cannot be right — a wrong hitter, a
+contact that never happened, or a real contact nobody recorded. It says where to look, not which.
+
+| clip | labelling | impossible alternations |
+|---|---|---|
+| test-video3 | blind | **0** |
+| test-video5 | blind | **0** |
+| test-video2 | migrated | **13** |
+
+The check separates the two labelling methods perfectly, on a rule taken from the sport rather
+than from any threshold. It now runs in every evaluation under `label_consistency` and is carried
+per clip in the freeze manifest, so a clip whose labels were confirmed rather than given cannot
+pass unremarked because its accuracy reads well.
+
+**Four corrections were applied; nine violations' worth were not.** The four the owner raised each
+also sat in an impossible run, so two independent reasons agreed, and 13 violations fell to 6.
+The remaining six are left alone deliberately: the rule says one of the two contacts in a pair is
+wrong without saying which, and a long gap (1.8-1.9s on two of them) is as consistent with a
+contact nobody recorded as with a wrong hitter. Inventing a contact from memory would be worse
+than declaring the gap.
+
+Three of the four corrections moved the label towards what the *current* pipeline already says —
+the migration had carried an older detector's answer that Milestone 1's September fixes had since
+corrected. The fourth, frame 5060, goes the other way and exposes a live pipeline error the stale
+label was hiding. Clip 2's hitter accuracy therefore moved 0.9245 → 0.9623, and **that is the
+labelling changing, not the detector improving.** The manifest is re-frozen at `milestone-1/1.1`.
+
+One scoring defect was fixed in passing: `uncertain` was being scored as a class. The labelling
+sheet invites `uncertain` in place of a guess, so scoring it punishes the model for failing to
+reproduce an answer no human would give. Clips 3 and 5 carry none, which is why it had never
+mattered; clip 2 carries two. They are now excluded and counted separately. This is worth 1.2
+points of the headline (0.5773 → 0.5895) and is stated so the gain is not mistaken for anything
+else.
+
+## What this establishes
+
+**A two-recording result was not predictive of a third.** That is the concrete version of the
+probe study's warning, and it is now measured rather than anticipated: 0.7273 → 0.5895, with the
+two strongest classes falling hardest.
+
+**BST still beats geometry by 23 points**, on three recordings and 95 shots. That is the durable
+part.
+
+**The answer key itself needed auditing, and one clip failed the audit.** Clip 2's labels were
+detector-confirmed, not independently given. Six impossible alternations remain in it, and its
+0.4706 should be read with that beside it — though the BST-corroboration split above says the
+labels are not what makes it low.
+
+## What is still not established
+
+- **Three recordings is three recordings.** The drop from two to three says the curve is not flat.
+  It does not say where it settles.
+- **Nothing explains the clip-2 gap.** Inputs, class mix and label quality are each ruled out
+  above. No positive cause is offered.
+- **drive remains 0 of 4** across every configuration tried, and is still the only class under
+  five examples.
+- **Six impossible alternations in clip 2 are unresolved.** Each needs a human to look at the
+  preview and say whether the hitter is wrong or a contact is missing.
+- **Clip 2 has never been labelled blind.** Correcting four contacts is not the same as relabelling
+  it the way clips 3 and 5 were, and the four that surfaced did so only because the owner happened
+  to notice while doing something else.

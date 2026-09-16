@@ -11,6 +11,7 @@ from __future__ import annotations
 import pytest
 
 from badminton_poc.truth import (
+    find_impossible_alternations,
     match_contacts,
     migrate_legacy_ground_truth,
     score_hit_detection,
@@ -493,3 +494,96 @@ def test_the_baseline_records_what_it_was_scored_over():
                                   "config": {"fps": 60.0}}, truth, [])
     assert out["hit_detection"]["labelled_contact_spans"] == [{"start_frame": 50, "end_frame": 200}]
     assert out["hit_detection"]["labelled_seconds"] == pytest.approx(151 / 60.0, abs=0.01)
+
+
+# --- alternation, a detector-independent consistency check ----------------------------
+
+def test_a_rally_whose_contacts_alternate_reports_nothing():
+    truth = {
+        "fps": FPS,
+        "contacts": [_c(100, "far"), _c(160, "near"), _c(220, "far")],
+        "rallies": [{"rally": 1, "start_frame": 100, "end_frame": 260}],
+    }
+    assert find_impossible_alternations(truth) == []
+
+
+def test_two_consecutive_contacts_by_the_same_player_are_impossible():
+    """Singles rallies strictly alternate. Two in a row means a wrong hitter, a contact that
+    never happened, or one that was never labelled -- the check cannot say which, only that
+    the labelling cannot be right as it stands."""
+    truth = {
+        "fps": FPS,
+        "contacts": [_c(100, "far"), _c(160, "near"), _c(220, "near")],
+        "rallies": [{"rally": 1, "start_frame": 100, "end_frame": 260}],
+    }
+    (bad,) = find_impossible_alternations(truth)
+    assert (bad["first_frame"], bad["second_frame"], bad["hitter"]) == (160, 220, "near")
+    assert bad["rally"] == 1
+    assert bad["gap_seconds"] == pytest.approx(1.0)
+
+
+def test_a_run_of_three_reports_both_adjacent_pairs():
+    truth = {
+        "fps": FPS,
+        "contacts": [_c(100, "near"), _c(160, "near"), _c(220, "near")],
+        "rallies": [{"rally": 1, "start_frame": 100, "end_frame": 260}],
+    }
+    assert [(b["first_frame"], b["second_frame"])
+            for b in find_impossible_alternations(truth)] == [(100, 160), (160, 220)]
+
+
+def test_a_contact_with_no_hitter_breaks_the_chain_rather_than_bridging_it():
+    """An unattributed contact could have been either player, so neither pair it sits in is
+    knowably impossible. Reporting one would invent a defect out of a missing label."""
+    truth = {
+        "fps": FPS,
+        "contacts": [_c(100, "near"), _c(160, None), _c(220, "near")],
+        "rallies": [{"rally": 1, "start_frame": 100, "end_frame": 260}],
+    }
+    assert find_impossible_alternations(truth) == []
+
+
+def test_a_contact_that_is_not_a_rally_shot_is_skipped_not_chained():
+    """Handing the shuttle back does not take a turn, so the contacts either side of it are
+    still adjacent in the rally and are still expected to alternate."""
+    truth = {
+        "fps": FPS,
+        "contacts": [
+            _c(100, "near"),
+            {"frame": 160, "hitter": "far", "in_rally": False},
+            _c(220, "near"),
+        ],
+        "rallies": [{"rally": 1, "start_frame": 100, "end_frame": 260}],
+    }
+    (bad,) = find_impossible_alternations(truth)
+    assert (bad["first_frame"], bad["second_frame"]) == (100, 220)
+
+
+def test_contacts_in_different_rallies_are_not_compared():
+    """A rally ends and the same player may serve the next one. Nothing is wrong with that."""
+    truth = {
+        "fps": FPS,
+        "contacts": [_c(100, "near"), _c(400, "near")],
+        "rallies": [{"rally": 1, "start_frame": 100, "end_frame": 260},
+                    {"rally": 2, "start_frame": 380, "end_frame": 500}],
+    }
+    assert find_impossible_alternations(truth) == []
+
+
+def test_a_contact_outside_every_rally_is_not_checked():
+    truth = {
+        "fps": FPS,
+        "contacts": [_c(100, "near"), _c(300, "near")],
+        "rallies": [{"rally": 1, "start_frame": 100, "end_frame": 260}],
+    }
+    assert find_impossible_alternations(truth) == []
+
+
+def test_violations_come_back_in_frame_order_across_rallies():
+    truth = {
+        "fps": FPS,
+        "contacts": [_c(400, "far"), _c(460, "far"), _c(100, "near"), _c(160, "near")],
+        "rallies": [{"rally": 2, "start_frame": 380, "end_frame": 500},
+                    {"rally": 1, "start_frame": 100, "end_frame": 260}],
+    }
+    assert [b["first_frame"] for b in find_impossible_alternations(truth)] == [100, 400]

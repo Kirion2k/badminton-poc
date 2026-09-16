@@ -1,9 +1,10 @@
 {
  "_what": "Milestone 1 frozen as an upstream dependency for Milestone 2. The detector settings below are the tuning surface of Milestone 1; tests/test_milestone1_frozen.py asserts they still hold these values, so retuning Milestone 1 fails the suite rather than passing unnoticed.",
- "_metrics_note": "Metrics are frozen only for clips whose labels are final. test-video3 still carries model-produced labels; when it is labelled by hand its metrics will move, and that is a change of labelling, not of the detector. Re-run the freeze script and record the new figures rather than tuning anything to reach them.",
- "version": "milestone-1/1.0",
- "frozen_at_commit": "af3c1576321117ccb3d0f2899d42d009db8f9d2f",
- "frozen_on": "2026-09-15",
+ "_metrics_note": "All three clips now carry hand labels, so all three sets of metrics are frozen. A figure here moves only when the labelling changes, and that is a change of labelling, not of the detector: re-run the freeze script and record the new figures rather than tuning anything to reach them.",
+ "_label_quality_note": "Not every hand labelling was produced the same way. Clips 3 and 5 were labelled blind from previews carrying no model output, and both hold zero impossible alternations. Clip 2's contacts were migrated from candidate verdicts whose true_hitter agreed with detected_hitter on 60 of 61 real hits, which is what confirming a detector looks like; it held thirteen impossible alternations, four were corrected on 2026-09-16 and six remain unresolved. Its metrics are the least trustworthy of the three and its impossible_alternations count is carried below so that is not forgotten.",
+ "version": "milestone-1/1.1",
+ "frozen_at_commit": "0ba17f38e30b4ae8195d35c07d8628919637b716",
+ "frozen_on": "2026-09-16",
  "detector_defaults": {
   "PlayerConfig": {
    "model": "yolo11m-pose.pt",
@@ -69,14 +70,14 @@
   "test-video2": {
    "label_provenance": "human",
    "config_sha256_16": "2b9278418e61e997",
-   "truth_sha256_16": "4fc9d6f311ff17e6",
+   "truth_sha256_16": "63d1c9f023fb8f6b",
    "labelled_contacts": 61,
    "labelled_rallies": 6,
    "metrics": {
     "hit_precision": 0.8852,
     "hit_recall": 0.9153,
     "hit_f1": 0.9,
-    "hitter_accuracy": 0.9245,
+    "hitter_accuracy": 0.9623,
     "hitter_scored": 53,
     "rallies_recovered": 6,
     "rallies_labelled": 6,
@@ -84,7 +85,8 @@
     "coverage": 0.9286,
     "coverage_trusted": true
    },
-   "metrics_are_frozen": true
+   "metrics_are_frozen": true,
+   "impossible_alternations": 6
   },
   "test-video3": {
    "label_provenance": "human",
@@ -104,7 +106,8 @@
     "coverage": 0.9785,
     "coverage_trusted": true
    },
-   "metrics_are_frozen": true
+   "metrics_are_frozen": true,
+   "impossible_alternations": 0
   },
   "test-video5": {
    "label_provenance": "human",
@@ -124,7 +127,8 @@
     "coverage": 0.9044,
     "coverage_trusted": true
    },
-   "metrics_are_frozen": true
+   "metrics_are_frozen": true,
+   "impossible_alternations": 0
   }
  }
 }

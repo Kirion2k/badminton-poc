@@ -1,383 +1,459 @@
 {
-  "_format": "badminton-poc/truth-v2",
-  "_instructions": "Watch annotated.mp4 and record what happened in the video, not what the pipeline said. contacts: one entry per real racket contact, with hitter 'near' or 'far'. rallies: one entry per rally actually played. Delete any contact you cannot see happen. Set labelled=true when finished. Nothing here should describe a detector.",
-  "clip": "test-video2",
-  "fps": 59.986172678840134,
-  "frame_reference": "outputs/<clip>/work.mp4; metadata.json holds the offset to source",
-  "labelled": true,
-  "contacts": [
-    {
-      "frame": 83,
-      "hitter": "near",
-      "notes": ""
-    },
-    {
-      "frame": 139,
-      "hitter": "far",
-      "notes": ""
-    },
-    {
-      "frame": 395,
-      "hitter": "near",
-      "notes": "near player handing the shuttle back to the far player - a real contact, not a rally shot",
-      "in_rally": false
-    },
-    {
-      "frame": 773,
-      "hitter": "far",
-      "notes": ""
-    },
-    {
-      "frame": 822,
-      "hitter": "near",
-      "notes": ""
-    },
-    {
-      "frame": 870,
-      "hitter": "near",
-      "notes": ""
-    },
-    {
-      "frame": 916,
-      "hitter": "near",
-      "notes": ""
-    },
-    {
-      "frame": 1124,
-      "hitter": "far",
-      "notes": "past the labelled end of rally 2; check whether this is a handback too",
-      "in_rally": false
-    },
-    {
-      "frame": 1502,
-      "hitter": "far",
-      "notes": ""
-    },
-    {
-      "frame": 1549,
-      "hitter": "near",
-      "notes": ""
-    },
-    {
-      "frame": 1622,
-      "hitter": "far",
-      "notes": ""
-    },
-    {
-      "frame": 1670,
-      "hitter": "near",
-      "notes": ""
-    },
-    {
-      "frame": 1717,
-      "hitter": "far",
-      "notes": ""
-    },
-    {
-      "frame": 1743,
-      "hitter": null,
-      "notes": ""
-    },
-    {
-      "frame": 1801,
-      "hitter": "near",
-      "notes": "real hit you flagged as missed at frame 1803; now detected. CONFIRM true_hitter. the shuttle goes out of view from the camera but you can still see the player hit it, while the shuttle is coming down"
-    },
-    {
-      "frame": 1877,
-      "hitter": "near",
-      "notes": "real hit you flagged as missed at frame 1886; now detected. CONFIRM true_hitter. model doesnt detect the far player for some reason and hence doesnt detect the shuttle being hit?"
-    },
-    {
-      "frame": 1931,
-      "hitter": "near",
-      "notes": ""
-    },
-    {
-      "frame": 2006,
-      "hitter": "far",
-      "notes": ""
-    },
-    {
-      "frame": 2077,
-      "hitter": "near",
-      "notes": "real hit you flagged as missed at frame 2079; now detected. CONFIRM true_hitter. near player hits the shuttle, doesnt get registered, but the far player is not being properly registered, its being registered as someone on the sideline"
-    },
-    {
-      "frame": 2120,
-      "hitter": "far",
-      "notes": ""
-    },
-    {
-      "frame": 2194,
-      "hitter": "near",
-      "notes": "real hit you flagged as missed at frame 2189; now detected. CONFIRM true_hitter. same thing as 2079, near player hits the shuttle, doesnt get registered, but the far player is not being properly registered, its being registered as someone on the sideline"
-    },
-    {
-      "frame": 2217,
-      "hitter": "far",
-      "notes": ""
-    },
-    {
-      "frame": 2292,
-      "hitter": "near",
-      "notes": ""
-    },
-    {
-      "frame": 2388,
-      "hitter": "far",
-      "notes": ""
-    },
-    {
-      "frame": 2452,
-      "hitter": "near",
-      "notes": ""
-    },
-    {
-      "frame": 2540,
-      "hitter": "far",
-      "notes": ""
-    },
-    {
-      "frame": 2597,
-      "hitter": "near",
-      "notes": ""
-    },
-    {
-      "frame": 2689,
-      "hitter": "near",
-      "notes": ""
-    },
-    {
-      "frame": 3810,
-      "hitter": "near",
-      "notes": ""
-    },
-    {
-      "frame": 3868,
-      "hitter": "far",
-      "notes": ""
-    },
-    {
-      "frame": 3935,
-      "hitter": "near",
-      "notes": ""
-    },
-    {
-      "frame": 3980,
-      "hitter": "far",
-      "notes": "real hit you flagged as missed at frame 3972; now detected. CONFIRM true_hitter. hit doenst get detected?"
-    },
-    {
-      "frame": 4095,
-      "hitter": "far",
-      "notes": ""
-    },
-    {
-      "frame": 4151,
-      "hitter": "near",
-      "notes": ""
-    },
-    {
-      "frame": 4238,
-      "hitter": "far",
-      "notes": ""
-    },
-    {
-      "frame": 4348,
-      "hitter": "far",
-      "notes": ""
-    },
-    {
-      "frame": 4407,
-      "hitter": "near",
-      "notes": ""
-    },
-    {
-      "frame": 4510,
-      "hitter": "near",
-      "notes": ""
-    },
-    {
-      "frame": 4556,
-      "hitter": "near",
-      "notes": ""
-    },
-    {
-      "frame": 4614,
-      "hitter": "far",
-      "notes": ""
-    },
-    {
-      "frame": 4704,
-      "hitter": "near",
-      "notes": ""
-    },
-    {
-      "frame": 4750,
-      "hitter": "far",
-      "notes": ""
-    },
-    {
-      "frame": 4814,
-      "hitter": "near",
-      "notes": ""
-    },
-    {
-      "frame": 4888,
-      "hitter": "far",
-      "notes": ""
-    },
-    {
-      "frame": 4936,
-      "hitter": "near",
-      "notes": ""
-    },
-    {
-      "frame": 5007,
-      "hitter": "far",
-      "notes": ""
-    },
-    {
-      "frame": 5060,
-      "hitter": "far",
-      "notes": ""
-    },
-    {
-      "frame": 5123,
-      "hitter": "far",
-      "notes": ""
-    },
-    {
-      "frame": 6171,
-      "hitter": "near",
-      "notes": ""
-    },
-    {
-      "frame": 6223,
-      "hitter": "far",
-      "notes": ""
-    },
-    {
-      "frame": 6285,
-      "hitter": "near",
-      "notes": "real hit you flagged as missed at frame 6286; now detected. CONFIRM true_hitter. near player hits a backhand shot"
-    },
-    {
-      "frame": 6326,
-      "hitter": "far",
-      "notes": ""
-    },
-    {
-      "frame": 6355,
-      "hitter": "near",
-      "notes": ""
-    },
-    {
-      "frame": 7013,
-      "hitter": "far",
-      "notes": ""
-    },
-    {
-      "frame": 7057,
-      "hitter": "near",
-      "notes": ""
-    },
-    {
-      "frame": 7114,
-      "hitter": "far",
-      "notes": ""
-    },
-    {
-      "frame": 7196,
-      "hitter": "near",
-      "notes": ""
-    },
-    {
-      "frame": 7227,
-      "hitter": "near",
-      "notes": ""
-    },
-    {
-      "frame": 7248,
-      "hitter": "near",
-      "notes": ""
-    },
-    {
-      "frame": 7286,
-      "hitter": "far",
-      "notes": ""
-    },
-    {
-      "frame": 7314,
-      "hitter": "near",
-      "notes": ""
-    }
-  ],
-  "_contacts_help": "[{\"frame\": 1234, \"hitter\": \"near\"|\"far\"|null, \"notes\": \"\"}] -- every racket contact in the clip, whether or not anything detected it.",
-  "rallies": [
-    {
-      "rally": 1,
-      "start_frame": 0,
-      "end_frame": 198,
-      "notes": "Corrected from 83-236 after frame-by-frame review. The clip opens mid-rally: at frame 0 the far player is already mid-stroke, so this rally's real start is before the recording and 0 is the earliest frame we can claim. Play stops between 193 and 201, where the near player straightens up and walks right.",
-      "start_truncated": true
-    },
-    {
-      "rally": 2,
-      "start_frame": 773,
-      "end_frame": 938,
-      "notes": "End corrected from 1098. At 933 the far player is lunging low at the net with the point live; by 941 both players are upright and walking. 1098 is two and a half seconds into dead time, with the near player alone on court. The shuttle track goes to a ceiling light at 1005 and stays there, which is what made the original end look plausible."
-    },
-    {
-      "rally": 3,
-      "start_frame": 1502,
-      "end_frame": 2740,
-      "notes": "End corrected from 2767. The shuttle is visible falling across 2721-2737 and lands about 2740; both players have stopped by 2705."
-    },
-    {
-      "rally": 4,
-      "start_frame": 3810,
-      "end_frame": 5175,
-      "notes": "End corrected from 5217. Both players are at the net with the near player airborne at 5163; by 5179 the near player has turned away with the racket down. Start moved from 3821 to the labelled serve contact at 3810; a rally starts when it is served."
-    },
-    {
-      "rally": 5,
-      "start_frame": 6171,
-      "end_frame": 6378,
-      "notes": "End corrected from 6439. The near player lunges at the net at 6364; by 6376 both are upright. Start moved from 6185 to the labelled serve contact at 6171; a rally starts when it is served."
-    },
-    {
-      "rally": 6,
-      "start_frame": 7013,
-      "end_frame": 7375,
-      "notes": "End corrected from 7355. The far player is lunging at the net at 7355 with the point still live, and the clip ends at 7375. This rally is truncated by the end of the recording. Start moved from 7024 to the labelled serve contact at 7013; a rally starts when it is served.",
-      "end_truncated": true
-    }
-  ],
-  "_rallies_help": "[{\"rally\": 1, \"start_frame\": 83, \"end_frame\": 236, \"notes\": \"\"}] -- inclusive spans where a rally was in progress.",
-  "tracking_failures": [],
-  "_tracking_failures_help": "Optional. [{\"start_frame\": 1918, \"end_frame\": 3291, \"kind\": \"...\", \"notes\": \"...\"}] -- stretches where the vision stack visibly followed the wrong thing. Not scored; kept so a known failure is not rediscovered twice.",
-  "migrated_from": {
-    "format": "candidate verdicts (ground_truth.json)",
-    "contacts_kept": 62,
-    "discarded_candidate_verdicts": 128,
-    "note": "Discarded rows recorded that a particular candidate was not a hit, which is true of a configuration rather than of the video. The matcher re-derives false positives for whatever configuration is scored."
+ "_format": "badminton-poc/truth-v2",
+ "_instructions": "Watch annotated.mp4 and record what happened in the video, not what the pipeline said. contacts: one entry per real racket contact, with hitter 'near' or 'far'. rallies: one entry per rally actually played. Delete any contact you cannot see happen. Set labelled=true when finished. Nothing here should describe a detector.",
+ "clip": "test-video2",
+ "fps": 59.986172678840134,
+ "frame_reference": "outputs/<clip>/work.mp4; metadata.json holds the offset to source",
+ "labelled": true,
+ "contacts": [
+  {
+   "frame": 83,
+   "hitter": "near",
+   "notes": "",
+   "shot_type": "net"
   },
-  "label_revisions": [
-    {
-      "date": "2026-09-10",
-      "what": "Every rally end and rally 1's start re-measured from the working video at 8-frame granularity.",
-      "why": "Rally 2's labelled end of 1098 was 2.7 seconds into dead time. Checking it exposed a systematic bias: five of six ends were labelled 20 to 40 frames after play stopped, and rally 2 by 160. The convention is now that a rally ends when the shuttle lands or the point is otherwise decided, not when the players finish walking.",
-      "method": "Frames pulled from outputs/test-video2/work.mp4 with ffmpeg and read directly. Each end was bracketed by one frame with the point visibly live and one with both players upright and disengaged, then set between them.",
-      "effect": "The correction was applied to all six ends before any of them was scored, and it moves two ends earlier than the detector reports and four later. Rally 4's correction made a rest-based end rule fail that the uncorrected label had passed. Rally starts were also aligned to the labelled serve contact, moving three of them 11 to 14 frames earlier. That works against the detector, whose starts already ran late."
-    },
-    {
-      "date": "2026-09-14",
-      "what": "Removed one of two byte-identical contact rows at frame 2006 (hitter far, no notes).",
-      "why": "A racket cannot strike the shuttle twice in the same frame, so one row was a data-entry duplicate. It was unmatchable by construction -- each contact is claimed once, so at most one prediction could ever pair with the two of them -- which made it a permanent false negative that no detector change could clear. The hitters around it read near, near, near, far, far, near, far with both rows and alternate correctly with one.",
-      "method": "Found by checking the interval between consecutive labelled contacts while validating the 0.30s consolidation window: the closest pair in the file was 0.000s apart. The rows are identical in every field.",
-      "effect": "Labelled contacts fall from 62 to 61 and rally shots from 60 to 59. No accuracy figure moves: precision, recall, F1, hitter accuracy and every rally number are unchanged. The duplicate was harmless only by luck -- match_contacts tracks claimed contacts by frame number, so the two rows collapsed to one entry and a prediction did match frame 2006. Had nothing matched it, both rows would have been counted as missed and the file would have carried a false negative no detector change could ever clear. score_clip now refuses a truth file containing two contacts on one frame, so this cannot come back silently."
-    }
-  ]
+  {
+   "frame": 139,
+   "hitter": "far",
+   "notes": "",
+   "shot_type": "lift"
+  },
+  {
+   "frame": 395,
+   "hitter": "near",
+   "notes": "near player handing the shuttle back to the far player - a real contact, not a rally shot",
+   "in_rally": false
+  },
+  {
+   "frame": 773,
+   "hitter": "far",
+   "notes": "",
+   "shot_type": "serve"
+  },
+  {
+   "frame": 822,
+   "hitter": "near",
+   "notes": "",
+   "shot_type": "lift"
+  },
+  {
+   "frame": 870,
+   "hitter": "far",
+   "notes": "Hitter corrected near -> far on 2026-09-16 by the project owner while labelling shot types from previews that stated the hitter as near.",
+   "shot_type": "drop",
+   "shot_type_note": "shot should be from the far player not the near player"
+  },
+  {
+   "frame": 916,
+   "hitter": "near",
+   "notes": "",
+   "shot_type": "lift"
+  },
+  {
+   "frame": 1124,
+   "hitter": "far",
+   "notes": "past the labelled end of rally 2; check whether this is a handback too",
+   "in_rally": false
+  },
+  {
+   "frame": 1502,
+   "hitter": "far",
+   "notes": "",
+   "shot_type": "serve"
+  },
+  {
+   "frame": 1549,
+   "hitter": "near",
+   "notes": "",
+   "shot_type": "lift"
+  },
+  {
+   "frame": 1622,
+   "hitter": "far",
+   "notes": "",
+   "shot_type": "drop",
+   "shot_type_note": "shot was from the backend but shuttle dropped to the front of the court"
+  },
+  {
+   "frame": 1670,
+   "hitter": "near",
+   "notes": "",
+   "shot_type": "net"
+  },
+  {
+   "frame": 1717,
+   "hitter": "far",
+   "notes": "",
+   "shot_type": "lift"
+  },
+  {
+   "frame": 1743,
+   "hitter": null,
+   "notes": ""
+  },
+  {
+   "frame": 1801,
+   "hitter": "near",
+   "notes": "real hit you flagged as missed at frame 1803; now detected. CONFIRM true_hitter. the shuttle goes out of view from the camera but you can still see the player hit it, while the shuttle is coming down",
+   "shot_type": "clear"
+  },
+  {
+   "frame": 1877,
+   "hitter": "near",
+   "notes": "real hit you flagged as missed at frame 1886; now detected. CONFIRM true_hitter. model doesnt detect the far player for some reason and hence doesnt detect the shuttle being hit?",
+   "shot_type": "lift"
+  },
+  {
+   "frame": 1931,
+   "hitter": "near",
+   "notes": "",
+   "shot_type": "clear"
+  },
+  {
+   "frame": 2006,
+   "hitter": "far",
+   "notes": "",
+   "shot_type": "clear"
+  },
+  {
+   "frame": 2077,
+   "hitter": "near",
+   "notes": "real hit you flagged as missed at frame 2079; now detected. CONFIRM true_hitter. near player hits the shuttle, doesnt get registered, but the far player is not being properly registered, its being registered as someone on the sideline",
+   "shot_type": "smash"
+  },
+  {
+   "frame": 2120,
+   "hitter": "far",
+   "notes": "",
+   "shot_type": "lift"
+  },
+  {
+   "frame": 2194,
+   "hitter": "near",
+   "notes": "real hit you flagged as missed at frame 2189; now detected. CONFIRM true_hitter. same thing as 2079, near player hits the shuttle, doesnt get registered, but the far player is not being properly registered, its being registered as someone on the sideline",
+   "shot_type": "smash"
+  },
+  {
+   "frame": 2217,
+   "hitter": "far",
+   "notes": "",
+   "shot_type": "lift"
+  },
+  {
+   "frame": 2292,
+   "hitter": "near",
+   "notes": "",
+   "shot_type": "clear"
+  },
+  {
+   "frame": 2388,
+   "hitter": "far",
+   "notes": "",
+   "shot_type": "clear"
+  },
+  {
+   "frame": 2452,
+   "hitter": "near",
+   "notes": "",
+   "shot_type": "clear"
+  },
+  {
+   "frame": 2540,
+   "hitter": "far",
+   "notes": "",
+   "shot_type": "drop"
+  },
+  {
+   "frame": 2597,
+   "hitter": "near",
+   "notes": "",
+   "shot_type": "lift"
+  },
+  {
+   "frame": 2689,
+   "hitter": "far",
+   "notes": "Hitter corrected near -> far on 2026-09-16 by the project owner while labelling shot types from previews that stated the hitter as near.",
+   "shot_type": "smash",
+   "shot_type_note": "but this was from far"
+  },
+  {
+   "frame": 3810,
+   "hitter": "near",
+   "notes": "",
+   "shot_type": "serve"
+  },
+  {
+   "frame": 3868,
+   "hitter": "far",
+   "notes": "",
+   "shot_type": "lift"
+  },
+  {
+   "frame": 3935,
+   "hitter": "near",
+   "notes": "",
+   "shot_type": "drop"
+  },
+  {
+   "frame": 3980,
+   "hitter": "far",
+   "notes": "real hit you flagged as missed at frame 3972; now detected. CONFIRM true_hitter. hit doenst get detected?",
+   "shot_type": "drop"
+  },
+  {
+   "frame": 4095,
+   "hitter": "far",
+   "notes": "",
+   "shot_type": "drop"
+  },
+  {
+   "frame": 4151,
+   "hitter": "near",
+   "notes": "",
+   "shot_type": "lift"
+  },
+  {
+   "frame": 4238,
+   "hitter": "far",
+   "notes": "",
+   "shot_type": "clear"
+  },
+  {
+   "frame": 4348,
+   "hitter": "far",
+   "notes": "",
+   "shot_type": "net"
+  },
+  {
+   "frame": 4407,
+   "hitter": "near",
+   "notes": "",
+   "shot_type": "lift"
+  },
+  {
+   "frame": 4510,
+   "hitter": "far",
+   "notes": "Hitter corrected near -> far on 2026-09-16 by the project owner while labelling shot types from previews that stated the hitter as near.",
+   "shot_type": "drop",
+   "shot_type_note": "this should be hit by the far player"
+  },
+  {
+   "frame": 4556,
+   "hitter": "near",
+   "notes": "",
+   "shot_type": "net"
+  },
+  {
+   "frame": 4614,
+   "hitter": "far",
+   "notes": "",
+   "shot_type": "lift"
+  },
+  {
+   "frame": 4704,
+   "hitter": "near",
+   "notes": "",
+   "shot_type": "drop",
+   "shot_type_note": "backend"
+  },
+  {
+   "frame": 4750,
+   "hitter": "far",
+   "notes": "",
+   "shot_type": "net"
+  },
+  {
+   "frame": 4814,
+   "hitter": "near",
+   "notes": "",
+   "shot_type": "lift"
+  },
+  {
+   "frame": 4888,
+   "hitter": "far",
+   "notes": "",
+   "shot_type": "drop"
+  },
+  {
+   "frame": 4936,
+   "hitter": "near",
+   "notes": "",
+   "shot_type": "lift"
+  },
+  {
+   "frame": 5007,
+   "hitter": "far",
+   "notes": "",
+   "shot_type": "drop"
+  },
+  {
+   "frame": 5060,
+   "hitter": "near",
+   "notes": "Hitter corrected far -> near on 2026-09-16 by the project owner while labelling shot types from previews that stated the hitter as far.",
+   "shot_type": "net",
+   "shot_type_note": "but this was hit by the near player"
+  },
+  {
+   "frame": 5123,
+   "hitter": "far",
+   "notes": "",
+   "shot_type": "net"
+  },
+  {
+   "frame": 6171,
+   "hitter": "near",
+   "notes": "",
+   "shot_type": "serve"
+  },
+  {
+   "frame": 6223,
+   "hitter": "far",
+   "notes": "",
+   "shot_type": "lift"
+  },
+  {
+   "frame": 6285,
+   "hitter": "near",
+   "notes": "real hit you flagged as missed at frame 6286; now detected. CONFIRM true_hitter. near player hits a backhand shot",
+   "shot_type": "drop",
+   "shot_type_note": "backhand"
+  },
+  {
+   "frame": 6326,
+   "hitter": "far",
+   "notes": "",
+   "shot_type": "drive"
+  },
+  {
+   "frame": 6355,
+   "hitter": "near",
+   "notes": "",
+   "shot_type": "clear"
+  },
+  {
+   "frame": 7013,
+   "hitter": "far",
+   "notes": "",
+   "shot_type": "serve"
+  },
+  {
+   "frame": 7057,
+   "hitter": "near",
+   "notes": "",
+   "shot_type": "net"
+  },
+  {
+   "frame": 7114,
+   "hitter": "far",
+   "notes": "",
+   "shot_type": "net"
+  },
+  {
+   "frame": 7196,
+   "hitter": "near",
+   "notes": "",
+   "shot_type": "lift"
+  },
+  {
+   "frame": 7227,
+   "hitter": "near",
+   "notes": "",
+   "shot_type": "uncertain",
+   "shot_type_note": "written as \"?\" by the labeller"
+  },
+  {
+   "frame": 7248,
+   "hitter": "near",
+   "notes": "",
+   "shot_type": "uncertain",
+   "shot_type_note": "written as \"?\" by the labeller"
+  },
+  {
+   "frame": 7286,
+   "hitter": "far",
+   "notes": "",
+   "shot_type": "smash"
+  },
+  {
+   "frame": 7314,
+   "hitter": "near",
+   "notes": "",
+   "shot_type": "lift"
+  }
+ ],
+ "_contacts_help": "[{\"frame\": 1234, \"hitter\": \"near\"|\"far\"|null, \"notes\": \"\"}] -- every racket contact in the clip, whether or not anything detected it.",
+ "rallies": [
+  {
+   "rally": 1,
+   "start_frame": 0,
+   "end_frame": 198,
+   "notes": "Corrected from 83-236 after frame-by-frame review. The clip opens mid-rally: at frame 0 the far player is already mid-stroke, so this rally's real start is before the recording and 0 is the earliest frame we can claim. Play stops between 193 and 201, where the near player straightens up and walks right.",
+   "start_truncated": true
+  },
+  {
+   "rally": 2,
+   "start_frame": 773,
+   "end_frame": 938,
+   "notes": "End corrected from 1098. At 933 the far player is lunging low at the net with the point live; by 941 both players are upright and walking. 1098 is two and a half seconds into dead time, with the near player alone on court. The shuttle track goes to a ceiling light at 1005 and stays there, which is what made the original end look plausible."
+  },
+  {
+   "rally": 3,
+   "start_frame": 1502,
+   "end_frame": 2740,
+   "notes": "End corrected from 2767. The shuttle is visible falling across 2721-2737 and lands about 2740; both players have stopped by 2705."
+  },
+  {
+   "rally": 4,
+   "start_frame": 3810,
+   "end_frame": 5175,
+   "notes": "End corrected from 5217. Both players are at the net with the near player airborne at 5163; by 5179 the near player has turned away with the racket down. Start moved from 3821 to the labelled serve contact at 3810; a rally starts when it is served."
+  },
+  {
+   "rally": 5,
+   "start_frame": 6171,
+   "end_frame": 6378,
+   "notes": "End corrected from 6439. The near player lunges at the net at 6364; by 6376 both are upright. Start moved from 6185 to the labelled serve contact at 6171; a rally starts when it is served."
+  },
+  {
+   "rally": 6,
+   "start_frame": 7013,
+   "end_frame": 7375,
+   "notes": "End corrected from 7355. The far player is lunging at the net at 7355 with the point still live, and the clip ends at 7375. This rally is truncated by the end of the recording. Start moved from 7024 to the labelled serve contact at 7013; a rally starts when it is served.",
+   "end_truncated": true
+  }
+ ],
+ "_rallies_help": "[{\"rally\": 1, \"start_frame\": 83, \"end_frame\": 236, \"notes\": \"\"}] -- inclusive spans where a rally was in progress.",
+ "tracking_failures": [],
+ "_tracking_failures_help": "Optional. [{\"start_frame\": 1918, \"end_frame\": 3291, \"kind\": \"...\", \"notes\": \"...\"}] -- stretches where the vision stack visibly followed the wrong thing. Not scored; kept so a known failure is not rediscovered twice.",
+ "migrated_from": {
+  "format": "candidate verdicts (ground_truth.json)",
+  "contacts_kept": 62,
+  "discarded_candidate_verdicts": 128,
+  "note": "Discarded rows recorded that a particular candidate was not a hit, which is true of a configuration rather than of the video. The matcher re-derives false positives for whatever configuration is scored."
+ },
+ "label_revisions": [
+  {
+   "date": "2026-09-10",
+   "what": "Every rally end and rally 1's start re-measured from the working video at 8-frame granularity.",
+   "why": "Rally 2's labelled end of 1098 was 2.7 seconds into dead time. Checking it exposed a systematic bias: five of six ends were labelled 20 to 40 frames after play stopped, and rally 2 by 160. The convention is now that a rally ends when the shuttle lands or the point is otherwise decided, not when the players finish walking.",
+   "method": "Frames pulled from outputs/test-video2/work.mp4 with ffmpeg and read directly. Each end was bracketed by one frame with the point visibly live and one with both players upright and disengaged, then set between them.",
+   "effect": "The correction was applied to all six ends before any of them was scored, and it moves two ends earlier than the detector reports and four later. Rally 4's correction made a rest-based end rule fail that the uncorrected label had passed. Rally starts were also aligned to the labelled serve contact, moving three of them 11 to 14 frames earlier. That works against the detector, whose starts already ran late."
+  },
+  {
+   "date": "2026-09-14",
+   "what": "Removed one of two byte-identical contact rows at frame 2006 (hitter far, no notes).",
+   "why": "A racket cannot strike the shuttle twice in the same frame, so one row was a data-entry duplicate. It was unmatchable by construction -- each contact is claimed once, so at most one prediction could ever pair with the two of them -- which made it a permanent false negative that no detector change could clear. The hitters around it read near, near, near, far, far, near, far with both rows and alternate correctly with one.",
+   "method": "Found by checking the interval between consecutive labelled contacts while validating the 0.30s consolidation window: the closest pair in the file was 0.000s apart. The rows are identical in every field.",
+   "effect": "Labelled contacts fall from 62 to 61 and rally shots from 60 to 59. No accuracy figure moves: precision, recall, F1, hitter accuracy and every rally number are unchanged. The duplicate was harmless only by luck -- match_contacts tracks claimed contacts by frame number, so the two rows collapsed to one entry and a prediction did match frame 2006. Had nothing matched it, both rows would have been counted as missed and the file would have carried a false negative no detector change could ever clear. score_clip now refuses a truth file containing two contacts on one frame, so this cannot come back silently."
+  },
+  {
+   "date": "2026-09-16",
+   "what": "Hitter corrected on four contacts: 870 far, 2689 far, 4510 far, 5060 near.",
+   "why": "Raised unprompted by the project owner while labelling shot types. The previews stated the hitter this file held, and on these four the owner said it was the other player. Each correction also removes an impossible sequence: a singles rally alternates, and every one of the four sat in a run where one player was credited with two contacts in a row. Two independent reasons agreeing is why these were applied and the remaining violations were not.",
+   "method": "Applied by frame to outputs/test-video2/truth.json. No detector, model or threshold was consulted. The alternation check (badminton_poc.truth.find_impossible_alternations) was run before and after: 13 impossible pairs before, 6 after.",
+   "effect": "6 impossible pairs remain and are NOT fixed here, because the rule says the labelling is wrong somewhere in each pair without saying which contact is wrong, and some are likely to be real contacts nobody recorded rather than wrong hitters. They are listed in every evaluation under label_consistency until a human resolves them.",
+   "context": "This clip's contacts were migrated from candidate verdicts, and its true_hitter agreed with detected_hitter on 60 of 61 real hits -- the signature of a pass that read the detector's answer and confirmed it. Clips 3 and 5 were re-labelled blind and carry zero impossible pairs; clip 2 carried thirteen. It has not had that treatment."
+  }
+ ],
+ "_shot_type_provenance": "Shot types hand-written by the project owner in outputs/test-video2/shot_labels.tsv, one line per contact, from preview clips that carry the frame, the rally and the hitter and no model output of any kind. Keyed to contacts Milestone 1's hand labels already confirmed; this pass added no contacts and moved no frames. Nothing in Milestone 1 reads the field."
 }

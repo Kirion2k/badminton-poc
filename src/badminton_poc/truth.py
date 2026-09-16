@@ -243,6 +243,53 @@ def _in_spans(frame: int, spans: list[dict[str, Any]] | None) -> bool:
     return any(int(s["start_frame"]) <= frame <= int(s["end_frame"]) for s in spans)
 
 
+def find_impossible_alternations(truth: dict[str, Any]) -> list[dict[str, Any]]:
+    """Every pair of adjacent rally contacts the labelling says one player made twice running.
+
+    A singles rally strictly alternates: whoever hit last cannot hit next. So two consecutive
+    contacts credited to the same player is not a close call, it is a labelling that cannot be
+    right as it stands -- a hitter given to the wrong player, a contact that never happened, or
+    a real contact between them that nobody recorded. This does not say which; it says where to
+    look, and it says so without consulting a detector, a model or a threshold.
+
+    That independence is the point. A labelling pass that reads the detector's answer and
+    confirms it inherits the detector's mistakes silently, and no amount of scoring against
+    itself will show that up. This invariant comes from the rules of the sport instead.
+
+    Contacts with no hitter are left alone: an unattributed contact could have been either
+    player, so neither pair around it is knowably wrong, and reporting one would manufacture a
+    defect out of a missing label. Contacts marked ``in_rally: false`` -- handing the shuttle
+    back, a knock-up between points -- do not take a turn, so they are skipped rather than
+    chained, leaving the contacts either side adjacent.
+    """
+    contacts = sorted(truth.get("contacts", []), key=lambda c: int(c["frame"]))
+    fps = float(truth.get("fps") or 0.0)
+    violations: list[dict[str, Any]] = []
+
+    for rally in truth.get("rallies", []):
+        start, end = int(rally["start_frame"]), int(rally["end_frame"])
+        turns = [
+            c for c in contacts
+            if start <= int(c["frame"]) <= end and c.get("in_rally") is not False
+        ]
+        for first, second in zip(turns, turns[1:]):
+            hitter = first.get("hitter")
+            if not hitter or hitter != second.get("hitter"):
+                continue
+            first_frame, second_frame = int(first["frame"]), int(second["frame"])
+            violations.append({
+                "rally": rally.get("rally"),
+                "first_frame": first_frame,
+                "second_frame": second_frame,
+                "hitter": hitter,
+                "gap_seconds": (second_frame - first_frame) / fps if fps else None,
+                "first_shot_type": first.get("shot_type"),
+                "second_shot_type": second.get("shot_type"),
+            })
+
+    return sorted(violations, key=lambda v: v["first_frame"])
+
+
 def score_hit_detection(
     predicted_frames: Iterable[int],
     contacts: list[dict[str, Any]],
@@ -597,12 +644,30 @@ def evaluate_against_truth(
         tolerance_seconds=rally_tolerance_seconds)
     tracking = score_player_tracking(player_rows, rallies, fps=fps)
 
+    # Reported, not raised. A violation says the labelling is wrong somewhere, but not always
+    # in a way the labeller can fix: a real contact nobody recorded leaves two adjacent turns
+    # by one player, and adding a contact from memory would be worse than declaring the gap.
+    # Scoring continues with the numbers stated beside the count, so nothing is quietly
+    # withheld and nothing is quietly trusted either.
+    alternation = find_impossible_alternations(truth)
+
     return {
         "_format": TRUTH_FORMAT,
         "clip": truth.get("clip"),
         "fps": fps,
         "labelled_contacts": len(contacts),
         "labelled_rallies": len(rallies),
+        "label_consistency": {
+            "impossible_alternations": len(alternation),
+            "violations": alternation,
+            "help": (
+                "Adjacent rally contacts credited to the same player. A singles rally "
+                "alternates, so each one marks a wrong hitter, a contact that never happened, "
+                "or a real contact nobody labelled. Derived from the rules of the sport, not "
+                "from any detector, so it catches labels that were copied from detector output "
+                "and confirmed."
+            ),
+        },
         "hit_detection": {k: v for k, v in detection.items() if k != "match"},
         "hitter_assignment": hitter,
         "rally_segmentation": segmentation,

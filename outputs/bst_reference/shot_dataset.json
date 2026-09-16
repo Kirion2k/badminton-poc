@@ -3,17 +3,26 @@
  "clips": {
   "test-video2": {
    "shots_built": 58,
-   "with_a_shot_type": 0,
-   "without_a_shot_type": 58,
+   "with_a_shot_type": 58,
+   "without_a_shot_type": 0,
    "excluded": 3,
-   "by_class": {},
+   "by_class": {
+    "lift": 18,
+    "drop": 11,
+    "net": 9,
+    "clear": 8,
+    "serve": 5,
+    "smash": 4,
+    "uncertain": 2,
+    "drive": 1
+   },
    "by_hitter": {
-    "near": 32,
-    "far": 26
+    "near": 30,
+    "far": 28
    },
    "rallies": 6,
    "median_window_seconds": 2.167,
-   "median_hitter_joint_coverage": 0.865,
+   "median_hitter_joint_coverage": 0.869,
    "median_shuttle_coverage": 1.0
   },
   "test-video3": {
@@ -63,42 +72,42 @@
  },
  "totals": {
   "shots_built": 106,
-  "with_a_shot_type": 48,
-  "without_a_shot_type": 58,
+  "with_a_shot_type": 106,
+  "without_a_shot_type": 0,
   "excluded": 3,
-  "recordings_with_labels": 2
+  "recordings_with_labels": 3
  },
  "by_class": {
-  "lift": 12,
-  "net": 12,
-  "smash": 8,
-  "clear": 7,
-  "serve": 4,
-  "drive": 3,
-  "drop": 2
+  "lift": 30,
+  "net": 21,
+  "clear": 15,
+  "drop": 13,
+  "smash": 12,
+  "serve": 9,
+  "drive": 4,
+  "uncertain": 2
  },
  "by_hitter": {
-  "near": 25,
-  "far": 23
+  "near": 55,
+  "far": 51
  },
  "class_balance": {
   "largest_class": [
    "lift",
-   12
+   30
   ],
-  "always_predict_largest": 0.25,
+  "always_predict_largest": 0.283,
   "classes_with_fewer_than_5": {
-   "serve": 4,
-   "drive": 3,
-   "drop": 2
+   "drive": 4,
+   "uncertain": 2
   }
  },
  "serves": {
-  "count": 4,
+  "count": 9,
   "note": "Serve is derivable from rally structure (is_first_in_rally) and is not evidence that a visual classifier works. Reported separately and excluded from the headline figures in Phase H.",
   "all_first_in_rally": true
  },
- "uncertain": 0,
+ "uncertain": 2,
  "excluded_detail": [
   {
    "clip": "test-video2",
@@ -127,7 +136,7 @@
    "hit_frame": 83,
    "hit_time_s": 1.384,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "net",
    "is_first_in_rally": true,
    "window_frames": [
     53,
@@ -145,7 +154,7 @@
    "hit_frame": 139,
    "hit_time_s": 2.317,
    "hitter": "far",
-   "shot_type": null,
+   "shot_type": "lift",
    "is_first_in_rally": false,
    "window_frames": [
     83,
@@ -163,7 +172,7 @@
    "hit_frame": 773,
    "hit_time_s": 12.886,
    "hitter": "far",
-   "shot_type": null,
+   "shot_type": "serve",
    "is_first_in_rally": true,
    "window_frames": [
     743,
@@ -181,7 +190,7 @@
    "hit_frame": 822,
    "hit_time_s": 13.703,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "lift",
    "is_first_in_rally": false,
    "window_frames": [
     773,
@@ -198,8 +207,8 @@
    "rally": 2,
    "hit_frame": 870,
    "hit_time_s": 14.503,
-   "hitter": "near",
-   "shot_type": null,
+   "hitter": "far",
+   "shot_type": "drop",
    "is_first_in_rally": false,
    "window_frames": [
     822,
@@ -207,7 +216,7 @@
    ],
    "window_seconds": 1.834,
    "samples_in_window": 55,
-   "hitter_joint_coverage": 0.81,
+   "hitter_joint_coverage": 0.914,
    "shuttle_coverage": 1.0
   },
   {
@@ -217,7 +226,7 @@
    "hit_frame": 916,
    "hit_time_s": 15.27,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "lift",
    "is_first_in_rally": false,
    "window_frames": [
     870,
@@ -235,7 +244,7 @@
    "hit_frame": 1502,
    "hit_time_s": 25.039,
    "hitter": "far",
-   "shot_type": null,
+   "shot_type": "serve",
    "is_first_in_rally": true,
    "window_frames": [
     1472,
@@ -253,7 +262,7 @@
    "hit_frame": 1549,
    "hit_time_s": 25.823,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "lift",
    "is_first_in_rally": false,
    "window_frames": [
     1502,
@@ -271,7 +280,7 @@
    "hit_frame": 1622,
    "hit_time_s": 27.04,
    "hitter": "far",
-   "shot_type": null,
+   "shot_type": "drop",
    "is_first_in_rally": false,
    "window_frames": [
     1549,
@@ -289,7 +298,7 @@
    "hit_frame": 1670,
    "hit_time_s": 27.84,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "net",
    "is_first_in_rally": false,
    "window_frames": [
     1622,
@@ -307,7 +316,7 @@
    "hit_frame": 1717,
    "hit_time_s": 28.623,
    "hitter": "far",
-   "shot_type": null,
+   "shot_type": "lift",
    "is_first_in_rally": false,
    "window_frames": [
     1670,
@@ -325,7 +334,7 @@
    "hit_frame": 1801,
    "hit_time_s": 30.024,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "clear",
    "is_first_in_rally": false,
    "window_frames": [
     1743,
@@ -343,7 +352,7 @@
    "hit_frame": 1877,
    "hit_time_s": 31.291,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "lift",
    "is_first_in_rally": false,
    "window_frames": [
     1801,
@@ -361,7 +370,7 @@
    "hit_frame": 1931,
    "hit_time_s": 32.191,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "clear",
    "is_first_in_rally": false,
    "window_frames": [
     1877,
@@ -379,7 +388,7 @@
    "hit_frame": 2006,
    "hit_time_s": 33.441,
    "hitter": "far",
-   "shot_type": null,
+   "shot_type": "clear",
    "is_first_in_rally": false,
    "window_frames": [
     1931,
@@ -397,7 +406,7 @@
    "hit_frame": 2077,
    "hit_time_s": 34.625,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "smash",
    "is_first_in_rally": false,
    "window_frames": [
     2006,
@@ -415,7 +424,7 @@
    "hit_frame": 2120,
    "hit_time_s": 35.341,
    "hitter": "far",
-   "shot_type": null,
+   "shot_type": "lift",
    "is_first_in_rally": false,
    "window_frames": [
     2077,
@@ -433,7 +442,7 @@
    "hit_frame": 2194,
    "hit_time_s": 36.575,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "smash",
    "is_first_in_rally": false,
    "window_frames": [
     2120,
@@ -451,7 +460,7 @@
    "hit_frame": 2217,
    "hit_time_s": 36.959,
    "hitter": "far",
-   "shot_type": null,
+   "shot_type": "lift",
    "is_first_in_rally": false,
    "window_frames": [
     2194,
@@ -469,7 +478,7 @@
    "hit_frame": 2292,
    "hit_time_s": 38.209,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "clear",
    "is_first_in_rally": false,
    "window_frames": [
     2217,
@@ -487,7 +496,7 @@
    "hit_frame": 2388,
    "hit_time_s": 39.809,
    "hitter": "far",
-   "shot_type": null,
+   "shot_type": "clear",
    "is_first_in_rally": false,
    "window_frames": [
     2298,
@@ -505,7 +514,7 @@
    "hit_frame": 2452,
    "hit_time_s": 40.876,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "clear",
    "is_first_in_rally": false,
    "window_frames": [
     2388,
@@ -523,7 +532,7 @@
    "hit_frame": 2540,
    "hit_time_s": 42.343,
    "hitter": "far",
-   "shot_type": null,
+   "shot_type": "drop",
    "is_first_in_rally": false,
    "window_frames": [
     2452,
@@ -541,7 +550,7 @@
    "hit_frame": 2597,
    "hit_time_s": 43.293,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "lift",
    "is_first_in_rally": false,
    "window_frames": [
     2540,
@@ -558,8 +567,8 @@
    "rally": 3,
    "hit_frame": 2689,
    "hit_time_s": 44.827,
-   "hitter": "near",
-   "shot_type": null,
+   "hitter": "far",
+   "shot_type": "smash",
    "is_first_in_rally": false,
    "window_frames": [
     2599,
@@ -567,7 +576,7 @@
    ],
    "window_seconds": 2.017,
    "samples_in_window": 60,
-   "hitter_joint_coverage": 0.872,
+   "hitter_joint_coverage": 0.927,
    "shuttle_coverage": 1.0
   },
   {
@@ -577,7 +586,7 @@
    "hit_frame": 3810,
    "hit_time_s": 63.515,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "serve",
    "is_first_in_rally": true,
    "window_frames": [
     3780,
@@ -595,7 +604,7 @@
    "hit_frame": 3868,
    "hit_time_s": 64.482,
    "hitter": "far",
-   "shot_type": null,
+   "shot_type": "lift",
    "is_first_in_rally": false,
    "window_frames": [
     3810,
@@ -613,7 +622,7 @@
    "hit_frame": 3935,
    "hit_time_s": 65.598,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "drop",
    "is_first_in_rally": false,
    "window_frames": [
     3868,
@@ -631,7 +640,7 @@
    "hit_frame": 3980,
    "hit_time_s": 66.349,
    "hitter": "far",
-   "shot_type": null,
+   "shot_type": "drop",
    "is_first_in_rally": false,
    "window_frames": [
     3935,
@@ -649,7 +658,7 @@
    "hit_frame": 4095,
    "hit_time_s": 68.266,
    "hitter": "far",
-   "shot_type": null,
+   "shot_type": "drop",
    "is_first_in_rally": false,
    "window_frames": [
     4005,
@@ -667,7 +676,7 @@
    "hit_frame": 4151,
    "hit_time_s": 69.199,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "lift",
    "is_first_in_rally": false,
    "window_frames": [
     4095,
@@ -685,7 +694,7 @@
    "hit_frame": 4238,
    "hit_time_s": 70.65,
    "hitter": "far",
-   "shot_type": null,
+   "shot_type": "clear",
    "is_first_in_rally": false,
    "window_frames": [
     4151,
@@ -703,7 +712,7 @@
    "hit_frame": 4348,
    "hit_time_s": 72.483,
    "hitter": "far",
-   "shot_type": null,
+   "shot_type": "net",
    "is_first_in_rally": false,
    "window_frames": [
     4258,
@@ -721,7 +730,7 @@
    "hit_frame": 4407,
    "hit_time_s": 73.467,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "lift",
    "is_first_in_rally": false,
    "window_frames": [
     4348,
@@ -738,8 +747,8 @@
    "rally": 4,
    "hit_frame": 4510,
    "hit_time_s": 75.184,
-   "hitter": "near",
-   "shot_type": null,
+   "hitter": "far",
+   "shot_type": "drop",
    "is_first_in_rally": false,
    "window_frames": [
     4420,
@@ -747,7 +756,7 @@
    ],
    "window_seconds": 2.534,
    "samples_in_window": 76,
-   "hitter_joint_coverage": 0.843,
+   "hitter_joint_coverage": 0.847,
    "shuttle_coverage": 1.0
   },
   {
@@ -757,7 +766,7 @@
    "hit_frame": 4556,
    "hit_time_s": 75.951,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "net",
    "is_first_in_rally": false,
    "window_frames": [
     4510,
@@ -775,7 +784,7 @@
    "hit_frame": 4614,
    "hit_time_s": 76.918,
    "hitter": "far",
-   "shot_type": null,
+   "shot_type": "lift",
    "is_first_in_rally": false,
    "window_frames": [
     4556,
@@ -793,7 +802,7 @@
    "hit_frame": 4704,
    "hit_time_s": 78.418,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "drop",
    "is_first_in_rally": false,
    "window_frames": [
     4614,
@@ -811,7 +820,7 @@
    "hit_frame": 4750,
    "hit_time_s": 79.185,
    "hitter": "far",
-   "shot_type": null,
+   "shot_type": "net",
    "is_first_in_rally": false,
    "window_frames": [
     4704,
@@ -829,7 +838,7 @@
    "hit_frame": 4814,
    "hit_time_s": 80.252,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "lift",
    "is_first_in_rally": false,
    "window_frames": [
     4750,
@@ -847,7 +856,7 @@
    "hit_frame": 4888,
    "hit_time_s": 81.485,
    "hitter": "far",
-   "shot_type": null,
+   "shot_type": "drop",
    "is_first_in_rally": false,
    "window_frames": [
     4814,
@@ -865,7 +874,7 @@
    "hit_frame": 4936,
    "hit_time_s": 82.286,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "lift",
    "is_first_in_rally": false,
    "window_frames": [
     4888,
@@ -883,7 +892,7 @@
    "hit_frame": 5007,
    "hit_time_s": 83.469,
    "hitter": "far",
-   "shot_type": null,
+   "shot_type": "drop",
    "is_first_in_rally": false,
    "window_frames": [
     4936,
@@ -900,8 +909,8 @@
    "rally": 4,
    "hit_frame": 5060,
    "hit_time_s": 84.353,
-   "hitter": "far",
-   "shot_type": null,
+   "hitter": "near",
+   "shot_type": "net",
    "is_first_in_rally": false,
    "window_frames": [
     5007,
@@ -909,7 +918,7 @@
    ],
    "window_seconds": 2.201,
    "samples_in_window": 66,
-   "hitter_joint_coverage": 0.914,
+   "hitter_joint_coverage": 0.872,
    "shuttle_coverage": 1.0
   },
   {
@@ -919,7 +928,7 @@
    "hit_frame": 5123,
    "hit_time_s": 85.403,
    "hitter": "far",
-   "shot_type": null,
+   "shot_type": "net",
    "is_first_in_rally": false,
    "window_frames": [
     5060,
@@ -937,7 +946,7 @@
    "hit_frame": 6171,
    "hit_time_s": 102.874,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "serve",
    "is_first_in_rally": true,
    "window_frames": [
     6141,
@@ -955,7 +964,7 @@
    "hit_frame": 6223,
    "hit_time_s": 103.741,
    "hitter": "far",
-   "shot_type": null,
+   "shot_type": "lift",
    "is_first_in_rally": false,
    "window_frames": [
     6171,
@@ -973,7 +982,7 @@
    "hit_frame": 6285,
    "hit_time_s": 104.774,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "drop",
    "is_first_in_rally": false,
    "window_frames": [
     6223,
@@ -991,7 +1000,7 @@
    "hit_frame": 6326,
    "hit_time_s": 105.458,
    "hitter": "far",
-   "shot_type": null,
+   "shot_type": "drive",
    "is_first_in_rally": false,
    "window_frames": [
     6285,
@@ -1009,7 +1018,7 @@
    "hit_frame": 6355,
    "hit_time_s": 105.941,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "clear",
    "is_first_in_rally": false,
    "window_frames": [
     6326,
@@ -1027,7 +1036,7 @@
    "hit_frame": 7013,
    "hit_time_s": 116.91,
    "hitter": "far",
-   "shot_type": null,
+   "shot_type": "serve",
    "is_first_in_rally": true,
    "window_frames": [
     6983,
@@ -1045,7 +1054,7 @@
    "hit_frame": 7057,
    "hit_time_s": 117.644,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "net",
    "is_first_in_rally": false,
    "window_frames": [
     7013,
@@ -1063,7 +1072,7 @@
    "hit_frame": 7114,
    "hit_time_s": 118.594,
    "hitter": "far",
-   "shot_type": null,
+   "shot_type": "net",
    "is_first_in_rally": false,
    "window_frames": [
     7057,
@@ -1081,7 +1090,7 @@
    "hit_frame": 7196,
    "hit_time_s": 119.961,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "lift",
    "is_first_in_rally": false,
    "window_frames": [
     7114,
@@ -1099,7 +1108,7 @@
    "hit_frame": 7227,
    "hit_time_s": 120.478,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "uncertain",
    "is_first_in_rally": false,
    "window_frames": [
     7196,
@@ -1117,7 +1126,7 @@
    "hit_frame": 7248,
    "hit_time_s": 120.828,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "uncertain",
    "is_first_in_rally": false,
    "window_frames": [
     7227,
@@ -1135,7 +1144,7 @@
    "hit_frame": 7286,
    "hit_time_s": 121.461,
    "hitter": "far",
-   "shot_type": null,
+   "shot_type": "smash",
    "is_first_in_rally": false,
    "window_frames": [
     7248,
@@ -1153,7 +1162,7 @@
    "hit_frame": 7314,
    "hit_time_s": 121.928,
    "hitter": "near",
-   "shot_type": null,
+   "shot_type": "lift",
    "is_first_in_rally": false,
    "window_frames": [
     7286,

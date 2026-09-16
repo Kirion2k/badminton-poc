@@ -67,17 +67,26 @@ def score(rows: list[dict]) -> dict:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--clips", default="test-video3,test-video5")
+    # Clip 2 joined on 2026-09-16, when its 58 contacts got shot types. It was excluded
+    # before only because it had none, not because anything was wrong with it -- though
+    # its labels are the weakest of the three and the manifest says why.
+    ap.add_argument("--clips", default="test-video2,test-video3,test-video5")
     ap.add_argument("--out", default="outputs/bst_reference/phase_h.json")
     args = ap.parse_args()
 
     bst = BSTConfig()
-    rows, unlabelled = [], 0
+    rows, unlabelled, uncertain = [], 0, 0
     for clip in [c.strip() for c in args.clips.split(",") if c.strip()]:
         cfg = PipelineConfig.load(str(ROOT / "configs" / f"{clip}.json"))
         shots = load_clip(clip, output_root=ROOT / "outputs", config=cfg, source="truth")
-        labelled = [(s, f) for s, f in zip(shots.samples, shots.features) if s.shot_type]
-        unlabelled += len(shots.samples) - len(labelled)
+        # "uncertain" is a label saying the labeller could not tell, which the labelling sheet
+        # invites in place of a guess. Scoring it would punish the model for failing to
+        # reproduce an answer no human was willing to give, so it is dropped here and counted.
+        # Clips 3 and 5 carry none; clip 2 carries two, which is why this had never mattered.
+        labelled = [(s, f) for s, f in zip(shots.samples, shots.features)
+                    if s.shot_type and s.shot_type != "uncertain"]
+        uncertain += sum(1 for s in shots.samples if s.shot_type == "uncertain")
+        unlabelled += sum(1 for s in shots.samples if not s.shot_type)
         if not labelled:
             continue
         feats = [f for _, f in labelled]
@@ -120,6 +129,10 @@ def main() -> int:
         "mapping_version": MAPPING_VERSION,
         "shots_scored": len(rows),
         "shots_without_a_label_skipped": unlabelled,
+        "shots_labelled_uncertain_skipped": uncertain,
+        "uncertain_note": "Contacts the labeller marked uncertain rather than guessing. They "
+                          "are recorded in the truth file and left out of scoring, so they "
+                          "neither flatter nor penalise the model.",
         "headline_excludes_serve": True,
         "serve_note": "Serve is the first contact of a rally and derivable from rally structure, "
                       "so it is scored separately rather than counted as evidence the visual "
