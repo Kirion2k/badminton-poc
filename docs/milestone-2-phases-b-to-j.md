@@ -262,9 +262,27 @@ opinion about who hit. Restricting to the shots where BST's own opinion corrobor
 The gap survives the restriction almost untouched. **Clip 2 is genuinely harder for this model.**
 
 It is the same 1920-wide framing at 59.99 fps, closest of the three to clip 3's 59.18, while the
-best-scoring clip 5 is the 33.75 fps outlier. So it is not frame rate either. What is left is
-something about this recording — court angle, player style, lighting — that this write-up does
-not identify, and three recordings is not enough to say which.
+best-scoring clip 5 is the 33.75 fps outlier. So it is not frame rate either.
+
+**It is most likely the kind of footage, and this corrects an earlier draft of this section which
+said no cause was offered.** Clips 3 and 5 are broadcast tournament footage — Yonex-branded
+tournament halls, green court mats against contrasting surrounds, an elevated camera behind the
+baseline. Clip 2 is a club hall: wooden floor with no colour break between court and surround, a
+lower and closer camera, spectators sitting on the floor at the court edge.
+
+**BST's checkpoint was trained on ShuttleSet, which is professional tournament broadcast
+footage.** Clips 3 and 5 are that. Clip 2 is not. The ordering of the three scores is the
+ordering of their resemblance to the training distribution.
+
+One measurable trace of the camera difference: the near player's box is 33.4% of frame height on
+clip 2 against 26.0% and 28.3%, and the near-to-far size ratio is 2.19 against 1.35 and 1.79. The
+perspective is more extreme than anything in the other two. That ratio does not by itself order
+the three scores — clip 3 has the flattest perspective and still scores below clip 5 — so it is
+evidence of the camera being different in kind, not a single variable that explains the gap.
+
+This is a hypothesis with one clip behind it, not a measured result. What would test it is a
+fourth recording: another club-hall clip should score near clip 2 if domain is the cause, and
+near clips 3 and 5 if it is not.
 
 ## The label-quality finding, which is separate and arrived first
 
@@ -330,8 +348,9 @@ labels are not what makes it low.
 
 - **Three recordings is three recordings.** The drop from two to three says the curve is not flat.
   It does not say where it settles.
-- **Nothing explains the clip-2 gap.** Inputs, class mix and label quality are each ruled out
-  above. No positive cause is offered.
+- **The domain hypothesis for the clip-2 gap is untested.** Inputs, class mix and label quality
+  are each ruled out above, and footage kind is the candidate that remains — but it rests on one
+  club-hall clip against two tournament clips. A second club-hall recording would test it.
 - **drive remains 0 of 4** across every configuration tried, and is still the only class under
   five examples.
 - **Six impossible alternations in clip 2 are unresolved.** Each needs a human to look at the
