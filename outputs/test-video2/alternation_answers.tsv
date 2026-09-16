@@ -1,0 +1,45 @@
+# Impossible alternations in test-video2. One block per pair, 6 of them.
+#
+# A singles rally alternates, so the labelling below cannot be right as it stands. Exactly one
+# of these is true of each pair, and watching is the only way to tell which:
+#
+#     a <pair>  hitter <first|second> <near|far>   the named contact's hitter is wrong
+#     a <pair>  missing <frame>                    a real contact between them was never
+#                                                  labelled; give roughly where, +/- 30 frames
+#                                                  is fine
+#     a <pair>  spurious <frame>                   one of the two is not a real contact
+#     a <pair>  unsure                             recorded and left alone rather than guessed
+#
+# Add a note after any of them. Preview clips are in outputs/test-video2/alternations.
+# The first contact is marked CYAN, the second MAGENTA, the gap between them YELLOW.
+
+
+# frames 1801 -> 1877, both labelled near, gap 1.27s, rally 3
+#   clear then lift
+#   preview pair_1801_1877_near.mp4
+a 1801-1877 
+
+# frames 1877 -> 1931, both labelled near, gap 0.90s, rally 3
+#   lift then clear
+#   preview pair_1877_1931_near.mp4
+a 1877-1931 
+
+# frames 3980 -> 4095, both labelled far, gap 1.92s, rally 4
+#   drop then drop
+#   preview pair_3980_4095_far.mp4
+a 3980-4095 
+
+# frames 4238 -> 4348, both labelled far, gap 1.83s, rally 4
+#   clear then net
+#   preview pair_4238_4348_far.mp4
+a 4238-4348 
+
+# frames 7196 -> 7227, both labelled near, gap 0.52s, rally 6
+#   lift then uncertain
+#   preview pair_7196_7227_near.mp4
+a 7196-7227 
+
+# frames 7227 -> 7248, both labelled near, gap 0.35s, rally 6
+#   uncertain then uncertain
+#   preview pair_7227_7248_near.mp4
+a 7227-7248 
