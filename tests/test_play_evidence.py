@@ -1,19 +1,23 @@
 """Does the play-evidence block describe a rally without pretending to judge one?
 
-Clip 3's detector invented a rally at frames 2017-2122 out of two people hand-throwing shuttles
-during an interval, and seven candidate signals were measured to try to gate it out. Every one of
-them overlapped on clip 2, the only clip with hand labels, so nothing here suppresses anything.
-What it does is put the numbers next to the rally they describe, and say which of them fall
-outside the range every hand-labelled rally sits in.
+Clip 3's detector invented a rally out of two people hand-throwing shuttles during an interval,
+and eight candidate signals have now been measured to try to gate that out. Every one of them
+overlaps on a clip with hand labels, so nothing here suppresses anything. What it does is put the
+numbers next to the rally they describe, and say which of them fall outside the range every
+hand-labelled rally sits in -- a range that must be recomputed whenever a clip gains labels, and
+was not when clip 5 did.
 
 The test that matters most is the last one: this must not grow a verdict.
 """
 from __future__ import annotations
 
+import json
 import math
+from pathlib import Path
 
 from badminton_poc.parsing import BallSample, BallTrack
-from badminton_poc.rallies import LABELLED_RALLY_RANGES, play_evidence
+from badminton_poc.rallies import (LABELLED_RALLY_RANGES, LABELLED_RALLY_SAMPLE,
+                                   play_evidence)
 
 FPS = 60.0
 WIDTH = 1920
@@ -73,10 +77,22 @@ def test_a_rally_shaped_span_falls_outside_nothing():
     assert e["usable_shuttle_fraction"] == 1.0
 
 
+def a_narrow_span_nobody_covers_ground_in():
+    """The shape of clip 5's invented rallies: the shuttle crosses the net and comes straight
+    back, and the slot nearest it stands still.
+
+    The slot here moves at 0.05 body heights/s, not the 0.23 this fixture used while the bounds
+    were stale. 0.23 stopped being remarkable when clip 5 was folded in: its real rally 3 has a
+    slot at 0.093, a player who genuinely does stand still through a point. A barely-moving slot
+    is weaker evidence than it looked, and the fixture says so rather than the bound being bent
+    back to keep this test reading the way it used to.
+    """
+    return (track(0, N, lateral_span=0.06 * WIDTH, speed_px=7.0),
+            rows(0, N, near_step=bh(0.33), far_step=bh(0.05)))
+
+
 def test_a_narrow_track_and_a_barely_moving_slot_are_both_reported():
-    """The shape of clip 3's invented rally: the shuttle stays put and nobody covers ground."""
-    ball = track(0, N, lateral_span=0.06 * WIDTH, speed_px=5.5)
-    prows = rows(0, N, near_step=bh(0.33), far_step=bh(0.23))
+    ball, prows = a_narrow_span_nobody_covers_ground_in()
     e = play_evidence(ball, prows, 0, N - 1, fps=FPS, width=WIDTH)
     named = {o["measurement"] for o in e["outside_labelled_range"]}
     assert named == {"shuttle_lateral_range_frac", "slower_slot_movement_bh_s"}
@@ -87,8 +103,7 @@ def test_a_narrow_track_and_a_barely_moving_slot_are_both_reported():
 
 
 def test_each_reported_signal_carries_the_value_and_the_bound_it_missed():
-    ball = track(0, N, lateral_span=0.06 * WIDTH, speed_px=5.5)
-    prows = rows(0, N, near_step=bh(0.33), far_step=bh(0.23))
+    ball, prows = a_narrow_span_nobody_covers_ground_in()
     e = play_evidence(ball, prows, 0, N - 1, fps=FPS, width=WIDTH)
     o = next(o for o in e["outside_labelled_range"] if o["measurement"] == "slower_slot_movement_bh_s")
     assert o["value"] == e["slower_slot_movement_bh_s"]
@@ -105,7 +120,7 @@ def test_the_slower_slot_is_the_one_reported_not_the_average():
 
 
 def test_a_value_exactly_on_the_bound_is_inside():
-    """The bounds are the extremes of ten labelled rallies, so those rallies are inside them."""
+    """The bounds are the extremes of fourteen labelled rallies, so those rallies are inside them."""
     lo, hi = LABELLED_RALLY_RANGES["slower_slot_movement_bh_s"]
     ball = track(0, N, lateral_span=RALLY_LATERAL, speed_px=7.0)
     for value in (lo, hi):
@@ -153,9 +168,9 @@ def test_lateral_range_is_a_fraction_of_width_so_clips_of_different_size_compare
 
 
 def test_it_reports_and_never_decides():
-    """Seven signals were measured and every one overlapped on the clip with hand labels. A
-    verdict field here would turn a ten-rally observation into a gate, which is the mistake this
-    whole exercise exists to avoid."""
+    """Eight signals were measured and every one overlapped on a clip with hand labels. A
+    verdict field here would turn a fourteen-rally observation into a gate, which is the mistake
+    this whole exercise exists to avoid -- three real rallies sit outside the bounds."""
     ball, prows = a_rally()
     e = play_evidence(ball, prows, 0, N - 1, fps=FPS, width=WIDTH)
     forbidden = {"is_play", "play", "suppress", "drop", "verdict", "pass", "ok", "valid",
@@ -163,3 +178,63 @@ def test_it_reports_and_never_decides():
     assert not (forbidden & set(e)), f"play_evidence grew a verdict: {forbidden & set(e)}"
     assert isinstance(e["outside_labelled_range"], list)
     assert "does not decide" in e["note"]
+
+
+# --- the bounds must keep matching the labelled rallies they are defined as -------------------
+#
+# LABELLED_RALLY_RANGES was taken over ten rallies on two clips. Clip 5 was hand-labelled
+# afterwards and the constant was not recomputed, so every one of its four bounds drifted away
+# from the sample it claims to describe -- the slower-slot floor by 3.4x -- and play_evidence
+# spent that time flagging four real rallies while missing one invented one. These two tests are
+# the guard: the first catches a bound that no longer matches the record, the second catches the
+# thing that actually went wrong, a clip gaining hand labels that nobody folded in.
+
+MEASUREMENTS = Path(__file__).resolve().parents[1] / "configs" / "labelled-rally-measurements.json"
+
+
+def _record():
+    return json.loads(MEASUREMENTS.read_text())
+
+
+def test_each_bound_is_the_range_of_the_labelled_rallies_on_record():
+    record = _record()
+    for name, (low, high) in LABELLED_RALLY_RANGES.items():
+        measured = [r[name] for r in record["rallies"]]
+        assert (round(min(measured), 3), round(max(measured), 3)) == (round(low, 3), round(high, 3)), (
+            f"{name} says ({low}, {high}) but the {len(measured)} labelled rallies on record run "
+            f"({min(measured)}, {max(measured)}). Re-run tools/measure_labelled_rallies.py.")
+
+
+def test_every_hand_labelled_clip_is_folded_into_the_bounds():
+    """The failure that actually happened: clip 5 was labelled and the bounds stayed on two clips."""
+    on_record = set(_record()["clips"])
+    labelled = {
+        path.parent.name
+        for path in sorted((Path(__file__).resolve().parents[1] / "outputs").glob("*/truth.json"))
+        if (lambda t: t.get("labelled") and t.get("rallies"))(json.loads(path.read_text()))
+    }
+    assert labelled == on_record, (
+        f"hand-labelled clips {sorted(labelled)} but the bounds were taken over "
+        f"{sorted(on_record)}. Re-run tools/measure_labelled_rallies.py.")
+
+
+def test_the_record_holds_every_rally_behind_each_bound_and_no_verdict():
+    """The bounds are only honest if the rallies they came from are on record to be argued with,
+    and only an observation for as long as nothing in the file decides anything."""
+    record = _record()
+    assert record["rally_count"] == len(record["rallies"]) == 14
+    for rally in record["rallies"]:
+        assert {"clip", "rally", "start_frame", "end_frame"} <= set(rally)
+        for name in LABELLED_RALLY_RANGES:
+            assert isinstance(rally[name], (int, float)), f"{rally['clip']} r{rally['rally']}"
+    forbidden = {"threshold", "gate", "cutoff", "min", "max", "reject", "suppress", "verdict"}
+    assert not (forbidden & set(record)), f"the record grew a decision: {forbidden & set(record)}"
+
+
+def test_the_sample_the_note_quotes_is_the_sample_the_bounds_came_from():
+    """The emitted note states the sample size, and that is the whole weight of the claim."""
+    record = _record()
+    assert LABELLED_RALLY_SAMPLE == (len(record["rallies"]), len(record["clips"]))
+    ball, prows = a_rally()
+    note = play_evidence(ball, prows, 0, N - 1, fps=FPS, width=WIDTH)["note"]
+    assert f"{LABELLED_RALLY_SAMPLE[0]} rallies, {LABELLED_RALLY_SAMPLE[1]} clips" in note

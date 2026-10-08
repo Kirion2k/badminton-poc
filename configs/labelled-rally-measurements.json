@@ -1,0 +1,171 @@
+{
+  "_what": "Every hand-labelled rally in the project, measured with play_evidence, and the range each measurement takes across them. rallies.LABELLED_RALLY_RANGES holds those bounds and tests/test_play_evidence.py asserts the two still agree.",
+  "_not_a_threshold": "Observed extremes of a small sample, not a decision boundary. Nothing suppresses a rally for falling outside them, and a real rally that is short, flat or central can sit outside on any axis.",
+  "_regenerate": "python tools/measure_labelled_rallies.py, then copy bounds into rallies.py",
+  "clips": [
+    "test-video2",
+    "test-video3",
+    "test-video5"
+  ],
+  "rally_count": 14,
+  "rallies": [
+    {
+      "clip": "test-video2",
+      "rally": 1,
+      "start_frame": 0,
+      "end_frame": 198,
+      "shuttle_lateral_range_frac": 0.405,
+      "slower_slot_movement_bh_s": 0.427,
+      "median_shuttle_speed_px": 10.44,
+      "usable_shuttle_fraction": 0.99
+    },
+    {
+      "clip": "test-video2",
+      "rally": 2,
+      "start_frame": 773,
+      "end_frame": 938,
+      "shuttle_lateral_range_frac": 0.285,
+      "slower_slot_movement_bh_s": 0.405,
+      "median_shuttle_speed_px": 8.33,
+      "usable_shuttle_fraction": 1.0
+    },
+    {
+      "clip": "test-video2",
+      "rally": 3,
+      "start_frame": 1502,
+      "end_frame": 2740,
+      "shuttle_lateral_range_frac": 0.537,
+      "slower_slot_movement_bh_s": 0.5,
+      "median_shuttle_speed_px": 8.1,
+      "usable_shuttle_fraction": 0.934
+    },
+    {
+      "clip": "test-video2",
+      "rally": 4,
+      "start_frame": 3810,
+      "end_frame": 5175,
+      "shuttle_lateral_range_frac": 0.568,
+      "slower_slot_movement_bh_s": 0.466,
+      "median_shuttle_speed_px": 6.41,
+      "usable_shuttle_fraction": 0.929
+    },
+    {
+      "clip": "test-video2",
+      "rally": 5,
+      "start_frame": 6171,
+      "end_frame": 6378,
+      "shuttle_lateral_range_frac": 0.389,
+      "slower_slot_movement_bh_s": 0.354,
+      "median_shuttle_speed_px": 11.88,
+      "usable_shuttle_fraction": 1.0
+    },
+    {
+      "clip": "test-video2",
+      "rally": 6,
+      "start_frame": 7013,
+      "end_frame": 7375,
+      "shuttle_lateral_range_frac": 0.234,
+      "slower_slot_movement_bh_s": 0.532,
+      "median_shuttle_speed_px": 6.42,
+      "usable_shuttle_fraction": 1.0
+    },
+    {
+      "clip": "test-video3",
+      "rally": 1,
+      "start_frame": 0,
+      "end_frame": 126,
+      "shuttle_lateral_range_frac": 0.371,
+      "slower_slot_movement_bh_s": 0.72,
+      "median_shuttle_speed_px": 7.21,
+      "usable_shuttle_fraction": 1.0
+    },
+    {
+      "clip": "test-video3",
+      "rally": 2,
+      "start_frame": 765,
+      "end_frame": 985,
+      "shuttle_lateral_range_frac": 0.188,
+      "slower_slot_movement_bh_s": 0.376,
+      "median_shuttle_speed_px": 6.41,
+      "usable_shuttle_fraction": 0.738
+    },
+    {
+      "clip": "test-video3",
+      "rally": 3,
+      "start_frame": 1570,
+      "end_frame": 1780,
+      "shuttle_lateral_range_frac": 0.229,
+      "slower_slot_movement_bh_s": 0.419,
+      "median_shuttle_speed_px": 6.41,
+      "usable_shuttle_fraction": 1.0
+    },
+    {
+      "clip": "test-video5",
+      "rally": 1,
+      "start_frame": 213,
+      "end_frame": 912,
+      "shuttle_lateral_range_frac": 0.402,
+      "slower_slot_movement_bh_s": 0.591,
+      "median_shuttle_speed_px": 9.96,
+      "usable_shuttle_fraction": 0.807
+    },
+    {
+      "clip": "test-video5",
+      "rally": 2,
+      "start_frame": 1674,
+      "end_frame": 2470,
+      "shuttle_lateral_range_frac": 0.387,
+      "slower_slot_movement_bh_s": 0.649,
+      "median_shuttle_speed_px": 11.89,
+      "usable_shuttle_fraction": 0.982
+    },
+    {
+      "clip": "test-video5",
+      "rally": 3,
+      "start_frame": 2998,
+      "end_frame": 3112,
+      "shuttle_lateral_range_frac": 0.193,
+      "slower_slot_movement_bh_s": 0.093,
+      "median_shuttle_speed_px": 19.6,
+      "usable_shuttle_fraction": 0.748
+    },
+    {
+      "clip": "test-video5",
+      "rally": 4,
+      "start_frame": 3509,
+      "end_frame": 3878,
+      "shuttle_lateral_range_frac": 0.359,
+      "slower_slot_movement_bh_s": 0.476,
+      "median_shuttle_speed_px": 9.42,
+      "usable_shuttle_fraction": 1.0
+    },
+    {
+      "clip": "test-video5",
+      "rally": 5,
+      "start_frame": 4395,
+      "end_frame": 4557,
+      "shuttle_lateral_range_frac": 0.184,
+      "slower_slot_movement_bh_s": 0.393,
+      "median_shuttle_speed_px": 9.96,
+      "usable_shuttle_fraction": 0.963
+    }
+  ],
+  "bounds": {
+    "shuttle_lateral_range_frac": [
+      0.184,
+      0.568
+    ],
+    "slower_slot_movement_bh_s": [
+      0.093,
+      0.72
+    ],
+    "median_shuttle_speed_px": [
+      6.41,
+      19.6
+    ],
+    "usable_shuttle_fraction": [
+      0.738,
+      1.0
+    ]
+  }
+}

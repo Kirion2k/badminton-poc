@@ -91,17 +91,33 @@ def detect_play_spans(
     return [(s, e) for s, e in spans if e - s + 1 >= min_span]
 
 
-# The range each measurement takes across every hand-labelled rally in this project: clip 2's six
-# and clip 3's four, ten in all, on two recordings. These are observed extremes, not thresholds.
-# A rally outside them is unlike everything that has been labelled, which is a reason to look at
-# it and not a reason to believe anything -- ten rallies is a small sample and a real rally that
-# is short, flat or central could sit outside on any of these axes.
+# The range each measurement takes across every hand-labelled rally in this project: clip 2's
+# six, clip 3's three and clip 5's five, fourteen in all, on three recordings. These are observed
+# extremes, not thresholds. A rally outside them is unlike everything that has been labelled,
+# which is a reason to look at it and not a reason to believe anything -- fourteen rallies is a
+# small sample and a real rally that is short, flat or central could sit outside on any axis.
+#
+# These went stale once already. The first version was taken over ten rallies on two clips; clip
+# 5 was hand-labelled afterwards and nobody recomputed them, so for a while every bound described
+# a sample smaller than the one on disk -- the slower-slot floor was 0.318 against a real rally at
+# 0.093, a 3.4x error -- and play_evidence flagged four real rallies while missing an invented
+# one. configs/labelled-rally-measurements.json holds the rally-by-rally measurements behind each
+# bound, tools/measure_labelled_rallies.py regenerates it, and two tests in
+# tests/test_play_evidence.py fail if a clip is labelled and not folded in here.
 LABELLED_RALLY_RANGES: dict[str, tuple[float, float]] = {
-    "shuttle_lateral_range_frac": (0.188, 0.568),
-    "slower_slot_movement_bh_s": (0.318, 0.742),
-    "median_shuttle_speed_px": (5.30, 11.88),
-    "usable_shuttle_fraction": (0.81, 1.00),
+    "shuttle_lateral_range_frac": (0.184, 0.568),
+    "slower_slot_movement_bh_s": (0.093, 0.720),
+    "median_shuttle_speed_px": (6.41, 19.60),
+    "usable_shuttle_fraction": (0.738, 1.00),
 }
+
+LABELLED_RALLY_SAMPLE = (14, 3)
+"""How many rallies, on how many clips, the bounds above were taken over.
+
+Carried next to them and quoted in the note the evidence block emits, because the sample size is
+the whole weight of the claim and the last copy of it -- "ten rallies, two clips" -- stayed in
+the output for three weeks after it stopped being true.
+"""
 
 MIN_EVIDENCE_FRAMES = 30
 """Below this the medians describe noise. Half a second at 60fps."""
@@ -182,11 +198,16 @@ def play_evidence(
       shuttle lateral range  separates clip 3, but a clip 2 dead gap beats four real rallies
       slot identity switches two ids, where clip 2's real rallies reach three
 
+    An eighth was measured on 2026-10-08 and overlaps too: shuttle depth excursion, on the idea
+    that knocking between points never drives the shuttle to the backcourt. Real rallies bottom
+    out at 0.279 of frame height and clip 5's invented 3203-3325 scores 0.361.
+
     So this suppresses nothing and returns no verdict. It reports four measurements and names the
     ones that fall outside ``LABELLED_RALLY_RANGES``, which is where every hand-labelled rally in
-    the project sits. On the invented rally two of the four fall outside; on all ten labelled
-    rallies none does. That is an observation about a sample of ten, offered so somebody looks at
-    the rally, and it is deliberately not wired to anything that drops a hit.
+    the project sits. Across the three clips that is three of three invented rallies named -- and
+    three of fourteen real ones named with them, which is exactly why it stays a report. That is
+    an observation about a sample of fourteen, offered so somebody looks at the rally, and it is
+    deliberately not wired to anything that drops a hit.
     """
     frames = end_frame - start_frame + 1
     note_tail = (" This does not decide anything: no signal measured so far separates a rally "
@@ -232,7 +253,8 @@ def play_evidence(
     measured["outside_labelled_range"] = outside
     measured["note"] = (
         "Measurements over this detected rally, against the range every hand-labelled rally in "
-        "the project falls in (ten rallies, two clips)." + note_tail
+        f"the project falls in ({LABELLED_RALLY_SAMPLE[0]} rallies, "
+        f"{LABELLED_RALLY_SAMPLE[1]} clips)." + note_tail
     )
     return measured
 
@@ -716,6 +738,7 @@ def rallies_from_flight(
         rally["duration_s"] = round(max(0.0, (chain.end_frame - chain.start_frame) / fps), 3)
         rally["termination_reason"] = "last_flight_ended"
         rally["start_kind"] = chain.start_kind
+        rally["quiet_before_frames"] = chain.quiet_before_frames
         rally["flight_segments"] = list(chain.segment_indices)
         rally["shuttle_seen_at_rest"] = chain.rest_seen_at
         rallies.append(rally)
