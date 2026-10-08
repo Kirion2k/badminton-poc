@@ -60,15 +60,19 @@ manifest = {
         'tuning anything to reach them.'
     ),
     '_label_quality_note': (
-        'Not every hand labelling was produced the same way. Clips 3 and 5 were labelled blind '
-        'from previews carrying no model output, and both hold zero impossible alternations. '
-        "Clip 2's contacts were migrated from candidate verdicts whose true_hitter agreed with "
-        'detected_hitter on 60 of 61 real hits, which is what confirming a detector looks like; '
-        'it held thirteen impossible alternations, four were corrected on 2026-09-16 and six '
-        'remain unresolved. Its metrics are the least trustworthy of the three and its '
-        'impossible_alternations count is carried below so that is not forgotten.'
+        'Not every hand labelling was produced the same way, and as of 2026-10-08 the '
+        'impossible_alternations count no longer shows that up. Clips 3 and 5 were labelled '
+        'blind from previews carrying no model output and reached zero on their own. Clip 2 '
+        "reached zero by repair: its contacts were migrated from candidate verdicts whose "
+        'true_hitter agreed with detected_hitter on 60 of 61 real hits, which is what confirming '
+        'a detector looks like, and it held thirteen impossible alternations. Four hitters were '
+        'corrected by the owner on 2026-09-16, four more were resolved model-derived the same '
+        'day, and the last two labels (frames 7227 and 7248) were removed on 2026-10-08 as '
+        'tracker artefacts, with the frames and the reasoning kept in the truth file under '
+        '_removed_contacts. A zero for clip 2 therefore means repaired, not independently '
+        'labelled, and its metrics remain the least trustworthy of the three.'
     ),
-    'version': 'milestone-1/1.1',
+    'version': 'milestone-1/1.2',
     'frozen_at_commit': head,
     'frozen_on': '2026-09-16',
     'detector_defaults': {

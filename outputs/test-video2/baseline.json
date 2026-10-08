@@ -2,42 +2,23 @@
   "_format": "badminton-poc/truth-v2",
   "clip": "test-video2",
   "fps": 59.986172678840134,
-  "labelled_contacts": 63,
+  "labelled_contacts": 61,
   "labelled_rallies": 6,
   "label_consistency": {
-    "impossible_alternations": 2,
-    "violations": [
-      {
-        "rally": 6,
-        "first_frame": 7196,
-        "second_frame": 7227,
-        "hitter": "near",
-        "gap_seconds": 0.5167857627118644,
-        "first_shot_type": "lift",
-        "second_shot_type": "uncertain"
-      },
-      {
-        "rally": 6,
-        "first_frame": 7227,
-        "second_frame": 7248,
-        "hitter": "near",
-        "gap_seconds": 0.3500806779661017,
-        "first_shot_type": "uncertain",
-        "second_shot_type": "uncertain"
-      }
-    ],
+    "impossible_alternations": 0,
+    "violations": [],
     "help": "Adjacent rally contacts credited to the same player. A singles rally alternates, so each one marks a wrong hitter, a contact that never happened, or a real contact nobody labelled. Derived from the rules of the sport, not from any detector, so it catches labels that were copied from detector output and confirmed."
   },
   "hit_detection": {
     "true_positives": 55,
     "false_positives": 6,
-    "false_negatives": 6,
+    "false_negatives": 4,
     "precision": 0.9016,
-    "recall": 0.9016,
-    "f1": 0.9016,
+    "recall": 0.9322,
+    "f1": 0.9167,
     "predicted": 61,
-    "labelled_contacts": 63,
-    "rally_shots": 61,
+    "labelled_contacts": 61,
+    "rally_shots": 59,
     "out_of_rally_matched": 0,
     "out_of_rally_missed": 2,
     "predictions_outside_labelled_spans": 0,

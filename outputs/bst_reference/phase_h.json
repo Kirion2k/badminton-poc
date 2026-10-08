@@ -5669,5 +5669,13 @@
    "hitter_joint_coverage": 0.865,
    "shuttle_coverage": 1.0
   }
- ]
+ ],
+ "_correction_2026_10_08": {
+  "what": "The two shots this run skipped as `uncertain` were clip 2's contacts at frames 7227 and 7248. Both were removed from the labels on 2026-10-08 as shuttle-tracker artefacts; see outputs/test-video2/truth.json under _removed_contacts.",
+  "effect_on_the_numbers": "None. The scored set was and remains the same 104 shots, verified by comparing this file's prediction rows against the rebuilt dataset. Every accuracy, F1 and per-class figure below still stands and the model was not re-run.",
+  "stale_fields": {
+   "shots_labelled_uncertain_skipped": "reads 2; is now 0, the rows no longer exist",
+   "note": "left at their original values so this run reads as it was produced"
+  }
+ }
 }

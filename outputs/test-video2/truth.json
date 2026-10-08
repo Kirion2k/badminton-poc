@@ -368,20 +368,6 @@
    "shot_type": "lift"
   },
   {
-   "frame": 7227,
-   "hitter": "near",
-   "notes": "",
-   "shot_type": "uncertain",
-   "shot_type_note": "written as \"?\" by the labeller"
-  },
-  {
-   "frame": 7248,
-   "hitter": "near",
-   "notes": "",
-   "shot_type": "uncertain",
-   "shot_type_note": "written as \"?\" by the labeller"
-  },
-  {
    "frame": 7286,
    "hitter": "far",
    "notes": "",
@@ -441,7 +427,7 @@
    "start_frame": 7216,
    "end_frame": 7261,
    "kind": "shuttle tracker parked on an undetected fixed object",
-   "notes": "TrackNet rests on a mark on the back wall at about (400, 175) in four stretches of 11-15 frames: 4170-4180, 7216-7228, 7247-7261, 7347-7360. The fixed-point detector found only the large parked point at (918, 222), which holds 2340 frames; this one holds 59 across four runs and falls under the threshold. The labelled contacts at 7227 and 7248 sit inside two of these stretches, the far player is untracked from 7228 to 7248, and the current pipeline emits no hit at either frame. That is consistent with both being detector artefacts the candidate-verdict migration confirmed, but it is not proof, so neither label was changed."
+   "notes": "TrackNet rests on a mark on the back wall at about (400, 175) in four stretches of 11-15 frames: 4170-4180, 7216-7228, 7247-7261, 7347-7360. The fixed-point detector does not find it, and not for the reason first recorded here: measured on 2026-10-08 the real fixed point at (918, 222) is pixel-identical across its runs (0.0 px drift) while these four drift 44.2, 62.4, 64.7 and 54.7 px, because the tracker slides along the wall instead of freezing on it. rest_tolerance_px is 8.0, so none of them ever becomes a rest run and none reaches the run-count threshold to fall under it; lowering fixed_point_min_runs to 1 finds nothing. The labelled contacts at 7227 and 7248 sat inside two of these stretches and were removed on 2026-10-08; see _removed_contacts."
   }
  ],
  "_tracking_failures_help": "Optional. [{\"start_frame\": 1918, \"end_frame\": 3291, \"kind\": \"...\", \"notes\": \"...\"}] -- stretches where the vision stack visibly followed the wrong thing. Not scored; kept so a known failure is not rediscovered twice.",
@@ -480,8 +466,46 @@
    "why": "Four of clip 2's six impossible alternations were resolvable from evidence already on disk. Two were one error: the run 1801/1877/1931 is three contacts credited to near, and 1877 is the wrong one. The other two were gaps of 1.9 and 1.8 seconds hiding a real contact each.",
    "method": "Shuttle trajectory from tracknet/work_ball.csv for the reversals, wrist keypoints from players.jsonl for the swing apex, and video frames read directly for confirmation. Each conclusion was checked against a frame before being applied.",
    "provenance": "DERIVED BY A MODEL, not by the project owner. Every contact touched here carries hitter_source=model-derived-2026-09-16 so it can be found and reverted, and neither added contact is given a shot type, because naming the stroke is the owner's call and Milestone 2 skips a contact that has none. Clips 3 and 5 remain entirely hand-labelled; this makes clip 2 a mixed labelling and that must be stated wherever it is scored.",
-   "effect": "Impossible alternations 6 -> 2. The remaining pair is 7196/7227/7248, left alone deliberately: see the tracking_failures entry."
+   "effect": "Impossible alternations 6 -> 2. The remaining pair was 7196/7227/7248, left alone deliberately at the time; 7227 and 7248 were removed on 2026-10-08 and the count is now 0. See the entry below."
+  },
+  {
+   "date": "2026-10-08",
+   "what": "Removed the contacts at 7227 and 7248 (both hitter near, both shot_type uncertain).",
+   "why": "Neither is a racket contact. The shuttle tracker is sitting on a mark on the back wall at about (400,175) at both frames with no shuttle near it, and between them, at 7233-7243, it jumps to the near player's racket at the net and back; what reads as two sharp reversals is the tracker leaving a static object and returning to it. The surrounding labels are a near lift at 7196 and a far smash at 7286, a complete and correctly alternating exchange with no room for a contact in between. The labeller wrote \"?\" for the stroke at both frames because there was no stroke to name.",
+   "method": "Video frames from outputs/test-video2/work.mp4 read directly with the tracker position drawn on them, plus the shuttle track from tracknet/work_ball.csv and a recurrence measurement over the whole clip. That the current pipeline emits no hit at either frame was deliberately NOT used: confirming the detector is how this file's labelling went wrong in the first place.",
+   "effect": "Impossible alternations 2 -> 0. Labelled contacts 63 -> 61. Hit recall 0.9016 -> 0.9322 and F1 0.9016 -> 0.9167, because both rows were false negatives no detector could ever have cleared; precision and hitter accuracy did not move. Milestone 1 re-frozen at milestone-1/1.2.",
+   "provenance": "Proposed by Claude from the frames and approved by the project owner. The full original rows are kept under _removed_contacts, so this is exactly reversible."
   }
  ],
- "_shot_type_provenance": "Shot types hand-written by the project owner in outputs/test-video2/shot_labels.tsv, one line per contact, from preview clips that carry the frame, the rally and the hitter and no model output of any kind. Keyed to contacts Milestone 1's hand labels already confirmed; this pass added no contacts and moved no frames. Nothing in Milestone 1 reads the field."
+ "_shot_type_provenance": "Shot types hand-written by the project owner in outputs/test-video2/shot_labels.tsv, one line per contact, from preview clips that carry the frame, the rally and the hitter and no model output of any kind. Keyed to contacts Milestone 1's hand labels already confirmed; this pass added no contacts and moved no frames. Nothing in Milestone 1 reads the field.",
+ "_removed_contacts": [
+  {
+   "removed_on": "2026-10-08",
+   "removed_by": "Claude, with the project owner's approval, from the video frames",
+   "frames": [
+    7227,
+    7248
+   ],
+   "original_rows": [
+    {
+     "frame": 7227,
+     "hitter": "near",
+     "notes": "",
+     "shot_type": "uncertain",
+     "shot_type_note": "written as \"?\" by the labeller"
+    },
+    {
+     "frame": 7248,
+     "hitter": "near",
+     "notes": "",
+     "shot_type": "uncertain",
+     "shot_type_note": "written as \"?\" by the labeller"
+    }
+   ],
+   "why": "Neither frame is a racket contact. At 7227 and again at 7248 the shuttle tracker is sitting on a mark on the back wall at about (400,175) with no shuttle near it; between them, at 7233-7243, it jumps to the near player's racket at the net and back. What reads as two sharp reversals is the tracker leaving a static object and returning to it. The surrounding labels are a near lift at 7196 and a far smash at 7286, a complete and correctly alternating exchange with no room for a contact in between, and the labeller wrote \"?\" for the stroke at both frames because there was no stroke to name.",
+   "evidence_not_used": "That the current detector emits no hit at either frame is NOT part of the grounds. Confirming the detector is how clip 2's labelling went wrong in the first place.",
+   "effect": "impossible alternations on clip 2 go from 2 to 0; labelled contacts 63 to 61.",
+   "reversible": "the full rows are kept above; restoring them undoes this exactly."
+  }
+ ]
 }

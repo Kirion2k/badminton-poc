@@ -2,8 +2,8 @@
  "_what": "Phase G: the Milestone 2 dataset, built only from hand-verified racket contacts. No detector hits, no model-produced labels, no predictions.",
  "clips": {
   "test-video2": {
-   "shots_built": 60,
-   "with_a_shot_type": 58,
+   "shots_built": 58,
+   "with_a_shot_type": 56,
    "without_a_shot_type": 2,
    "excluded": 3,
    "by_class": {
@@ -13,15 +13,14 @@
     "clear": 8,
     "serve": 5,
     "smash": 4,
-    "uncertain": 2,
     "drive": 1
    },
    "by_hitter": {
-    "near": 31,
+    "near": 29,
     "far": 29
    },
    "rallies": 6,
-   "median_window_seconds": 2.15,
+   "median_window_seconds": 2.184,
    "median_hitter_joint_coverage": 0.863,
    "median_shuttle_coverage": 1.0
   },
@@ -71,8 +70,8 @@
   }
  },
  "totals": {
-  "shots_built": 108,
-  "with_a_shot_type": 106,
+  "shots_built": 106,
+  "with_a_shot_type": 104,
   "without_a_shot_type": 2,
   "excluded": 3,
   "recordings_with_labels": 3
@@ -84,11 +83,10 @@
   "drop": 13,
   "smash": 12,
   "serve": 9,
-  "drive": 4,
-  "uncertain": 2
+  "drive": 4
  },
  "by_hitter": {
-  "near": 54,
+  "near": 52,
   "far": 52
  },
  "class_balance": {
@@ -96,10 +94,9 @@
    "lift",
    30
   ],
-  "always_predict_largest": 0.283,
+  "always_predict_largest": 0.2885,
   "classes_with_fewer_than_5": {
-   "drive": 4,
-   "uncertain": 2
+   "drive": 4
   }
  },
  "serves": {
@@ -107,7 +104,7 @@
   "note": "Serve is derivable from rally structure (is_first_in_rally) and is not evidence that a visual classifier works. Reported separately and excluded from the headline figures in Phase H.",
   "all_first_in_rally": true
  },
- "uncertain": 2,
+ "uncertain": 0,
  "excluded_detail": [
   {
    "clip": "test-video2",
@@ -1130,52 +1127,16 @@
    "is_first_in_rally": false,
    "window_frames": [
     7114,
-    7242
+    7301
    ],
-   "window_seconds": 2.15,
-   "samples_in_window": 64,
-   "hitter_joint_coverage": 0.862,
+   "window_seconds": 3.134,
+   "samples_in_window": 94,
+   "hitter_joint_coverage": 0.861,
    "shuttle_coverage": 1.0
   },
   {
    "clip": "test-video2",
    "shot_id": 56,
-   "rally": 6,
-   "hit_frame": 7227,
-   "hit_time_s": 120.478,
-   "hitter": "near",
-   "shot_type": "uncertain",
-   "is_first_in_rally": false,
-   "window_frames": [
-    7196,
-    7263
-   ],
-   "window_seconds": 1.134,
-   "samples_in_window": 34,
-   "hitter_joint_coverage": 0.856,
-   "shuttle_coverage": 1.0
-  },
-  {
-   "clip": "test-video2",
-   "shot_id": 57,
-   "rally": 6,
-   "hit_frame": 7248,
-   "hit_time_s": 120.828,
-   "hitter": "near",
-   "shot_type": "uncertain",
-   "is_first_in_rally": false,
-   "window_frames": [
-    7227,
-    7301
-   ],
-   "window_seconds": 1.25,
-   "samples_in_window": 37,
-   "hitter_joint_coverage": 0.855,
-   "shuttle_coverage": 1.0
-  },
-  {
-   "clip": "test-video2",
-   "shot_id": 58,
    "rally": 6,
    "hit_frame": 7286,
    "hit_time_s": 121.461,
@@ -1183,17 +1144,17 @@
    "shot_type": "smash",
    "is_first_in_rally": false,
    "window_frames": [
-    7248,
+    7196,
     7329
    ],
-   "window_seconds": 1.367,
-   "samples_in_window": 41,
-   "hitter_joint_coverage": 0.931,
+   "window_seconds": 2.234,
+   "samples_in_window": 67,
+   "hitter_joint_coverage": 0.781,
    "shuttle_coverage": 1.0
   },
   {
    "clip": "test-video2",
-   "shot_id": 59,
+   "shot_id": 57,
    "rally": 6,
    "hit_frame": 7314,
    "hit_time_s": 121.928,
