@@ -1422,3 +1422,147 @@ the labels got wrong: players knocking the shuttle back between points. That is 
 problem, it is the play gate, and seven attempts at one are recorded above as having failed to
 separate on two clips. It now has a third clip to fail or succeed against, and two labelled
 examples of exactly the stretch it has to reject.
+
+### The eighth play-gate signal, and the bounds that had gone stale (2026-10-08)
+
+Three spurious rallies remained: clip 3's 317-465 and clip 5's 2646-2681 and 3203-3325. Frames
+pulled from all three show the same thing, players knocking the shuttle back across the net
+between points, and in clip 5 the near player stands in the same spot in the same pose 35 frames
+apart.
+
+**An eighth signal was measured and it overlaps like the other seven.** The frames suggest one
+nothing had tried: between-point knocking never drives the shuttle *deep*, where a rally has to
+reach the backcourt. Measured as shuttle depth excursion over the span, real rallies bottom out
+at 0.279 of frame height and clip 5's invented 3203-3325 scores 0.361, above two real rallies.
+It joins the list.
+
+| signal | real rallies | the invented ones | why it fails |
+|---|---|---|---|
+| shuttle depth excursion | 0.279-0.889 of height | 0.247, 0.285, 0.361 | clip 5's 3203-3325 sits above two real rallies |
+
+Lateral range multiplied by depth does separate all seventeen detected rallies, at a margin of
+1.28x on three examples. That is **below the 1.4x player-motion margin this project already
+rejected** as fitted to one example, so it is recorded here and wired to nothing.
+
+**`start_kind` cannot help either.** It reads `serve` on all sixteen non-truncated detected
+rallies, including all three invented ones, because it means "preceded by a quiet stretch" and
+knocking between points is preceded by one too. The name promises a discrimination the
+measurement does not make.
+
+**What was actually wrong was the bounds.** `LABELLED_RALLY_RANGES` defines itself as the range
+every hand-labelled rally in the project falls in. It was taken over ten rallies on two clips,
+clip 5 was hand-labelled afterwards, and nobody recomputed it. All four bounds were describing a
+sample smaller than the one on disk:
+
+| measurement | documented | the 14 labelled rallies |
+|---|---|---|
+| `slower_slot_movement_bh_s` | 0.318-0.742 | **0.093**-0.720 |
+| `median_shuttle_speed_px` | 5.30-11.88 | 6.410-**19.600** |
+| `usable_shuttle_fraction` | 0.81-1.00 | **0.738**-1.00 |
+| `shuttle_lateral_range_frac` | 0.188-0.568 | **0.184**-0.568 |
+
+The slower-slot floor was out by 3.4x, and that is the bound the seven attempts' player-motion
+claim rested on. Correcting it takes the evidence block from flagging **2 of 3 invented rallies
+and 4 of 14 real ones** to **3 of 3 and 3 of 14**. The bounds are computed from real labelled
+rallies only, so the invented ones falling outside is an observation and not a fit.
+
+**It still decides nothing.** Three real rallies are outside the corrected bounds, so a gate on
+them would drop real play. `play_evidence` reports and does not suppress, and the test that says
+so still passes.
+
+Two of the synthetic tests had been reading a slot at 0.23 body heights/s as barely moving. It
+is not: clip 5's real rally 3 has a slot at 0.093, a player who stands still through a genuine
+point. The fixture was moved to 0.05 rather than the bound bent back to keep the test reading
+the way it used to.
+
+`configs/labelled-rally-measurements.json` now holds the rally-by-rally measurement behind every
+bound, `tools/measure_labelled_rallies.py` regenerates it, and a test fails if a clip gains hand
+labels without being folded in -- which is the thing that actually went wrong.
+
+### Working the open-problems list: one fix, four diagnoses, two dead ends (2026-10-08)
+
+**`start_kind` no longer claims to have seen a serve.** It read `serve` on all sixteen
+non-truncated rallies across the three clips, including all three the detector invented, because
+what it measures is silence before the first flight and knocking the shuttle back between points
+is preceded by silence too. The value is now `after_quiet`, and `quiet_before_frames` carries the
+number it was decided on.
+
+This was never cosmetic. `after_quiet` **synthesises a contact** at the first flight's start
+frame, on the reasoning that an unseen stroke launched it. That synthesis is worth keeping — on
+clip 2 all five are real contacts — but it also manufactures a false positive on every invented
+rally, and the old name hid that the evidence was silence rather than a stroke.
+
+**Clip 3's hit precision is not an independent problem.** Its four false positives decompose
+completely:
+
+| false positive | cause |
+|---|---|
+| 317, 372, 436 | the invented rally at 317-465 — the play-gate problem |
+| 1035 | rally 3 running past its labelled end (765-985 labelled, 768-1069 detected) |
+
+Remove the invented rally and precision goes 0.667 to 0.889 with recall unchanged. There is
+nothing to fix here that is not already the play gate or the clip-3 rally-3 boundary, and the
+list should stop carrying it as a fifth item.
+
+**The second parked point is not a threshold problem, and the entry saying it was is corrected.**
+`docs/milestone-2-phases-b-to-j.md` recorded the back-wall mark as holding "59 frames across four
+runs" and so falling under `fixed_point_min_runs`. Measured, that is not what happens:
+
+| | drift across the run |
+|---|---|
+| the real fixed point (918, 222) | **0.0 px** — pixel-identical |
+| 4170-4180 | 44.2 px |
+| 7216-7228 | 62.4 px |
+| 7247-7261 | 64.7 px |
+| 7347-7360 | 54.7 px |
+
+`rest_tolerance_px` is 8.0, so the tracker sliding down the wall never becomes a rest run at all
+and never reaches the run count to fall under it. **Lowering `fixed_point_min_runs` to 1 finds
+nothing.** Closing this means detecting a tracker drifting over a static feature with no shuttle
+present, which is a different detector, not a smaller number. A test holds both halves with a
+frozen control, so it cannot rot into passing for the wrong reason.
+
+The video settles what the labels at 7227 and 7248 are. At both frames the tracker is on the wall
+mark with no shuttle near it; in between, at 7233-7243, it is on the near player's racket at the
+net. The surrounding labels are a near lift at 7196 and a far smash at 7286, which is a complete
+and correctly alternating exchange with no room for a contact between them. The labeller marked
+both `uncertain`. **They are not contacts**, and with the owner's approval both were removed.
+
+The two rows, the reasoning and the frames are kept in `truth.json` under `_removed_contacts`, so
+the deletion is auditable and exactly reversible. What it did to clip 2:
+
+| | before | after |
+|---|---|---|
+| labelled contacts | 63 | 61 |
+| hit recall | 0.9016 | **0.9322** |
+| hit F1 | 0.9016 | **0.9167** |
+| hit precision | 0.9016 | 0.9016 |
+| hitter accuracy | 0.9811 | 0.9811 |
+| impossible alternations | 2 | **0** |
+
+Deleting labels improved a score, which is the move most worth being suspicious of, so what
+happened is worth stating plainly: the two rows were false negatives **no detector could ever
+have cleared**, because there was no contact at either frame to detect. Nothing else moved —
+precision, hitter accuracy and every other clip are untouched. The manifest is re-frozen at
+`milestone-1/1.2`.
+
+All three clips now read zero impossible alternations, and that is the moment the check stops
+distinguishing them, so the manifest now says so: clips 3 and 5 reached zero by being labelled
+blind, clip 2 reached it by repair. A zero means *repaired* for clip 2, and its labelling is
+still the least trustworthy of the three.
+
+**Drive is a sample-size problem, not a tuning problem.** It is 0 of 4, and the shape of the
+failure rules out the hopeful readings:
+
+| true drive | BST called it | where drive ranked |
+|---|---|---|
+| clip 2 f6326 | net (0.27) | **#2** at 0.207 |
+| clip 5 f1736 | drop (0.92) | #3 at 0.012 |
+| clip 5 f2219 | smash (0.86) | #4 at 0.024 |
+| clip 5 f3568 | other (0.66) | #7 at 0.021 |
+
+Only one is a near miss. On the other three BST puts drive at about 0.02 and is confident in
+something else, so this is not a threshold, a reweighting or a calibration away. The four
+predictions of drive are all wrong too (smash, lift, net, net). With four examples, anything that
+got them right would be fitted to four points. Drive needs labelled drives, which is the same
+blocker as the club recording, and it should be tracked as that rather than as its own problem.
