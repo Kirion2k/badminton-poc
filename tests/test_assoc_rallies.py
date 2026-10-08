@@ -584,12 +584,14 @@ def test_trimming_never_empties_a_rally():
 
 
 class _Chain:
-    def __init__(self, start, end, hits, kind="serve", rest=None, segments=(0,)):
+    def __init__(self, start, end, hits, kind="after_quiet", rest=None, segments=(0,),
+                 quiet_before=90):
         self.start_frame = start
         self.end_frame = end
         self.hit_frames = tuple(hits)
         self.segment_indices = tuple(segments)
         self.start_kind = kind
+        self.quiet_before_frames = quiet_before if kind == "after_quiet" else None
         self.rest_seen_at = rest
 
 
@@ -616,7 +618,9 @@ def test_flight_rally_span_comes_from_the_chain_not_the_hits():
     assert (rallies[0]["start_frame"], rallies[0]["end_frame"]) == (100, 400)
     assert rallies[0]["hit_count"] == 2
     assert rallies[0]["termination_reason"] == "last_flight_ended"
-    assert rallies[0]["start_kind"] == "serve"
+    assert rallies[0]["start_kind"] == "after_quiet"
+    # the measurement the kind was decided on travels with it
+    assert rallies[0]["quiet_before_frames"] == 90
 
 
 def test_require_hitter_drops_unattributed_hits_but_keeps_the_span():

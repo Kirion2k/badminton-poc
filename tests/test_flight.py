@@ -96,6 +96,44 @@ def test_a_position_frozen_once_is_not_a_fixed_point():
     assert find_fixed_points(track(points), FPS, _cfg()) == []
 
 
+def _four_visits(step_x, step_y, run_frames=30):
+    """Four separate visits to the same starting position, each drifting at a chosen rate."""
+    points: list[tuple[int, float, float]] = []
+    frame = 0
+    for _ in range(4):
+        points += [(frame + i, 400.0 + step_x * i, 150.0 + step_y * i) for i in range(run_frames)]
+        frame += run_frames
+        points += [(frame + i, 100.0 + 25.0 * i, 400.0) for i in range(20)]
+        frame += 20
+    return points
+
+
+def test_a_tracker_sliding_down_a_wall_mark_is_not_found_by_lowering_the_run_count():
+    """Clip 2's second false fixed point, and why the obvious fix for it does not work.
+
+    TrackNet latches onto a mark on the back wall in four stretches -- 4170-4180, 7216-7228,
+    7247-7261, 7347-7360 -- and two hand-labelled contacts sit inside them, at 7227 and 7248.
+    `docs/milestone-2-phases-b-to-j.md` recorded the cause as the point holding "59 frames across
+    four runs", under `fixed_point_min_runs`. Measured, that is not what happens: the real fixed
+    point at (918, 222) is pixel-identical across its runs, 0.0 px of drift, while these four
+    stretches drift 44, 62, 65 and 55 px as the tracker slides along the wall.
+
+    So they never become rest runs at all and never reach the run-count threshold. Dropping
+    `fixed_point_min_runs` to 1 still finds nothing: the blind spot is the definition of rest,
+    not the number of visits.
+    """
+    sliding = _four_visits(0.8, 4.8)                      # ~4.9 px/frame, clip 2's measured rate
+    assert find_fixed_points(track(sliding), FPS, _cfg()) == []
+    assert find_fixed_points(track(sliding), FPS, _cfg(fixed_point_min_runs=1)) == []
+
+
+def test_the_same_four_visits_frozen_are_found__so_the_slide_is_what_hides_them():
+    """The control for the test above: same four visits, same lengths, no drift. Without this
+    the test passes for having short runs rather than for the thing it claims."""
+    frozen = find_fixed_points(track(_four_visits(0.0, 0.0)), FPS, _cfg())
+    assert len(frozen) == 1 and frozen[0]["runs"] == 4
+
+
 def test_a_position_returned_to_again_and_again_is_a_fixed_point():
     points: list[tuple[int, float, float]] = []
     frame = 0
@@ -194,15 +232,27 @@ def test_a_chain_below_the_hit_minimum_is_not_a_rally():
     assert model.rallies == ()
 
 
-def test_quiet_before_the_first_flight_makes_the_start_a_serve():
+def test_quiet_before_the_first_flight_is_reported_as_quiet_not_as_a_serve():
+    """The measurement is silence. It is named for silence because knocking the shuttle back
+    between points is preceded by silence too, and on the three clips the old name `serve` was
+    returned for all three rallies the detector invented as well as every real one."""
     points = [(i, 500.0, 700.0) for i in range(120)]           # shuttle held, two seconds
     points += straight(120, 40, 500.0, 700.0, 12.0, -4.0)
     points += straight(162, 40, 980.0, 540.0, -12.0, 4.0)
     model = segment_flight(track(points), FPS, _cfg())
     assert len(model.rallies) == 1
-    assert model.rallies[0].start_kind == "serve"
-    # The serve itself is reported as a hit, so a two-flight rally carries two contacts.
+    assert model.rallies[0].start_kind == "after_quiet"
+    assert model.rallies[0].quiet_before_frames == 120
+    # An unseen opening stroke is still synthesised as a hit, so a two-flight rally carries two.
     assert len(model.rallies[0].hit_frames) == 2
+
+
+def test_a_truncated_start_carries_no_quiet_measurement_to_argue_with():
+    points = straight(0, 40, 100.0, 400.0, 12.0, 0.0)
+    points += straight(42, 40, 570.0, 400.0, -12.0, 0.0)
+    model = segment_flight(track(points), FPS, _cfg(min_hits_per_rally=1))
+    assert model.rallies[0].start_kind == "truncated"
+    assert model.rallies[0].quiet_before_frames is None
 
 
 def test_a_track_starting_mid_flight_is_reported_as_truncated():

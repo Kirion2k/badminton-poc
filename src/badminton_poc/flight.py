@@ -98,8 +98,26 @@ class FlightRally:
     hit_frames: tuple[int, ...]
     segment_indices: tuple[int, ...]
     start_kind: str
-    """``serve`` when a quiet period precedes the first segment, ``truncated`` when the clip or
-    the track simply begins mid-flight and the real start is not observable."""
+    """``after_quiet`` when nothing flew for ``min_serve_quiet_seconds`` before the first segment,
+    ``truncated`` when the clip or the track simply begins mid-flight.
+
+    It was called ``serve`` until 2026-10-08 and that name claimed more than the measurement
+    makes good on. Quiet before a flight is what a serve looks like, and also what two players
+    knocking the shuttle back between points looks like: the value read ``serve`` on all sixteen
+    non-truncated rallies across the three clips, including all three the detector invented.
+
+    This is not cosmetic. ``after_quiet`` synthesises a contact at the first flight's start frame,
+    on the reasoning that the stroke that launched it was a serve the detector could not see. On
+    clip 2 all five of those are real contacts; on clip 3 one of the four is the invented rally's,
+    a false positive created rather than merely missed. Keeping the synthesis is still the right
+    trade -- it wins far more contacts than it invents -- but the name should not hide that the
+    evidence is silence rather than a stroke. ``quiet_before_frames`` carries the measurement.
+    """
+    quiet_before_frames: int | None
+    """Frames between the previous flight ending and this one starting, or from the track start.
+
+    The number ``start_kind`` was decided on, kept so the decision can be argued with. ``None``
+    on a truncated start, where there is no preceding flight and no track to measure from."""
     rest_seen_at: int | None
     """Frame where the shuttle was next seen lying still, when it was seen at all. Evidence that
     the rally really did end, not the boundary itself: on the development clip the shuttle takes
@@ -113,6 +131,7 @@ class FlightRally:
             "hit_frames": list(self.hit_frames),
             "segments": list(self.segment_indices),
             "start_kind": self.start_kind,
+            "quiet_before_frames": self.quiet_before_frames,
             "rest_seen_at": self.rest_seen_at,
         }
 
@@ -684,12 +703,13 @@ def segment_flight(
         rallies.append(
             FlightRally(
                 # Truncated or not, the rally was in progress from the first flight we can see.
-                # What the missing serve costs is a hit, not a boundary.
+                # What the unobserved opening stroke costs is a hit, not a boundary.
                 start_frame=first.start_frame,
                 end_frame=last.end_frame,
                 hit_frames=tuple(sorted(hits)),
                 segment_indices=tuple(chain),
-                start_kind="serve" if served else "truncated",
+                start_kind="after_quiet" if served else "truncated",
+                quiet_before_frames=quiet_before if served else None,
                 rest_seen_at=rest_after(last.end_frame),
             )
         )

@@ -395,6 +395,17 @@ This one holds 59 frames across four runs and falls under the threshold. **A par
 not have to be long-lived to put a false contact in the labels; it only has to be parked while
 something is being decided.**
 
+> **Correction, 2026-10-08: the last two sentences are wrong, and the fix they imply does not
+> work.** The run count is not what stops this being found. Measured, the real fixed point at
+> (918, 222) is *pixel-identical* across its runs — 0.0 px of drift — while these four stretches
+> drift 44.2, 62.4, 64.7 and 54.7 px, because the tracker slides along the wall rather than
+> freezing on it. `rest_tolerance_px` is 8.0, so none of the four ever becomes a rest run, and
+> they never reach the run-count threshold to fall under it. Lowering `fixed_point_min_runs` to 1
+> finds nothing. The blind spot is the definition of rest — a frozen pixel — not the number of
+> visits, and closing it means detecting a tracker that *drifts* over a static feature with no
+> shuttle present. `tests/test_flight.py` holds both halves of this, with a frozen control so the
+> claim cannot rot into passing for the wrong reason.
+
 Three things agree that 7227 and 7248 are artefacts: the tracker is parked at both, the far
 player is untracked from 7228 to 7248, and the current pipeline emits no hit at either frame. The
 owner independently marked both `uncertain` when asked for a stroke — they could not name one
