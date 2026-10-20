@@ -59,6 +59,15 @@ manifest = {
         'not of the detector: re-run the freeze script and record the new figures rather than '
         'tuning anything to reach them.'
     ),
+    '_detector_change_note': (
+        'milestone-1/1.3 (2026-10-20) is the first re-freeze caused by the detector rather than '
+        'the labels. FlightConfig gained reentry_kink_speed_ratio: a racket contact made as the '
+        'shuttle came back into view after the tracker lost it, found as a sudden jump in step '
+        'against the approach it was seen making. It recovers clip 2 at 4317 and clip 3 at 971, '
+        'both correctly attributed, adds no false positive on any labelled frame, and moves no '
+        'clip 5 figure. The evidence is two positives against eight blind re-entries that read '
+        '2.3x or less; see the field docstring.'
+    ),
     '_label_quality_note': (
         'Not every hand labelling was produced the same way, and as of 2026-10-08 the '
         'impossible_alternations count no longer shows that up. Clips 3 and 5 were labelled '
@@ -72,9 +81,9 @@ manifest = {
         '_removed_contacts. A zero for clip 2 therefore means repaired, not independently '
         'labelled, and its metrics remain the least trustworthy of the three.'
     ),
-    'version': 'milestone-1/1.2',
+    'version': 'milestone-1/1.3',
     'frozen_at_commit': head,
-    'frozen_on': '2026-09-16',
+    'frozen_on': '2026-10-20',
     'detector_defaults': {
         'PlayerConfig': defaults(PlayerConfig),
         'AnalysisConfig': defaults(AnalysisConfig),

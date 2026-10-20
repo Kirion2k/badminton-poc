@@ -10,13 +10,13 @@
     "help": "Adjacent rally contacts credited to the same player. A singles rally alternates, so each one marks a wrong hitter, a contact that never happened, or a real contact nobody labelled. Derived from the rules of the sport, not from any detector, so it catches labels that were copied from detector output and confirmed."
   },
   "hit_detection": {
-    "true_positives": 55,
+    "true_positives": 56,
     "false_positives": 6,
-    "false_negatives": 4,
-    "precision": 0.9016,
-    "recall": 0.9322,
-    "f1": 0.9167,
-    "predicted": 61,
+    "false_negatives": 3,
+    "precision": 0.9032,
+    "recall": 0.9492,
+    "f1": 0.9256,
+    "predicted": 62,
     "labelled_contacts": 61,
     "rally_shots": 59,
     "out_of_rally_matched": 0,
@@ -26,12 +26,12 @@
     "labelled_seconds": null
   },
   "hitter_assignment": {
-    "matched_hits": 55,
-    "scored": 53,
-    "correct": 52,
+    "matched_hits": 56,
+    "scored": 54,
+    "correct": 53,
     "incorrect": 1,
     "unassigned": 2,
-    "accuracy": 0.9811
+    "accuracy": 0.9815
   },
   "rally_segmentation": {
     "labelled_rallies": 6,

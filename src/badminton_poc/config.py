@@ -498,6 +498,18 @@ class FlightConfig:
     Shorter than this and the test sees no turn at all -- at the 3-frame span the turn angle
     uses, it flags nothing on either labelled clip, because a shuttle near the top of its arc
     barely moves."""
+    reentry_kink_speed_ratio: float = 3.0
+    """How many times faster than it was arriving the shuttle must suddenly move, in the frames
+    where it came back into view after the tracker lost it, to count as a racket contact there.
+
+    The case is a stroke taken above the top of the frame: the shuttle reappears falling, a
+    racket meets it, and the fit refuses the kinked frames, so the contact sits inside a gap no
+    turn test looks into. The two labelled contacts hidden that way (clip 2 at 4317, clip 3 at
+    971) jump 7.2x and 8.4x their approach speed; every other blind re-entry on the three clips
+    reads 2.3x or less, the worst a tracker teleporting on its first sample back. Three is a
+    round number in that gap, not one fitted to it, and the evidence is two positives.
+
+    Zero disables it."""
     contact_frame_rule: str = "exit"
     """Where in the gap between two flight segments to place the contact.
 

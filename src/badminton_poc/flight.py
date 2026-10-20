@@ -79,6 +79,13 @@ class Link:
     kind: str
     """``contact`` (a racket hit) or ``continuation`` (one flight, tracking briefly lost)."""
     hit_frame: int | None
+    reentry_contact_frame: int | None = None
+    """A second contact inside the gap, found where the shuttle came back into view.
+
+    ``kind`` describes the turn from one segment to the next and ``hit_frame`` the contact that
+    turn implies. When the tracker lost the shuttle in between and, where it reappeared, it
+    suddenly jumps to several times the speed it was arriving at, a racket did that, and it is a
+    contact the turn cannot see -- most often a stroke taken above the top of the frame."""
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -88,6 +95,7 @@ class Link:
             "turn_degrees": round(self.turn_degrees, 1),
             "kind": self.kind,
             "hit_frame": self.hit_frame,
+            "reentry_contact_frame": self.reentry_contact_frame,
         }
 
 
@@ -552,6 +560,53 @@ def _gravity_apex(
     return n1 / n0 < max_speed_ratio
 
 
+REENTRY_MIN_APPROACH_STEPS = 3
+"""Frames the shuttle must be seen arriving before a kink counts: a median over fewer is noise."""
+
+
+def _reentry_contact(
+    positions: dict[int, tuple[float, float]],
+    exit_frame: int,
+    entry_frame: int,
+    min_speed_ratio: float,
+) -> int | None:
+    """The frame a racket met the shuttle as it came back into view, if one did.
+
+    Walks back from the next segment's first frame through the unbroken run of samples leading
+    into it. If that run starts after a frame the tracker saw nothing in, the shuttle reappeared
+    there, and the frames from the reappearance to the segment are ones the fit refused. A racket
+    in those frames is a sudden jump in speed after an approach the tracker saw: the largest
+    step, measured against the median step before it, at ``min_speed_ratio`` or more. The
+    contact is the last frame before the jump, as ``exit`` places one at an ordinary join.
+
+    Not the fit residual: a stuttering track refuses to fit with no racket anywhere near it.
+    Not speed across the gap: a shuttle whose apex was out of frame comes back faster than it
+    left with no racket involved. And the approach is required, so a tracker that teleports on
+    its first sample back has nothing to jump from.
+    """
+    if min_speed_ratio <= 0:
+        return None
+    frame = entry_frame
+    while frame - 1 > exit_frame and frame - 1 in positions:
+        frame -= 1
+    if frame - 1 <= exit_frame:
+        return None
+    run = list(range(frame, entry_frame + 1))
+    steps = [
+        math.hypot(positions[f + 1][0] - positions[f][0], positions[f + 1][1] - positions[f][1])
+        for f in run[:-1]
+    ]
+    best: tuple[float, int] | None = None
+    for k in range(REENTRY_MIN_APPROACH_STEPS, len(steps)):
+        approach = _median(steps[:k])
+        if approach < 1e-6:
+            continue
+        ratio = steps[k] / approach
+        if best is None or ratio > best[0]:
+            best = (ratio, run[k])
+    return best[1] if best is not None and best[0] >= min_speed_ratio else None
+
+
 def segment_flight(
     ball: BallTrack,
     fps: float,
@@ -648,6 +703,7 @@ def segment_flight(
         if turn is None:
             continue
         hit_frame = _contact_frame(cfg.contact_frame_rule, exit_frame, entry_frame, residual)
+        hidden = _reentry_contact(positions, exit_frame, entry_frame, cfg.reentry_kink_speed_ratio)
         if turn < cfg.min_turn_degrees:
             # A small turn is what a drive, a flat push or a block looks like, and it is also
             # what a tracker blink mid-flight looks like. The angle cannot separate them; where
@@ -656,9 +712,9 @@ def segment_flight(
             if cfg.promote_continuation_within_body_heights > 0 and racket_reach_at is not None:
                 reach = racket_reach_at((exit_frame + entry_frame) // 2)
             if reach is not None and reach <= cfg.promote_continuation_within_body_heights:
-                links.append(Link(index, index + 1, gap, turn, "contact_by_reach", hit_frame))
+                links.append(Link(index, index + 1, gap, turn, "contact_by_reach", hit_frame, hidden))
                 continue
-            links.append(Link(index, index + 1, gap, turn, "continuation", None))
+            links.append(Link(index, index + 1, gap, turn, "continuation", None, hidden))
             continue
         if cfg.gravity_apex_max_speed_ratio > 0 and _gravity_apex(
             positions, exit_frame, entry_frame,
@@ -667,9 +723,9 @@ def segment_flight(
         ):
             # Rising in, falling out, and no quicker for it: gravity turned the shuttle over at
             # the top of a lift, and no racket was involved.
-            links.append(Link(index, index + 1, gap, turn, "gravity_apex", None))
+            links.append(Link(index, index + 1, gap, turn, "gravity_apex", None, hidden))
             continue
-        links.append(Link(index, index + 1, gap, turn, "contact", hit_frame))
+        links.append(Link(index, index + 1, gap, turn, "contact", hit_frame, hidden))
 
     linked = {link.before: link for link in links}
     chains: list[list[int]] = []
@@ -688,8 +744,10 @@ def segment_flight(
     for chain in chains:
         first, last = segments[chain[0]], segments[chain[-1]]
         contacts = [
-            linked[i].hit_frame for i in chain[:-1]
-            if i in linked and linked[i].hit_frame is not None
+            frame
+            for i in chain[:-1] if i in linked
+            for frame in (linked[i].hit_frame, linked[i].reentry_contact_frame)
+            if frame is not None
         ]
         previous_end = segments[chain[0] - 1].end_frame if chain[0] > 0 else None
         track_start = ball.frames[0] if ball.frames else 0
@@ -725,6 +783,7 @@ def segment_flight(
             "contact": sum(1 for l in links if l.kind == "contact"),
             "contact_by_reach": sum(1 for l in links if l.kind == "contact_by_reach"),
             "continuation": sum(1 for l in links if l.kind == "continuation"),
+            "reentry_contact": sum(1 for l in links if l.reentry_contact_frame is not None),
         },
         "chains": len(chains),
         "chains_below_min_hits": len(chains) - len(rallies),

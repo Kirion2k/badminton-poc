@@ -525,6 +525,89 @@ def test_a_turn_from_falling_to_rising_is_never_an_apex():
     assert _gravity_apex(rising, 109, 111, span=8, max_speed_ratio=1.0) is False
 
 
+# --- a contact made where the tracker could not see it ---
+# Clip 3 at 899-976: the far player's clear climbs out of the top of the frame and the tracker
+# loses it. It comes back into view at 966, falling, and at 971-972 the near player smashes it --
+# the step jumps from 12 px to 104 px and the heading swings. The fit refuses those frames, so
+# the next segment starts at 976, after the smash, and the join from the clear to the smash read
+# as the top of one arc. Clip 2 at 4312-4323 is the same thing inside a join the detector
+# already called a contact: the far clear at 4238 left the frame, came back at 4312, and the
+# near player's stroke at 4316 sat in the refused frames and was missed.
+#
+# Neither of the obvious measurements finds it, and both were tried. Speed across the gap: a lift
+# whose top is out of frame comes back faster than it left with no racket involved -- clip 2 at
+# 4641-4686 leaves at 13 px/frame and returns at 17-20 -- so a speed ratio flips a gravity join
+# to a contact and plants a phantom that then eats the real hit beside it. Fit residual: clip
+# 5's re-entry at 355-371 stutters at about 10 px residual throughout with no racket near it.
+# What separates them is a sudden jump against an approach the tracker saw: 7.2x and 8.4x at the
+# two hidden contacts, 2.3x or less at every other blind re-entry on the three labelled clips.
+
+
+def _clear_then_smash_above_the_frame():
+    points = [(i, 400.0 + 4.0 * i, 600.0 - 16.0 * i) for i in range(30)]   # rising, out the top
+    points += [(30 + i, 0.0, 0.0, False) for i in range(40)]                 # blind
+    # Back in view still falling from the top of the clear, then the racket: a kink to 35
+    # px/frame that the fit refuses, and only once the shuttle has slowed does it fit again.
+    points += [(70 + i, 560.0, 10.0 + 13.0 * i) for i in range(6)]
+    points += [(76 + i, 520.0 - 20.0 * i, 160.0 + 30.0 * i) for i in range(5)]
+    points += [(81 + i, 430.0 - 4.0 * i, 310.0 + 11.0 * i) for i in range(30)]
+    return points
+
+
+def test_a_racket_kink_where_the_shuttle_reappeared_is_a_contact():
+    model = segment_flight(
+        track(_clear_then_smash_above_the_frame()), FPS,
+        _cfg(min_serve_quiet_seconds=1000.0, min_hits_per_rally=1),
+    )
+    assert len(model.segments) == 2
+    assert model.segments[1].start_frame > 76, "the fit must refuse the kink for this to test anything"
+    # Rising in and falling out with the top unseen: the join itself still reads as an apex.
+    assert [link.kind for link in model.links] == ["gravity_apex"]
+    # The last frame the shuttle was still falling toward the racket, as at any other join.
+    assert model.links[0].reentry_contact_frame == 75
+    assert list(model.rallies[0].hit_frames) == [75]
+
+
+def test_a_tracker_teleporting_on_its_first_sample_back_is_not_a_contact():
+    """Clip 5 at 355: one sample by the far player, then a 514 px jump to where the shuttle
+    really was. The jump is the largest step in the run, but nothing was seen arriving before
+    it, so there is nothing for it to be faster than."""
+    points = [(i, 400.0 + 4.0 * i, 600.0 - 16.0 * i) for i in range(30)]
+    points += [(30 + i, 0.0, 0.0, False) for i in range(40)]
+    points += [(70, 900.0, 520.0)]
+    points += [(71 + i, 780.0 - 4.0 * i, 12.0 + 34.0 * i) for i in range(40)]
+    model = segment_flight(track(points), FPS, _cfg(min_serve_quiet_seconds=1000.0, min_hits_per_rally=1))
+    assert all(link.reentry_contact_frame is None for link in model.links)
+
+
+def test_the_reentry_kink_can_be_switched_off():
+    model = segment_flight(
+        track(_clear_then_smash_above_the_frame()), FPS,
+        _cfg(min_serve_quiet_seconds=1000.0, min_hits_per_rally=1, reentry_kink_speed_ratio=0.0),
+    )
+    assert model.links[0].reentry_contact_frame is None
+
+
+def test_a_smooth_fall_back_into_view_is_not_a_contact():
+    """The other half, and clip 2 at 4641-4686: a lift whose top was out of frame comes back
+    faster than it left, and smoothly. Nothing in the refused frames is a kink."""
+    points = [(i, 400.0 + 4.0 * i, 600.0 - 13.0 * i) for i in range(30)]
+    points += [(30 + i, 0.0, 0.0, False) for i in range(40)]
+    points += [(70 + i, 560.0 + 4.0 * i, 10.0 + 18.0 * i) for i in range(40)]
+    model = segment_flight(track(points), FPS, _cfg(min_serve_quiet_seconds=1000.0, min_hits_per_rally=1))
+    assert all(link.reentry_contact_frame is None for link in model.links)
+
+
+def test_a_shuttle_seen_all_the_way_over_the_top_is_still_an_apex():
+    """The other half: with no blind stretch there is no re-entry to measure from, and a slow
+    fall after a visible apex is gravity, as before."""
+    points = [(i, 400.0 + 4.0 * i, 600.0 - 16.0 * i) for i in range(30)]
+    points += [(30 + i, 520.0 + 2.0 * i, 120.0 - 3.0 * i + 0.3 * i * i) for i in range(20)]
+    points += [(50 + i, 560.0 + 2.0 * i, 180.0 + 9.0 * i) for i in range(30)]
+    model = segment_flight(track(points), FPS, _cfg(min_serve_quiet_seconds=1000.0, min_hits_per_rally=1))
+    assert "gravity_apex" in [link.kind for link in model.links]
+
+
 # --- a gap the tracker spent blind is not the end of a rally ---
 # Clip 5's first rally runs from the serve at 213 to 915 and was reported as starting at 513,
 # nearly nine seconds late, because the chain broke twice inside it: at 284-370 and again at

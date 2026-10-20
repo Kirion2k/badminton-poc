@@ -1566,3 +1566,53 @@ something else, so this is not a threshold, a reweighting or a calibration away.
 predictions of drive are all wrong too (smash, lift, net, net). With four examples, anything that
 got them right would be fitted to four points. Drive needs labelled drives, which is the same
 blocker as the club recording, and it should be tracked as that rather than as its own problem.
+
+### A stroke taken above the frame, and two measurements that could not see it (2026-10-20)
+
+Clip 3's rally 3 was carried as "ends 1.4s late". Looked at frame by frame it is two problems,
+and the one underneath was a **missed smash**. The far player's clear at 884 climbs out of the
+top of the frame and the tracker loses it at 902. It comes back into view at 966, falling, and
+at 971-972 the near player smashes it: the step jumps from 12 px to 104 px and the heading
+swings. The fit refuses those kinked frames, so the next segment starts at 976, after the
+smash, and the join from the clear to the smash read as the top of one arc -- `gravity_apex`,
+no contact. Clip 2 at 4312-4323 is the same thing inside a join already called a contact: the
+far clear at 4238 left the frame, came back at 4312, and the near player's stroke at 4316 sat
+in the refused frames, missed.
+
+Two obvious measurements were tried first and **both are wrong**:
+
+| measurement | why it fails |
+|---|---|
+| apex speed ratio, measured from the re-entry instead of the segment | a lift whose top is out of frame comes back faster than it left with no racket involved (clip 2 at 4641-4686: 13 px/frame out, 17-20 back). It flips a gravity join to a contact and the phantom hit then wins consolidation against the real one beside it -- clip 2 lost a true hit |
+| fit residual in the refused frames | clip 5's re-entry at 355-371 stutters at about 10 px residual throughout with nothing near a racket; it would have planted a hit at 357, which the frames show is a one-sample teleport |
+
+What does separate them is a **sudden jump in step against an approach the tracker saw**, the
+same physics the apex test already rests on (a racket adds energy), measured at the kink instead
+of across the gap:
+
+| blind re-entry | largest step / median approach step | labelled contact there |
+|---|---|---|
+| clip 3, 966-976 | **8.4** | yes (960; the kink is at 971) |
+| clip 2, 4312-4323 | **7.2** | yes (4316) |
+| the other eight, all clips | 2.3 or less | no |
+
+`FlightConfig.reentry_kink_speed_ratio = 3.0` records it on the link as `reentry_contact_frame`,
+alongside the join's own `kind` and `hit_frame`, and the chain counts it as a hit. **Three is a
+round number in the gap, and the evidence is two positives.**
+
+| clip | hit P | hit R | hitter |
+|---|---|---|---|
+| test-video2 | 0.9016 -> **0.9032** | 0.9322 -> **0.9492** | 0.9811 -> 0.9815 |
+| test-video3 | 0.6667 -> **0.6923** | 0.8000 -> **0.9000** | 0.8750 -> **0.8889** |
+| test-video5 | unchanged | unchanged | unchanged |
+
+Both recovered hits are attributed to the right player and no false positive was added on any
+labelled frame. This is the first re-freeze caused by the detector rather than the labels, and
+the manifest is at `milestone-1/1.3` with a `_detector_change_note` saying so.
+
+What it does **not** fix: clip 3's rally 3 still ends at 1069 rather than about 1000. The smash
+lands at the far player's feet at 999, inside the segment that started at 976, and the tracker
+then follows the shuttle being picked up and handled -- 1029-1035 and 1045-1069 -- which links on
+as a `contact_by_reach` at 1035, the one remaining false positive on that clip not caused by the
+play gate. That is the post-point handling problem the play gate already names, seen from the
+other end of a rally.
