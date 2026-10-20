@@ -140,7 +140,7 @@ single `y` because the camera is rarely square to the court.
 For a clip that will actually work:
 
 - singles, landscape, fixed camera, whole court visible
-- camera behind a baseline and **elevated** if possible
+- camera behind a baseline and **elevated** -- not optional: at head height the near player hides the far one (see "The first club recording" below)
 - nobody walking between the camera and the court
 - 1080p, 60 fps genuine constant frame rate
 - 1–5 minutes
@@ -1616,3 +1616,57 @@ then follows the shuttle being picked up and handled -- 1029-1035 and 1045-1069 
 as a `contact_by_reach` at 1035, the one remaining false positive on that clip not caused by the
 play gate. That is the post-point handling problem the play gate already names, seen from the
 other end of a rally.
+
+### The first club recording: the camera height costs both tracking and hitter assignment (2026-10-20)
+
+`test-video6` is three minutes of the owner's club footage (`club-recording.MP4`, 120-300 s,
+the first game), the recording the last two handoffs were blocked on. It is technically the
+cleanest clip in the project -- genuine constant 59.94 fps, 1.6 px of camera drift, a far player
+165 px tall, a shuttle track `track_quality` calls sound -- and it breaks one rule of the
+recording spec: the camera is behind the baseline at about **head height**, not raised, and the
+near baseline is below the bottom of the frame.
+
+`tools/propose_court.py` refused it (seated officials are the far player's size at the far
+player's depth), so the court was fitted by hand from a foot-position survey under a permissive
+polygon; the measurements are in `configs/test-video6.json`'s notes. Unlabelled, the run says:
+
+| | clip 6 | labelled clips |
+|---|---|---|
+| both players, every frame | **0.855** (near 0.975, far 0.880) | 0.90-0.98 |
+| adjacent attributed hits given to the same player | **0.51** | 0.07, 0.22, 0.21 |
+| rallies detected | 7 in 3 minutes | -- |
+
+**Both failures have the same cause, and it is the camera.** At head height, a near player who
+comes forward to the net stands at the same image height as the far player and covers them.
+
+- **Coverage.** In 68% of the frames the far player is lost, the place they were last seen is
+  more than half covered by the near player's box. They are not being missed; they are not
+  visible. No code change recovers that honestly -- holding the last position would raise the
+  figure without anyone being seen.
+- **Hitter assignment.** It is decided by raw pixel distance from the shuttle to each player's
+  nearest anchor. On a raised camera a near player at the net is still *below* the far player
+  in frame, so the distance sorts them; here their heads are level and the near player's box is
+  two and a half times larger, so the near player wins contacts that cannot be theirs -- rally 5
+  reads near seven times out of eleven consecutive hits. Singles alternates, so 0.51 against
+  0.07-0.22 is a measurement of this, not an impression, and it needs no labels.
+
+**Tried and rejected: decoding each rally's hitters as one alternating sequence.** A singles
+rally has only two possible hitter sequences, so choosing the one the per-hit evidence favours
+overall looks like it should repair this. Measured against the hand labels it is worse on two of
+three clips -- clip 2 0.946 -> 0.768, clip 5 0.794 -> 0.676, clip 3 0.889 -> 1.0 on nine hits --
+because one missed or spurious hit flips the parity of everything after it. Doing it properly
+means a sequence model that allows a hit to be spurious or missing, and that should be designed
+against clip 6's labels, not ahead of them.
+
+What this changes:
+
+1. **"Elevated" is a requirement, not a preference.** It is now worded that way under Recording
+   conditions. For a future recording, a tripod raised to 2.5-3 m behind the baseline is the
+   cheapest fix in the project.
+2. **This clip is still worth labelling**, because it is real club play and the first chance to
+   test the domain-shift question for Milestone 2. `outputs/test-video6/label-part-A.mp4` and
+   `-B.mp4` carry frame numbers and nothing else; `outputs/test-video6/labels.tsv` is the sheet.
+3. **Unrelated, noted for later:** the shuttle tracker's fixed point is at x = 918 px here,
+   (918, 270), and was at (918, 222) on clip 3 -- a different hall, camera and resolution
+   pipeline. A real object would not land on the same column twice. It looks like a TrackNet
+   default output when it finds nothing.

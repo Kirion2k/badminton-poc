@@ -1,0 +1,28 @@
+{
+  "notes": "club recording club singles, 120-300 s of the source (first game), cut 2026-10-20. Court fitted by hand: tools/propose_court.py refused it because seated people sit at far-player depth. Measured from a pose pass under a permissive polygon: far player feet x 0.40-0.60, y 0.55-0.62 at about 0.15 of frame height (165 px); umpire seated at (0.21, 0.58), line official at (0.77, 0.64) and both the same apparent size as the far player; a seated row behind the far baseline at y 0.536-0.547; seated spectators bottom right at x 0.92-0.96, y 0.80-0.92; the next court's players at x < 0.15. Net posts stand at (0.281, 0.643) and (0.712, 0.648). WARNING: the camera is behind the baseline at about head height, not raised, and the near baseline is below the bottom of the frame, so the near player's feet leave the frame at the back of the court. Camera drift 1.6 px sustained. DETECTOR SETTINGS COPIED FROM CLIP 5 UNCHANGED.",
+  "court": {
+    "polygon": [[0.33, 0.548], [0.67, 0.548], [0.74, 0.645], [0.95, 0.999], [0.02, 0.999], [0.26, 0.645]],
+    "net_line": [[0.281, 0.643], [0.712, 0.648]],
+    "shuttle_polygon": [[0.2, 0.0], [0.85, 0.0], [0.99, 0.999], [0.01, 0.999], [0.01, 0.72], [0.22, 0.6]]
+  },
+  "target_width": 1920,
+  "players": {
+    "model": "yolo11m-pose.pt",
+    "imgsz": 1920,
+    "conf": 0.25,
+    "min_box_height_frac": 0.03,
+    "max_box_height_frac": 0.8,
+    "identity_smoothing_frames": 20
+  },
+  "shuttle": {"repo": "../BadmintonTrackNet", "device": "auto", "batch_size": 8},
+  "analysis": {
+    "hit_search_radius_frames": 4,
+    "assignment_margin_px": 40.0,
+    "rally_gap_seconds": 2.5,
+    "shuttle_absent_seconds": 1.0,
+    "min_hit_confidence": 0.85,
+    "play_gate_min_speed_px": 0.0,
+    "event_source": "flight",
+    "require_both_players": true
+  }
+}
