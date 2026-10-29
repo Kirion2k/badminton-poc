@@ -46,7 +46,7 @@ def analyze(
 
     player_rows = load_jsonl(players_jsonl)
     players_by_frame = {int(row["frame"]): row for row in player_rows}
-    ball_raw = load_ball_csv(ball_csv)
+    ball_raw = load_ball_csv(ball_csv, (width, height))
     ball, offcourt_frames = mask_offcourt_shuttle(ball_raw, court, width, height)
     upstream_events = load_events_json(events_json)
     upstream_events, offcourt_events = drop_offcourt_events(upstream_events, court, width, height)

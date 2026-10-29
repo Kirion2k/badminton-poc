@@ -4,6 +4,9 @@ The schemas here are taken from the upstream source, not from documentation:
 
 * ``<stem>_ball.csv`` is written by ``tracknet.data.io.write_pred_csv`` with columns
   ``Frame, Visibility, X, Y`` (plus ``Inpaint_Mask`` when saving InpaintNet training data).
+  Inference never writes ``Inpaint_Mask``, and InpaintNet's gap fills arrive with
+  ``Visibility = 1`` like real detections; ``load_ball_csv`` recovers which is which from the
+  decode grid when given the frame size.
 * ``<stem>_events.json`` is written by ``tracknet.inference.events.main`` as a JSON list of
   the candidate dicts built in ``tracknet.events.candidate_generator``:
   ``frame, x, y, event_type, rule, confidence, all_rules, auxiliary_rules, features``.
@@ -115,7 +118,24 @@ class BallTrack:
         return spans
 
 
-def load_ball_csv(path: str | Path) -> BallTrack:
+TRACKNET_INPUT_SIZE = (512, 288)
+"""``tracknet.data.io.WIDTH, HEIGHT``. A TrackNet detection is the centre of a bounding box on
+this heatmap scaled to the frame, so it always lands on a half-cell grid; InpaintNet's output is
+a free float. Checked against upstream's own ``_inpaint_mask`` (``tools/export_inpaint_mask.py``)
+on clips 2, 3, 5 and 6: identical on all 30,902 visible samples."""
+
+
+def _off_decode_grid(x: float, y: float, width: int, height: int) -> bool:
+    for value, size, cells in ((x, width, TRACKNET_INPUT_SIZE[0]), (y, height, TRACKNET_INPUT_SIZE[1])):
+        q = value / (size / (2 * cells))
+        if abs(q - round(q)) > 0.01:
+            return True
+    return False
+
+
+def load_ball_csv(path: str | Path, frame_size: tuple[int, int] | None = None) -> BallTrack:
+    """``frame_size`` (width, height) lets a file with no ``Inpaint_Mask`` column mark
+    InpaintNet's samples as ``inpainted``; without it they read as observed."""
     path = Path(path)
     if not path.exists():
         raise ParseError(f"shuttle CSV not found: {path}")
@@ -152,6 +172,8 @@ def load_ball_csv(path: str | Path) -> BallTrack:
             inpainted = False
             if mask_key is not None and str(row.get(mask_key, "")).strip() != "":
                 inpainted = float(row[mask_key]) > 0
+            elif visible and frame_size is not None:
+                inpainted = _off_decode_grid(x, y, *frame_size)
             samples.append(BallSample(frame=frame, x=x, y=y, visible=visible, inpainted=inpainted))
     if not samples:
         raise ParseError(f"{path} contains a header but no rows")

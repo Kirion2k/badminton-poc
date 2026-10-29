@@ -454,8 +454,8 @@ class FlightConfig:
     fixed_point_tolerance_px: float = 12.0
     """A frozen position reached in this many separate stretches is a fixed object in the room,
     not a shuttle at rest. TrackNetV3 emits one shuttle per frame whether or not one is in play;
-    on the development clip it settles on a single ceiling light in fourteen separate stretches
-    totalling 2340 frames, while the one real shuttle-at-rest appears once for 85."""
+    on the development clip InpaintNet fills gaps with one constant point in fourteen separate
+    stretches totalling 2340 frames, while the one real shuttle-at-rest appears once for 85."""
     min_serve_quiet_seconds: float = 1.0
     """Quiet needed before a chain's first segment for its start to count as a serve. Without it
     the rally is reported as ``truncated``: the clip began mid-flight and its real start cannot

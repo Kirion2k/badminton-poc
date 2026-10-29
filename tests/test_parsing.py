@@ -33,6 +33,28 @@ def test_load_ball_csv_accepts_inpaint_mask_column(tmp_path):
     assert track.get(1).inpainted is True
 
 
+def test_load_ball_csv_marks_samples_off_the_tracknet_decode_grid_as_inpainted(tmp_path):
+    """Rows taken from clip 6 (1920x1080): two TrackNet detections, then InpaintNet's constant
+    gap fill and one of its interpolations. Upstream writes all four with Visibility 1."""
+    path = write(tmp_path, "b.csv",
+                 "Frame,Visibility,X,Y\n"
+                 "0,1,736.875,455.625\n"
+                 "1,1,729.375,451.87501430511475\n"
+                 "2,1,914.9338483810425,268.08826871216297\n"
+                 "3,1,731.4021,449.0517\n"
+                 "4,0,0,0\n")
+    track = load_ball_csv(path, (1920, 1080))
+    assert [track.get(f).inpainted for f in range(5)] == [False, False, True, True, False]
+    assert all(track.get(f).visible for f in range(4))
+    # Without the frame size nothing can be inferred, so nothing is claimed.
+    assert not any(s.inpainted for s in load_ball_csv(path))
+
+
+def test_load_ball_csv_mask_column_wins_over_the_grid(tmp_path):
+    path = write(tmp_path, "b.csv", "Frame,Visibility,X,Y,Inpaint_Mask\n0,1,914.9338,268.0882,0\n")
+    assert load_ball_csv(path, (1920, 1080)).get(0).inpainted is False
+
+
 def test_load_ball_csv_honours_real_frame_ids_with_gaps(tmp_path):
     """Upstream documents Frame as a real identifier that may start late and contain gaps."""
     path = write(tmp_path, "b.csv", "Frame,Visibility,X,Y\n100,1,1,2\n103,1,3,4\n")

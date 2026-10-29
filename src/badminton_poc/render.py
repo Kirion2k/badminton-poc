@@ -105,7 +105,8 @@ def shuttle_state(
     shuttle, ``parked`` the tracker resting on a fixed object in the room.
 
     TrackNetV3 emits exactly one shuttle per frame whether or not one is in play, so between
-    points it holds a single pixel on a ceiling light for seconds at a time. Drawn as a live
+    points it holds a single pixel for seconds at a time (InpaintNet's constant gap fill, or a
+    fixture the tracker really sees). Drawn as a live
     shuttle that reads as a shuttle hovering mid-court, which is the most misleading thing in the
     annotated video. It is still drawn, greyed and labelled, because hiding it would hide a real
     failure mode of the tracker.

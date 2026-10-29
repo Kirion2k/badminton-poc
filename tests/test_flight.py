@@ -147,6 +147,22 @@ def test_a_position_returned_to_again_and_again_is_a_fixed_point():
     assert found[0]["runs"] == 4
     assert found[0]["x"] == pytest.approx(900.0, abs=12.0)
     assert found[0]["y"] == pytest.approx(220.0, abs=12.0)
+    assert found[0]["source"] == "tracknet"
+
+
+def test_a_fixed_point_made_of_inpainted_samples_is_attributed_to_inpaintnet():
+    """The (918, 222) point on clips 2, 3 and 5 was read as a ceiling light for weeks; its
+    samples are InpaintNet's, and the persisted note now says so instead of blaming the room."""
+    samples = []
+    frame = 0
+    for _ in range(4):
+        samples += [BallSample(frame + i, 914.93, 219.93, True, inpainted=True) for i in range(30)]
+        frame += 30
+        samples += [BallSample(frame + i, 100.0 + 25.0 * i, 400.0, True) for i in range(20)]
+        frame += 20
+    found = find_fixed_points(BallTrack(samples), FPS, _cfg())
+    assert len(found) == 1 and found[0]["source"] == "inpaintnet"
+    assert "InpaintNet" in found[0]["note"]
 
 
 # --------------------------------------------------------------------------------------------

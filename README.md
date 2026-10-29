@@ -1670,3 +1670,45 @@ What this changes:
    (918, 270), and was at (918, 222) on clip 3 -- a different hall, camera and resolution
    pipeline. A real object would not land on the same column twice. It looks like a TrackNet
    default output when it finds nothing.
+### The (918, 222) point is InpaintNet, and a third of "visible" shuttle samples were never seen (2026-10-29)
+
+The fixed point the project has called a ceiling light since the first clip is not in any room.
+It is the same normalised position, **(0.4765, 0.2482)**, on clips 2, 3, 5, 6 and yt-melbourne
+at three different frame heights (884, 886, 1080): InpaintNet's output for a gap with nothing to
+inpaint from. Upstream fills every gap between two detections with InpaintNet and writes the
+result with `Visibility = 1`, and inference never writes the `Inpaint_Mask` column, so
+`BallSample.inpainted` -- which the parser already supported -- was `False` on every sample of
+every run.
+
+The two kinds can be told apart exactly. A TrackNet detection is a bounding-box centre on the
+512x288 heatmap scaled to the frame, so it lies on a grid of `width/1024` by `height/576`;
+InpaintNet's output is a free float. On every clip, **every off-grid sample lies inside a gap
+between on-grid ones**, which is upstream's `_inpaint_mask` rule, so the test agrees with the code
+that produced the file.
+
+| clip | visible samples | inpainted | of which the constant | rally-frame coverage, all / observed |
+|---|---|---|---|---|
+| test-video2 | 7198 | 3136 | 2553 | 0.951 / 0.911 |
+| test-video3 | 4934 | 3680 | 3219 | 0.938 / 0.936 |
+| test-video5 | 4210 | 1949 | 1481 | 0.927 / 0.847 |
+| test-video6 | 10570 | 6021 | 4789 | 0.914 / 0.795 |
+
+`load_ball_csv(path, frame_size)` now marks them, `shuttle_track_quality` reports
+`frames_inpainted` and `observed_coverage` beside `coverage`, and each fixed point carries
+`source: inpaintnet | tracknet` (yt-melbourne's (906, 798) is a real `tracknet` fixation). **No
+decision reads the flag**: re-analysed from the same inputs, every event, rally and hitter on
+clips 2, 3, 5 and 6 is identical, and the three frozen clips reproduce `milestone-1/1.3` exactly.
+
+**Checked against upstream's real mask.** Upstream has no option to write the mask, but it is
+a pure function of TrackNet's raw output, so `tools/export_inpaint_mask.py` re-runs upstream's
+own classes once, takes `InferencePipeline._inpaint_mask`, and inpaints the way `events.py`
+does -- no change to upstream or its model. The re-run reproduced all four committed shuttle
+CSVs exactly, and the mask and the grid agree on **all 30,902 visible samples** (clips 2, 3, 5,
+6; no sample on either side only). The parser keeps the grid: it needs no second inference and
+nothing to differ from. The tool stays as the check to repeat if upstream or its checkpoints
+change.
+
+Using it to gate contacts was measured and is not justified: of the hits with at least three of
+the seven surrounding samples inpainted, clips 2 and 3 have 5 true and 0 false, and clip 5 has
+5 true and 6 false (matched within 0.25 s, not the scorer's closest-first pairing). InpaintNet
+bridges short gaps inside real rallies as well as fabricating positions in long ones.

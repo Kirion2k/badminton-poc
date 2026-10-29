@@ -281,10 +281,14 @@ def track_quality(
     positions = {s.frame: (s.x, s.y) for s in ball if s.visible}
     wanted = set(frames) if frames is not None else set(positions)
     seen = sorted(f for f in positions if f in wanted)
+    inpainted = sum(1 for f in seen if ball.get(f).inpainted)
     out: dict[str, Any] = {
         "frames_considered": len(wanted),
         "frames_with_a_shuttle": len(seen),
         "coverage": round(len(seen) / len(wanted), 4) if wanted else 0.0,
+        # InpaintNet's gap fills, counted in coverage above: predicted, not seen.
+        "frames_inpainted": inpainted,
+        "observed_coverage": round((len(seen) - inpainted) / len(wanted), 4) if wanted else 0.0,
     }
     steps = [
         (f, math.dist(positions[f], positions[f - 1]))
@@ -403,8 +407,12 @@ def find_fixed_points(
 
     TrackNetV3 emits exactly one shuttle per frame whether or not one is in play, so between
     points it settles on whatever else in the room looks like a shuttle. On the development clip
-    that is a single ceiling light: the position is pixel-identical across fourteen separate
-    stretches totalling 2340 frames, while the one genuine shuttle-at-rest appears once for 85.
+    the position is pixel-identical across fourteen separate stretches totalling 2340 frames,
+    while the one genuine shuttle-at-rest appears once for 85. That point was long read as a
+    ceiling light; it is not in the room at all. It is InpaintNet's output for a gap with nothing
+    to inpaint from, the same normalised (0.4765, 0.2482) on every clip, and its samples are
+    ``inpainted``. A point the tracker really saw stays on TrackNet's decode grid
+    (yt-melbourne's (906, 798) is one), and ``source`` says which kind each is.
 
     Recurrence is what separates them, and it needs no court geometry: a shuttle can lie still
     in one place for a while, but it does not return to the same pixel again and again across a
@@ -426,9 +434,16 @@ def find_fixed_points(
                 "runs": len(spans),
                 "frames": sum(end - start + 1 for start, end in spans),
                 "first_frame": min(start for start, _ in spans),
-                "note": (
-                    "the shuttle track froze on this point in several separate stretches, so it "
-                    "is a fixed object in the room rather than a shuttle come to rest"
+                **(
+                    {"source": "inpaintnet", "note": (
+                        "InpaintNet filled several separate gaps with this same point, so it is "
+                        "the model's output for a gap with no evidence, not a shuttle"
+                    )}
+                    if all(ball.get(start).inpainted for start, _ in spans) else
+                    {"source": "tracknet", "note": (
+                        "the shuttle track froze on this point in several separate stretches, so "
+                        "it is a fixed object in the room rather than a shuttle come to rest"
+                    )}
                 ),
             }
         )
