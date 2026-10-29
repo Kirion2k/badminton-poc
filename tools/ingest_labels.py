@@ -46,7 +46,7 @@ def main() -> int:
         parts = line.split()
         kind = parts[0].lower()
         try:
-            if kind in ("c", "k"):
+            if kind in ("c", "k", "u"):
                 frame, hitter = int(parts[1]), parts[2].lower()
                 if hitter not in ("near", "far", "?"):
                     problems.append(f"line {number}: hitter must be near, far or ? -- got {hitter!r}")
@@ -67,19 +67,24 @@ def main() -> int:
                     # A real racket contact that is not a rally shot: handing the shuttle back,
                     # a knock-up between points. Scored as neither a hit nor a miss.
                     entry["in_rally"] = False
+                if kind == "u":
+                    # Maybe a contact; the video does not show it. Scored as neither hit nor miss.
+                    entry["uncertain"] = True
                 contacts.append(entry)
             elif kind == "r":  # a rally span
                 rallies.append({"start_frame": int(parts[1]), "end_frame": int(parts[2]),
                                 "notes": " ".join(parts[3:])})
             else:
                 problems.append(
-                    f"line {number}: expected a line starting c, k or r -- got {kind!r}")
+                    f"line {number}: expected a line starting c, k, u or r -- got {kind!r}")
         except (IndexError, ValueError):
             problems.append(f"line {number}: could not read {raw.strip()!r}")
 
     spans = [{"start_frame": a, "end_frame": b} for a, b in (args.span or [])]
     stray = [c["frame"] for c in contacts
              if spans and not any(s["start_frame"] <= c["frame"] <= s["end_frame"] for s in spans)]
+    if not contacts:
+        problems.append("no contact lines: refusing to write a labelled truth file with nothing in it")
     if stray:
         problems.append(f"contacts outside every labelled span: {sorted(stray)}")
     frames = [c["frame"] for c in contacts]

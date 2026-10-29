@@ -11,6 +11,7 @@ from .config import AnalysisConfig, CourtROI, FlightConfig
 from .parsing import BallTrack, load_ball_csv, load_events_json, load_jsonl
 from .players import swing_features
 from .flight import find_fixed_points, segment_flight, track_quality
+from . import visibility
 from .rallies import (
     build_timeline,
     rallies_from_flight,
@@ -205,6 +206,12 @@ def analyze(
         frames=rally_frames or None,
     )
 
+    # Reported, never acted on: why each empty player slot is empty.
+    player_visibility = {
+        "all_frames": visibility.summarise(player_rows, fps),
+        "during_detected_rallies": visibility.summarise(player_rows, fps, rally_frames) if rally_frames else None,
+    }
+
     summary = _summarise(player_rows, ball, timeline, rallies, assignments, fps)
     summary["two_player_coverage"]["during_detected_rallies"] = _rally_coverage(
         player_rows, rallies
@@ -243,6 +250,7 @@ def analyze(
         "weak_swing_hits_dropped": weak_swings,
         "trailing_hits_trimmed": trailing_trimmed,
         "offcourt_events_dropped": offcourt_events,
+        "player_visibility": player_visibility,
         "shuttle_track_quality": shuttle_quality,
         "shuttle_fixed_points": fixed_points,
         "flight": None if flight_model is None else flight_model.to_dict(fps),

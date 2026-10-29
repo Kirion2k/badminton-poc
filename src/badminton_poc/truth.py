@@ -313,10 +313,13 @@ def score_hit_detection(
     # knock-up between points -- is real but has no place in a rally timeline. Detecting one is
     # not a false positive and missing one is not a miss; it belongs in neither column.
     out_of_rally = {int(c["frame"]) for c in contacts if c.get("in_rally") is False}
-    matched = [(p, t) for p, t in match["matched"] if t not in out_of_rally]
-    out_matched = len(match["matched"]) - len(matched)
-    missed = [t for t in match["missed"] if t not in out_of_rally]
-    out_missed = len(match["missed"]) - len(missed)
+    # The labeller could not tell from the video whether a racket touched the shuttle at all.
+    # Same treatment, counted separately: neither a hit to find nor a phantom to avoid.
+    uncertain = {int(c["frame"]) for c in contacts if c.get("uncertain")} - out_of_rally
+    matched = [(p, t) for p, t in match["matched"] if t not in out_of_rally | uncertain]
+    out_matched = sum(1 for _, t in match["matched"] if t in out_of_rally)
+    missed = [t for t in match["missed"] if t not in out_of_rally | uncertain]
+    out_missed = sum(1 for t in match["missed"] if t in out_of_rally)
     tp, fp, fn = len(matched), len(match["false_positives"]), len(missed)
     precision = tp / (tp + fp) if tp + fp else 0.0
     recall = tp / (tp + fn) if tp + fn else 0.0
@@ -330,9 +333,10 @@ def score_hit_detection(
         "f1": round(f1, 4),
         "predicted": tp + fp,
         "labelled_contacts": len(contacts),
-        "rally_shots": len(contacts) - len(out_of_rally),
+        "rally_shots": len(contacts) - len(out_of_rally) - len(uncertain),
         "out_of_rally_matched": out_matched,
         "out_of_rally_missed": out_missed,
+        "uncertain_contacts": len(uncertain),
         "predictions_outside_labelled_spans": len(outside),
         "match": match,
     }
@@ -353,7 +357,8 @@ def score_hitter_assignment(
     wrong, and the pipeline reports it deliberately.
     """
     by_frame = {
-        int(c["frame"]): c.get("hitter") for c in contacts if c.get("in_rally") is not False
+        int(c["frame"]): c.get("hitter") for c in contacts
+        if c.get("in_rally") is not False and not c.get("uncertain")
     }
     match = match_contacts(predicted_hitters.keys(), contacts, fps=fps,
                            tolerance_seconds=tolerance_seconds)

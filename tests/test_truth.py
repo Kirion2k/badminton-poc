@@ -375,6 +375,18 @@ def test_out_of_rally_contacts_do_not_affect_hitter_accuracy():
     assert result["scored"] == 0 and result["accuracy"] is None
 
 
+def test_an_uncertain_contact_is_neither_a_hit_nor_a_miss_nor_a_hitter_question():
+    """A 'u' line: the labeller could not tell from the video whether a racket touched it."""
+    contacts = [_c(103), {"frame": 398, "hitter": "near", "uncertain": True},
+                {"frame": 900, "hitter": None, "uncertain": True}]
+    result = score_hit_detection([100, 400], contacts, fps=FPS, tolerance_seconds=0.25)
+    assert (result["true_positives"], result["false_positives"], result["false_negatives"]) == (1, 0, 0)
+    assert result["uncertain_contacts"] == 2 and result["rally_shots"] == 1
+    assert result["out_of_rally_matched"] == result["out_of_rally_missed"] == 0
+    hitters = score_hitter_assignment({400: "far"}, contacts, fps=FPS, tolerance_seconds=0.25)
+    assert hitters["scored"] == 0
+
+
 def test_contacts_default_to_being_rally_shots():
     """Existing labels have no in_rally field and every one of them is a rally shot."""
     result = score_hit_detection([100], [_c(103)], fps=FPS, tolerance_seconds=0.25)

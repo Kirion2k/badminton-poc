@@ -1670,6 +1670,7 @@ What this changes:
    (918, 270), and was at (918, 222) on clip 3 -- a different hall, camera and resolution
    pipeline. A real object would not land on the same column twice. It looks like a TrackNet
    default output when it finds nothing.
+
 ### The (918, 222) point is InpaintNet, and a third of "visible" shuttle samples were never seen (2026-10-29)
 
 The fixed point the project has called a ceiling light since the first clip is not in any room.
@@ -1712,3 +1713,47 @@ Using it to gate contacts was measured and is not justified: of the hits with at
 the seven surrounding samples inpainted, clips 2 and 3 have 5 true and 0 false, and clip 5 has
 5 true and 6 false (matched within 0.25 s, not the scorer's closest-first pairing). InpaintNet
 bridges short gaps inside real rallies as well as fabricating positions in long ones.
+
+### Why a player slot is empty, and clip 6 made ready to label (2026-10-29)
+
+`analysis.json` now carries `player_visibility`, from `src/badminton_poc/visibility.py`: for
+every frame with an empty slot, the likely reason, read from that slot's last observed box. It
+is a report. No slot is filled, no position is predicted, no decision reads it, and its
+`both_observed_fraction` equals the existing `two_player_coverage` on every clip, which is the
+check that the definition did not move.
+
+| state | meaning |
+|---|---|
+| `candidate_not_selected` | someone was detected on that side and passed the court filter, but was not chosen |
+| `occluded` | the slot's last box is at least half covered by the other player's box now |
+| `at_frame_edge` | the last box touched the image border |
+| `unknown` | none of the above |
+
+During detected rallies, far player:
+
+| clip | observed | occluded | not selected | unknown |
+|---|---|---|---|---|
+| test-video2 | 0.921 | 55 frames | 124 | 111 |
+| test-video3 | 0.986 | 9 | 0 | 2 |
+| test-video5 | 0.902 | 136 | 46 | 41 |
+| test-video6 | 0.874 | **378** | 26 | **4** |
+
+On clip 6, 93% of the far player's absence in rallies is occlusion, and the longest occluded stretches in the clip
+(1513-1590, 9672-9700, 2487-2513) are the far player directly behind the near one -- checked by
+eye with `tools/occlusion_sheet.py`. The 0.5 cover line is measured, not chosen; the
+`OCCLUDED_COVER` docstring has the distributions, including the part that does not separate:
+on the low cameras a far player is still detected behind 11-15% box cover.
+
+What the states cannot say: `unknown` on clip 6 includes players walking off court between
+points and a far player in plain view whom selection lost, and `at_frame_edge` is mostly a near
+player still in shot with their feet cut off. They are likely reasons, not observations.
+
+**Occlusion does not explain clip 6's hitter repeats.** See the last section of
+`docs/hitter-assignment-investigation.md`: 14 of 21 same-player pairs have both players in
+frame and the shuttle at the near player's wrist.
+
+**Labelling.** `labels.tsv` gained a `u` line for a contact the video cannot confirm, scored as
+neither hit nor miss and left out of the hitter figure (`truth.score_hit_detection` reports
+`uncertain_contacts`); no existing truth file uses it, so no frozen figure moves. The sheet now
+says that a missed swing gets no line, and `tools/ingest_labels.py` refuses to write a
+"labelled" truth file with no contacts in it.

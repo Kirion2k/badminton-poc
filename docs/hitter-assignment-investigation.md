@@ -201,3 +201,63 @@ the other three sit between 12% and 21%. A shuttle is near top speed for a few f
 and nowhere else, so that tail is the tracker jumping. `shuttle_track_quality` in `analysis.json`
 now reports all of this per clip. Nothing branches on the verdict; it exists so that a clip like
 this announces itself instead of quietly producing 38 confident contacts.
+
+## Clip 6, before labels: what goes wrong, and what a sequence model would need (2026-10-29)
+
+Clip 6 (club, camera at head height) has no hand labels yet, so nothing here is an accuracy
+figure. What can be measured without labels is the singles invariant: within a rally, two
+consecutive attributed hits should not go to the same player.
+
+| clip | consecutive same-player pairs | of which near via `closest_anchor`, both players observed | far player occluded at the hit |
+|---|---|---|---|
+| test-video2 | 3 / 51 | 0 | 0 of 62 hits |
+| test-video3 | 4 / 12 | 2 | 0 of 13 |
+| test-video5 | 10 / 42 | 7 | 5 of 70 |
+| test-video6 | **21 / 40** | **14** | 8 of 57 |
+
+(From a fresh `analyze` run; the far-player state is `visibility.classify`.)
+
+**Occlusion is not what drives clip 6's repeats.** Only 2 of the 21 come from `only_near_detected`.
+Fourteen are the near player winning `closest_anchor` with both players in frame, and in all 14
+the shuttle is genuinely at the near player's wrist in the image: 0.04-0.43 of the near player's
+body height away, against 0.48-2.03 of the far player's. Normalising distance by body height
+flips **none** of them, so that obvious fix is out before it is tried. Each repeat is one of:
+
+1. a real near hit, with the hit before it misattributed or spurious;
+2. a far contact whose position projects onto the near player's body, because a head-height
+   camera puts both players on the same image rows;
+3. a spurious contact detected as the shuttle passes the near player's racket.
+
+The labels decide between these. Until then, any change to `assign_hit` would be tuned blind.
+
+### Inputs a sequence model would need
+
+Per detected hit, all already in `analysis.json` or one join away:
+
+- both players' best-anchor distances and body heights (`assignment_evidence`);
+- each slot's visibility state at the hit (`player_visibility`, `visibility.classify`);
+- the shuttle's direction of travel after the contact, from the flight segment that starts at
+  it: **towards** the camera means far hit it, away means near did. This is the one strong cue
+  pixel distance does not use, and on a head-height camera the depth axis is still readable
+  from image y and apparent speed;
+- whether the shuttle samples around the hit are observed or inpainted
+  (`BallSample.inpainted`): a direction read from InpaintNet's fill is weaker evidence;
+- the hit's own detection confidence and kind (`rule`, flight join kind).
+
+### Proposed model, not built
+
+A two-state HMM (near, far) over each rally's detected hits, with two extra transitions: a
+**missed hit** (the same player appears twice because the other's hit was not detected) and a
+**spurious hit** (an emission that belongs to no stroke and is skipped). Per-hit emissions come
+from the features above, calibrated on clips 2, 3 and 5. Decoding is Viterbi per rally. This is
+what forced alternation was not: one missed or spurious hit costs one decision, not every
+decision after it.
+
+### How it would be judged
+
+- Hitter accuracy on matched hits, per clip, against the frozen `milestone-1/1.3` figures on 2,
+  3 and 5: no clip may regress.
+- Clip 6 is held out completely: emission weights fitted on 2, 3 and 5 only, scored once on 6.
+- Contacts the labeller marked `?` or `u` are excluded, as the scorer already does.
+- The miss/spurious transition probabilities come from the scored hit-detection recall and
+  precision on 2, 3 and 5, not from tuning on any clip's hitter figure.

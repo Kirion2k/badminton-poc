@@ -275,6 +275,8 @@ def build_samples_from_truth(
             reason = None
             if contact.get("in_rally") is False:
                 reason = "a real contact but not a rally shot, so not a stroke to classify"
+            elif contact.get("uncertain"):
+                reason = "the labeller could not tell whether this was a contact at all"
             elif not inside_spans(frame):
                 reason = (
                     "outside labelled_contact_spans, where the contact list is incomplete by "

@@ -32,6 +32,18 @@
 #
 #   Handing the shuttle back, a knock-up between points, a player bouncing it on their
 #   racket. Real contacts, but not part of a rally, and scored as neither hit nor miss.
+#   This matters on this clip: the pipeline cannot tell between-point hitting from a rally,
+#   so these lines are what lets that failure be measured.
+#
+# ONE LINE PER MAYBE-CONTACT
+#
+#     u  <frame>  <near|far|?>  [note...]
+#
+#   The video does not show whether a racket touched the shuttle at all -- hidden behind a
+#   player, out of shot, too blurred. Scored as neither hit nor miss and left out of the
+#   hitter figure. Prefer u to a guess.
+#
+# A SWING THAT MISSES THE SHUTTLE, OR A FEINT, GETS NO LINE AT ALL.
 #
 # ONE LINE PER RALLY
 #
