@@ -375,8 +375,8 @@ def measure_track(
     one: a residual taken over four samples is not comparable to one taken over seven, and a
     frame we cannot measure should read as unknown, not as smooth.
     """
-    if window_frames < 3 or window_frames % 2 == 0:
-        raise ValueError("window_frames must be odd and at least 3")
+    if window_frames < 5 or window_frames % 2 == 0:
+        raise ValueError("window_frames must be odd and at least 5: a quadratic fits 3 exactly")
     half = window_frames // 2
     positions = {s.frame: (s.x, s.y) for s in ball if s.visible}
     residual: dict[int, float] = {}
@@ -642,7 +642,9 @@ def segment_flight(
         raise ValueError("fps must be positive")
     scale = width / cfg.reference_width if cfg.reference_width > 0 else 1.0
 
-    window = max(3, int(round(cfg.fit_window_seconds * fps)))
+    # A quadratic through 3 points is exact, so a 3-frame window reads every contact as smooth;
+    # 0.12 s rounds to 3 below 25 fps (kwyoke's china2 at 24.8 fps: residual 0.0 on every frame).
+    window = max(5, int(round(cfg.fit_window_seconds * fps)))
     if window % 2 == 0:
         window += 1
     residual, speed = measure_track(ball, fps, window_frames=window)

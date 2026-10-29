@@ -190,6 +190,20 @@ def test_a_reversal_between_two_flights_is_a_contact():
     assert [e.event_type for e in model.events] == ["hit", "landing"]
 
 
+def test_a_reversal_with_no_gap_is_a_contact_at_25_fps():
+    """0.12 s is 3 frames at 25 fps, and a quadratic through 3 points is exact: the residual was
+    0.0 on every frame, so no contact could break a segment (kwyoke's china2, 24.8 fps)."""
+    points = straight(0, 30, 100.0, 400.0, 20.0, 0.0)
+    points += straight(30, 30, 100.0 + 20.0 * 29, 400.0, -20.0, 0.0)
+    model = segment_flight(track(points), 25.0, _cfg(min_serve_quiet_seconds=1000.0, min_hits_per_rally=1))
+    assert [link.kind for link in model.links] == ["contact"]
+
+
+def test_measure_track_rejects_a_window_a_quadratic_fits_exactly():
+    with pytest.raises(ValueError):
+        measure_track(track(straight(0, 9, 0.0, 0.0, 1.0, 1.0)), FPS, window_frames=3)
+
+
 def test_a_dropout_without_a_turn_is_a_continuation_not_a_contact():
     points = straight(0, 40, 100.0, 400.0, 12.0, 0.0)
     # Same heading, resumed 10 frames later where the shuttle would have been.
