@@ -55,3 +55,6 @@ egg-info/
 configs/*.screen.json
 configs/*.proposed.json
 data/input/yt/
+
+# External datasets without a licence (kwyoke): run locally, never published.
+outputs/kw-*/

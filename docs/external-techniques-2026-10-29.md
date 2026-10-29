@@ -51,7 +51,7 @@ alternation check sides with declining: consecutive same-player pairs within a r
 0.52 for our hits with nearest wrist, 0.41 for COURTSIDE end to end -- which also detects more
 hits there, of unknown precision.
 
-**Verdict.** Detector: **reject** -- lower F1 pooled and on two of three clips. Wrist pass:
+**Verdict on our clips.** Detector: **reject on clips 2, 3 and 5** -- lower F1 pooled and on two of three, but see section 5: those are the clips ours was built on, and out of sample the result reverses. Wrist pass:
 **reject** -- +1 true hit for +5 false positives. Attribution: **reject** -- our gate is
 already a nearest-wrist rule plus a refusal to guess, and removing the refusal costs accuracy.
 **Continue investigating** one thing: the speed-change term (`|v_out - v_in|`), which our
@@ -98,3 +98,40 @@ checkpoints. Read for the inpainting: `test.py:generate_inpaint_mask` marks gaps
 detections whose y is above 30 px; BadmintonTrackNet uses 5% of frame height. Neither writes the
 mask at inference, which is the gap this project's `BallSample.inpainted` now closes. No change
 proposed.
+
+## 5. The first out-of-sample test: kwyoke's amateur singles labels
+
+kwyoke's dataset (no licence; used locally, kept under the gitignored `data/input/kwyoke/` and
+never committed) has 7 labelled amateur rallies from two matches, 55 single-frame hits with the
+hitter, labelled by its authors. Both cameras are low, behind the near baseline -- the clip-6
+situation. `tools/ingest_kwyoke.py` converts the labels (1 = near, 2 = far, checked by eye);
+`configs/kw-china2.json` and `configs/kw-yewtee.json` are hand-fitted courts with detector
+settings copied from test-video6 unchanged. Nothing was tuned on these clips.
+
+**It found a bug first.** china2 is 24.8 fps, where the 0.12 s fit window rounds to 3 frames,
+and a quadratic through 3 points is exact: the residual was 0.0 on every frame and no contact
+could ever break a segment. The window is now at least 5 frames. Our own clips (34-60 fps)
+already had 5-7, so every frozen figure is unchanged.
+
+| match | detector | windows | TP | FP | FN | P | R | F1 | hitter |
+|---|---|---|---|---|---|---|---|---|---|
+| china2 (33 hits) | ours, before the fix | detected | 4 | 8 | 29 | 0.333 | 0.121 | 0.178 | 3/4 |
+| | **ours, after** | detected | 9 | 21 | 24 | 0.300 | 0.273 | **0.286** | 8/8 |
+| | COURTSIDE | our detected rallies | 23 | 12 | 10 | 0.657 | 0.697 | **0.676** | 19/23 |
+| | COURTSIDE | labelled rallies | 30 | 15 | 3 | 0.667 | 0.909 | 0.769 | 26/30 |
+| yewtee (22 hits) | ours | detected | 5 | 5 | 17 | 0.500 | 0.227 | 0.312 | 4/5 |
+| | COURTSIDE | our detected rallies | 9 | 6 | 13 | 0.600 | 0.409 | 0.486 | 6/9 |
+| | COURTSIDE | labelled rallies | 21 | 16 | 1 | 0.568 | 0.955 | 0.712 | 12/19 |
+
+yewtee is outside the recording spec (camera at floor level): both players are found together on
+0% of one rally's frames, so its hits are dropped for want of a hitter. china2 is the fair test.
+There our hits are not offset by a constant; they scatter from -42 to +32 frames around the
+labels with many spurious ones.
+
+**This reverses section 1's verdict on the detector.** On clips 2, 3 and 5 ours wins, but ours
+was built on those clips, so that comparison is in-sample. On the only data neither detector was
+developed on, COURTSIDE's kink detector is far better: 0.676 against 0.286 F1 on china2 inside
+the same rally windows. Two matches and 55 hits are not enough to replace the frozen detector,
+and clip 6 -- once labelled -- is the third independent test. **Status: continue, as the leading
+candidate.** Our rally windows also limit it: with labelled windows COURTSIDE reaches 0.909 recall
+on china2, with ours 0.697, because our segmentation misses or truncates rallies on this footage.

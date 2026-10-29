@@ -1,0 +1,75 @@
+{
+  "notes": "kwyoke am_singles match_yewtee (external). OUTSIDE THE RECORDING SPEC: camera at floor level, off to the side; both players' feet within ~0.03 of frame height of each other, so the net floor line barely separates them. Fitted by hand on singles0 frame 120: far feet ~(0.20, 0.89), near ~(0.70, 0.915), net post base (0.09, 0.895). Detector settings copied from test-video6 unchanged.",
+  "court": {
+    "polygon": [
+      [
+        0.1,
+        0.86
+      ],
+      [
+        0.9,
+        0.86
+      ],
+      [
+        0.999,
+        0.999
+      ],
+      [
+        0.03,
+        0.999
+      ]
+    ],
+    "net_line": [
+      [
+        0.0,
+        0.896
+      ],
+      [
+        1.0,
+        0.905
+      ]
+    ],
+    "shuttle_polygon": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.999,
+        0.0
+      ],
+      [
+        0.999,
+        0.999
+      ],
+      [
+        0.0,
+        0.999
+      ]
+    ]
+  },
+  "target_width": 1920,
+  "players": {
+    "model": "yolo11m-pose.pt",
+    "imgsz": 1920,
+    "conf": 0.25,
+    "min_box_height_frac": 0.03,
+    "max_box_height_frac": 0.8,
+    "identity_smoothing_frames": 20
+  },
+  "shuttle": {
+    "repo": "../BadmintonTrackNet",
+    "device": "auto",
+    "batch_size": 8
+  },
+  "analysis": {
+    "hit_search_radius_frames": 4,
+    "assignment_margin_px": 40.0,
+    "rally_gap_seconds": 2.5,
+    "shuttle_absent_seconds": 1.0,
+    "min_hit_confidence": 0.85,
+    "play_gate_min_speed_px": 0.0,
+    "event_source": "flight",
+    "require_both_players": true
+  }
+}

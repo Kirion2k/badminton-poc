@@ -1757,3 +1757,15 @@ neither hit nor miss and left out of the hitter figure (`truth.score_hit_detecti
 `uncertain_contacts`); no existing truth file uses it, so no frozen figure moves. The sheet now
 says that a missed swing gets no line, and `tools/ingest_labels.py` refuses to write a
 "labelled" truth file with no contacts in it.
+
+### The first out-of-sample test, and a fit window that could not see a contact (2026-10-29)
+
+kwyoke's amateur singles labels (55 hits, two low-camera matches, used locally and never
+committed; `tools/ingest_kwyoke.py`) are the first data neither this project's detector nor its
+author had seen. Below 25 fps the 0.12 s fit window was 3 frames, which a quadratic fits exactly,
+so no contact could ever be found; it is now at least 5 frames, and every frozen figure is
+unchanged. Even fixed, our detector reaches F1 **0.286** on china2 where COURTSIDE's kink
+detector, ported in `src/badminton_poc/experiments/courtside.py`, reaches **0.676** inside the
+same rally windows. On clips 2, 3 and 5 ours wins, but it was built on them. Two matches are not
+enough to swap the frozen detector; clip 6's labels are the third test.
+`docs/external-techniques-2026-10-29.md` section 5 has the table.

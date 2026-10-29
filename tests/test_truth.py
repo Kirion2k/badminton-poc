@@ -599,3 +599,20 @@ def test_violations_come_back_in_frame_order_across_rallies():
                     {"rally": 1, "start_frame": 100, "end_frame": 260}],
     }
     assert [b["first_frame"] for b in find_impossible_alternations(truth)] == [100, 400]
+
+
+# --- external labels ------------------------------------------------------------------
+
+def test_kwyoke_labels_convert_to_contacts_and_one_rally():
+    import importlib.util, pathlib
+    spec = importlib.util.spec_from_file_location(
+        "ingest_kwyoke", pathlib.Path(__file__).parent.parent / "tools" / "ingest_kwyoke.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    rows = [{"frame": str(i), "player_hit": "0", "rally_bound": "0"} for i in range(10)]
+    rows[2]["player_hit"], rows[5]["player_hit"], rows[8]["rally_bound"] = "1", "2", "1"
+    truth = mod.convert(rows, "c", 30.0, 10)
+    assert [(c["frame"], c["hitter"]) for c in truth["contacts"]] == [(2, "near"), (5, "far")]
+    assert (truth["rallies"][0]["start_frame"], truth["rallies"][0]["end_frame"]) == (2, 8)
+    with pytest.raises(ValueError):
+        mod.convert(rows, "c", 30.0, 11)  # a frame count mismatch would misalign every label

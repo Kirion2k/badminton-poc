@@ -45,12 +45,12 @@ def intersect(windows, spans):
     return out
 
 
-def run_clip(clip: str, analysis: dict) -> dict:
+def run_clip(clip: str, analysis: dict, truth_path: Path, config_path: str) -> dict:
     root = Path("outputs") / clip
     meta = json.loads((root / "metadata.json").read_text())["working"]
     fps, width, height = float(meta["fps"]), int(meta["width"]), int(meta["height"])
-    config = PipelineConfig.load(f"configs/{clip}.json")
-    truth = json.loads((root / "truth.json").read_text())
+    config = PipelineConfig.load(config_path)
+    truth = json.loads(truth_path.read_text())
     ball, _ = mask_offcourt_shuttle(
         load_ball_csv(root / "tracknet/work_ball.csv", (width, height)), config.court, width, height)
     fixed = analysis.get("shuttle_fixed_points") or []
@@ -108,14 +108,22 @@ def run_clip(clip: str, analysis: dict) -> dict:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--analysis-dir", required=True,
-                    help="directory holding a fresh <clip>.json analysis for each clip")
+    ap.add_argument("--analysis-dir",
+                    help="directory holding a fresh <clip>.json analysis for each clip "
+                         "(default: each clip's outputs/<clip>/analysis.json)")
+    ap.add_argument("--clips", nargs="+", default=list(CLIPS))
+    ap.add_argument("--truth-dir", help="<clip>.json truth files (default: outputs/<clip>/truth.json)")
+    ap.add_argument("--config", help="one config for every clip (default: configs/<clip>.json)")
     ap.add_argument("--out")
     args = ap.parse_args()
     report = {}
-    for clip in CLIPS:
-        analysis = json.loads((Path(args.analysis_dir) / f"{clip}.json").read_text())
-        report[clip] = run_clip(clip, analysis)
+    for clip in args.clips:
+        analysis_path = (Path(args.analysis_dir) / f"{clip}.json" if args.analysis_dir
+                         else Path("outputs") / clip / "analysis.json")
+        truth_path = (Path(args.truth_dir) / f"{clip}.json" if args.truth_dir
+                      else Path("outputs") / clip / "truth.json")
+        report[clip] = run_clip(clip, json.loads(analysis_path.read_text()), truth_path,
+                                args.config or f"configs/{clip}.json")
         for window, rows in report[clip].items():
             for variant, m in rows.items():
                 print(f"{clip:12} {window:9} {variant:20} P {m['precision']:.3f} R {m['recall']:.3f} "

@@ -1,0 +1,91 @@
+{
+  "notes": "kwyoke am_singles match_china2 (external, labels by the dataset authors). Camera near floor level behind the near baseline. Court fitted by hand on singles1 frame 100: far player feet y ~0.615, near ~0.665; net post bases (0.23, 0.632) and (0.72, 0.642); the posts at x 0.82 and the seated pair at (0.62-0.66, 0.59) belong to the next court and the gallery. Detector settings copied from test-video6 unchanged; nothing tuned on this clip. Left edge widened to y 0.64 at x 0: in singles0 frame 80 the near player plays a stroke with feet at (0.03, 0.65).",
+  "court": {
+    "polygon": [
+      [
+        0.3,
+        0.585
+      ],
+      [
+        0.7,
+        0.585
+      ],
+      [
+        0.75,
+        0.645
+      ],
+      [
+        0.95,
+        0.999
+      ],
+      [
+        0.0,
+        0.999
+      ],
+      [
+        0.0,
+        0.64
+      ],
+      [
+        0.22,
+        0.635
+      ]
+    ],
+    "net_line": [
+      [
+        0.22,
+        0.632
+      ],
+      [
+        0.73,
+        0.642
+      ]
+    ],
+    "shuttle_polygon": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.82,
+        0.0
+      ],
+      [
+        0.82,
+        0.62
+      ],
+      [
+        0.999,
+        0.999
+      ],
+      [
+        0.0,
+        0.999
+      ]
+    ]
+  },
+  "target_width": 1920,
+  "players": {
+    "model": "yolo11m-pose.pt",
+    "imgsz": 1920,
+    "conf": 0.25,
+    "min_box_height_frac": 0.03,
+    "max_box_height_frac": 0.8,
+    "identity_smoothing_frames": 20
+  },
+  "shuttle": {
+    "repo": "../BadmintonTrackNet",
+    "device": "auto",
+    "batch_size": 8
+  },
+  "analysis": {
+    "hit_search_radius_frames": 4,
+    "assignment_margin_px": 40.0,
+    "rally_gap_seconds": 2.5,
+    "shuttle_absent_seconds": 1.0,
+    "min_hit_confidence": 0.85,
+    "play_gate_min_speed_px": 0.0,
+    "event_source": "flight",
+    "require_both_players": true
+  }
+}
